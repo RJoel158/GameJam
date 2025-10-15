@@ -12,6 +12,7 @@ namespace StarterAssets
 		public Vector2 look;
 		public bool jump;
 		public bool sprint;
+		public bool draw;
 
 		[Header("Movement Settings")]
 		public bool analogMovement;
@@ -66,7 +67,17 @@ namespace StarterAssets
 			sprint = newSprintState;
 		}
 
-		private void OnApplicationFocus(bool hasFocus)
+		public void OnDraw(InputValue value)
+		{
+			DrawInput(value.isPressed);
+		}
+
+		public void DrawInput(bool newDrawState)
+        {
+            draw = newDrawState;
+        }
+
+        private void OnApplicationFocus(bool hasFocus)
 		{
 			SetCursorState(cursorLocked);
 		}
