@@ -21,7 +21,7 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.R) && playerAnimator.GetBool("Grounded"))
         {
             isEquipping = true;
-            playerAnimator.SetTrigger("Equip");
+            playerAnimator.SetTrigger("DrawSword");
         }
     }
 

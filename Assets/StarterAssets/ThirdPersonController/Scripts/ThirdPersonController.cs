@@ -39,6 +39,10 @@ namespace StarterAssets
         public float GroundedRadius = 0.28f;
         public LayerMask GroundLayers;
 
+        [Header("Equipment")]
+        public bool isEquipping;
+        public bool isEquipped;
+
         [Header("Cinemachine")]
         [Tooltip("The follow target set in the Cinemachine Virtual Camera that the camera will follow")]
         public GameObject CinemachineCameraTarget;
@@ -77,6 +81,9 @@ namespace StarterAssets
         private int _animIDJump;
         private int _animIDFreeFall;
         private int _animIDMotionSpeed;
+        private int _animIDDrawSword;
+        private int _animIDSheathSword;
+        private int _animIDEquipped;
 
         private PlayerInput _playerInput;
 
@@ -131,6 +138,7 @@ namespace StarterAssets
         {
             _hasAnimator = TryGetComponent(out _animator);
 
+            DrawSheathSword();
             JumpAndGravity();
             GroundedCheck();
             Move();
@@ -148,6 +156,9 @@ namespace StarterAssets
             _animIDJump = Animator.StringToHash("Jump");
             _animIDFreeFall = Animator.StringToHash("FreeFall");
             _animIDMotionSpeed = Animator.StringToHash("MotionSpeed");
+            _animIDDrawSword = Animator.StringToHash("DrawSword");
+            _animIDSheathSword = Animator.StringToHash("SheathSword");
+            _animIDEquipped = Animator.StringToHash("Equipped");
         }
 
         private void GroundedCheck()
@@ -188,10 +199,11 @@ namespace StarterAssets
 
         private void Move()
         {
-            if (playerController.isEquipping || playerController.isBlocking)
-            {
-                return;
-            }
+            // ELIMINAR, RESTRINGE EL MOVIMIENTO EN LA EQUIPACION Y BLOQUEO
+            //if (playerController.isEquipping || playerController.isBlocking)
+            //{
+            //    return;
+            //}
             
             // set target speed based on move speed, sprint speed and if sprint is pressed
             float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
@@ -325,6 +337,36 @@ namespace StarterAssets
             if (_verticalVelocity < _terminalVelocity)
             {
                 _verticalVelocity += Gravity * Time.deltaTime;
+            }
+        }
+
+        private void DrawSheathSword()
+        {
+            if (Grounded)
+            {
+                // Draw
+                if (_input.draw && !isEquipped)
+                {
+                    // update animator if using character
+                    if (_hasAnimator)
+                    {
+                        isEquipping = true;
+                        _animator.SetTrigger(_animIDDrawSword);
+                        _animator.SetBool(_animIDEquipped, true);
+                        _input.draw = false;
+                    }
+                }
+                else if (_input.draw && isEquipped)
+                {
+                    // update animator if using character
+                    if (_hasAnimator)
+                    {
+                        isEquipping = false;
+                        _animator.SetTrigger(_animIDSheathSword);
+                        _animator.SetBool(_animIDEquipped, false);
+                        _input.draw = false;
+                    }
+                }
             }
         }
 
