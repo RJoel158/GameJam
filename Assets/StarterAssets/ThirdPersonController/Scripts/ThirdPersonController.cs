@@ -69,7 +69,7 @@ namespace StarterAssets
 
         // player
         private float _speed;
-        private float _animationBlend;
+        public float _animationBlend;
         private float _targetRotation = 0.0f;
         private float _rotationVelocity;
         private float _verticalVelocity;

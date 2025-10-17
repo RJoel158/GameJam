@@ -48,6 +48,7 @@ public class AttackSystem : MonoBehaviour
 
         if (thirdPersonController.inAttackAnimation)
         {
+            // ERRROR DE DESBORDAMIENTO EN EL ARRAY
             clipLength = thirdPersonController._animator.GetCurrentAnimatorClipInfo(1)[0].clip.length;
             clipSpeed = thirdPersonController._animator.GetCurrentAnimatorStateInfo(1).speed;
             
@@ -60,7 +61,7 @@ public class AttackSystem : MonoBehaviour
                 timePassed = 0f;
             }
 
-            if (timePassed >= (clipLength / clipSpeed))
+            if (timePassed >= (clipLength / clipSpeed) || thirdPersonController._animationBlend >= 0.01f)
             {
                 thirdPersonController._animator.SetTrigger("ExitCombo");
                 timePassed = 0f;
