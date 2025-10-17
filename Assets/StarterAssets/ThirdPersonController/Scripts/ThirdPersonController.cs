@@ -43,6 +43,10 @@ namespace StarterAssets
         public bool isEquipping;
         public bool isEquipped;
 
+        [Header("Attack")]
+        public bool isAttacking;
+        public bool inAttackAnimation = false;
+
         [Header("Cinemachine")]
         [Tooltip("The follow target set in the Cinemachine Virtual Camera that the camera will follow")]
         public GameObject CinemachineCameraTarget;
@@ -84,10 +88,12 @@ namespace StarterAssets
         private int _animIDDrawSword;
         private int _animIDSheathSword;
         private int _animIDEquipped;
+        private int _animIDAttack;
+        private int _animIDAttacking;
 
         private PlayerInput _playerInput;
 
-        private Animator _animator;
+        public Animator _animator;
         private CharacterController _controller;
         private StarterAssetsInputs _input;
         private GameObject _mainCamera;
@@ -138,6 +144,7 @@ namespace StarterAssets
         {
             _hasAnimator = TryGetComponent(out _animator);
 
+            Attack();
             DrawSheathSword();
             JumpAndGravity();
             GroundedCheck();
@@ -159,6 +166,8 @@ namespace StarterAssets
             _animIDDrawSword = Animator.StringToHash("DrawSword");
             _animIDSheathSword = Animator.StringToHash("SheathSword");
             _animIDEquipped = Animator.StringToHash("Equipped");
+            _animIDAttack = Animator.StringToHash("Attack");
+            _animIDAttacking = Animator.StringToHash("Attacking");
         }
 
         private void GroundedCheck()
@@ -365,6 +374,26 @@ namespace StarterAssets
                         _animator.SetTrigger(_animIDSheathSword);
                         _animator.SetBool(_animIDEquipped, false);
                         _input.draw = false;
+                    }
+                }
+            }
+        }
+
+        private void Attack()
+        {
+            _animator.SetBool(_animIDAttacking, inAttackAnimation);
+
+            if (Grounded)
+            {
+                // Attack
+                if (_input.attack && isEquipped && !isAttacking)
+                {
+                    // update animator if using character
+                    if (_hasAnimator)
+                    {
+                        _animator.SetTrigger(_animIDAttack);
+                        _animator.SetFloat(_animIDSpeed, 0);
+                        _input.attack = false;
                     }
                 }
             }

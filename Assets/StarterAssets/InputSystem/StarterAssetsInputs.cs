@@ -13,6 +13,7 @@ namespace StarterAssets
 		public bool jump;
 		public bool sprint;
 		public bool draw;
+		public bool attack;
 
 		[Header("Movement Settings")]
 		public bool analogMovement;
@@ -75,6 +76,16 @@ namespace StarterAssets
 		public void DrawInput(bool newDrawState)
         {
             draw = newDrawState;
+        }
+
+        public void OnAttack(InputValue value)
+        {
+            AttackInput(value.isPressed);
+        }
+
+        public void AttackInput(bool newDrawState)
+        {
+            attack = newDrawState;
         }
 
         private void OnApplicationFocus(bool hasFocus)

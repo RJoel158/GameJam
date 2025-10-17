@@ -34,6 +34,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "Sprint",
+                    "type": "PassThrough",
+                    "id": "980e881e-182c-404c-8cbf-3d09fdb48fef",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Draw",
                     "type": "Button",
                     "id": "2b9fa919-899d-4b45-b6e6-1e0b2605de40",
@@ -43,9 +52,9 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Sprint",
-                    "type": "PassThrough",
-                    "id": "980e881e-182c-404c-8cbf-3d09fdb48fef",
+                    "name": "Attack",
+                    "type": "Button",
+                    "id": "75ab34dc-32a0-480d-87b8-5e703ad31b05",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -215,6 +224,17 @@
                     "processors": "",
                     "groups": "KeyboardMouse",
                     "action": "Draw",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "fe8b6cb0-d7bb-435d-894e-a4ad222133ce",
+                    "path": "<Keyboard>/f",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Attack",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

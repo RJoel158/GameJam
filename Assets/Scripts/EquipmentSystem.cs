@@ -4,7 +4,7 @@ using UnityEngine;
 public class EquipmentSystem : MonoBehaviour
 {
     [SerializeField]
-    ThirdPersonController thridPersonController;
+    ThirdPersonController thirdPersonController;
 
     [SerializeField] GameObject weaponHolder;
     [SerializeField] GameObject weapon;
@@ -16,7 +16,7 @@ public class EquipmentSystem : MonoBehaviour
     void Start()
     {
         //currentWeaponInSheath = Instantiate(weapon, weaponSheath.transform);
-        thridPersonController = GetComponent<ThirdPersonController>();
+        thirdPersonController = GetComponent<ThirdPersonController>();
     }
 
     //public void DrawSword()
@@ -34,17 +34,17 @@ public class EquipmentSystem : MonoBehaviour
 
     public void ActiveWeapon()
     {
-        if (!thridPersonController.isEquipped)
+        if (!thirdPersonController.isEquipped)
         {
             weaponHolder.SetActive(true);
             weaponSheath.SetActive(false);
-            thridPersonController.isEquipped = !thridPersonController.isEquipped;
+            thirdPersonController.isEquipped = !thirdPersonController.isEquipped;
         }
         else
         {
             weaponHolder.SetActive(false);
             weaponSheath.SetActive(true);
-            thridPersonController.isEquipped = !thridPersonController.isEquipped;
+            thirdPersonController.isEquipped = !thirdPersonController.isEquipped;
         }
     }
 
