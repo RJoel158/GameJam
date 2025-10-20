@@ -22,7 +22,7 @@ namespace StarterAssets
 		public bool cursorLocked = true;
 		public bool cursorInputForLook = true;
 
-		#if ENABLE_INPUT_SYSTEM
+#if ENABLE_INPUT_SYSTEM
 		public void OnMove(InputValue value)
 		{
 			MoveInput(value.Get<Vector2>());
@@ -45,13 +45,13 @@ namespace StarterAssets
 		{
 			SprintInput(value.isPressed);
 		}
-		#endif
+#endif
 
 
 		public void MoveInput(Vector2 newMoveDirection)
 		{
 			move = newMoveDirection;
-		} 
+		}
 
 		public void LookInput(Vector2 newLookDirection)
 		{
@@ -68,27 +68,28 @@ namespace StarterAssets
 			sprint = newSprintState;
 		}
 
-		public void OnDraw(InputValue value)
-		{
-			DrawInput(value.isPressed);
-		}
+#if ENABLE_INPUT_SYSTEM
+	public void OnDraw(InputValue value)
+	{
+		DrawInput(value.isPressed);
+	}
+
+	public void OnAttack(InputValue value)
+	{
+		AttackInput(value.isPressed);
+	}
+#endif
 
 		public void DrawInput(bool newDrawState)
-        {
-            draw = newDrawState;
-        }
+		{
+			draw = newDrawState;
+		}
 
-        public void OnAttack(InputValue value)
-        {
-            AttackInput(value.isPressed);
-        }
-
-        public void AttackInput(bool newDrawState)
-        {
-            attack = newDrawState;
-        }
-
-        private void OnApplicationFocus(bool hasFocus)
+		public void AttackInput(bool newDrawState)
+		{
+			attack = newDrawState;
+		}
+		private void OnApplicationFocus(bool hasFocus)
 		{
 			SetCursorState(cursorLocked);
 		}
@@ -98,5 +99,5 @@ namespace StarterAssets
 			Cursor.lockState = newState ? CursorLockMode.Locked : CursorLockMode.None;
 		}
 	}
-	
+
 }

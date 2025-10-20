@@ -1,4 +1,4 @@
-﻿ using UnityEngine;
+﻿using UnityEngine;
 #if ENABLE_INPUT_SYSTEM 
 using UnityEngine.InputSystem;
 #endif
@@ -9,9 +9,9 @@ using UnityEngine.InputSystem;
 namespace StarterAssets
 {
     [RequireComponent(typeof(CharacterController))]
-
+#if ENABLE_INPUT_SYSTEM
     [RequireComponent(typeof(PlayerInput))]
-
+#endif
     public class ThirdPersonController : MonoBehaviour
     {
         [Header("Player")]
@@ -91,7 +91,9 @@ namespace StarterAssets
         private int _animIDAttack;
         private int _animIDAttacking;
 
+#if ENABLE_INPUT_SYSTEM
         private PlayerInput _playerInput;
+#endif
 
         public Animator _animator;
         private CharacterController _controller;
@@ -106,7 +108,11 @@ namespace StarterAssets
         {
             get
             {
+#if ENABLE_INPUT_SYSTEM
                 return _playerInput.currentControlScheme == "KeyboardMouse";
+#else
+                return true;
+#endif
             }
         }
 
@@ -116,7 +122,7 @@ namespace StarterAssets
         private void Awake()
         {
             playerController = GetComponent<PlayerController>();
-            
+
             // get a reference to our main camera
             if (_mainCamera == null)
             {
@@ -127,11 +133,13 @@ namespace StarterAssets
         private void Start()
         {
             _cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
-            
+
             _hasAnimator = TryGetComponent(out _animator);
             _controller = GetComponent<CharacterController>();
             _input = GetComponent<StarterAssetsInputs>();
+#if ENABLE_INPUT_SYSTEM
             _playerInput = GetComponent<PlayerInput>();
+#endif
 
             AssignAnimationIDs();
 
@@ -213,7 +221,7 @@ namespace StarterAssets
             //{
             //    return;
             //}
-            
+
             // set target speed based on move speed, sprint speed and if sprint is pressed
             float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
 
