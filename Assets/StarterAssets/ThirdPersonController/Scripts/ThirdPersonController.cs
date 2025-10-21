@@ -33,6 +33,24 @@ namespace StarterAssets
         public float JumpTimeout = 0.50f;
         public float FallTimeout = 0.15f;
 
+        [Header("Stadistics")]
+        [Range(0f, 100f)]
+        public float healthPercent = 100f;
+        public int health = 1000;
+        public int maxHealth = 2000;
+
+        [Space(10)]
+        [Range(0f, 100f)]
+        public float staminaPercent = 100f;
+        public int stamina = 100;
+        public int maxStamina = 2000;
+
+        [Space(10)]
+        [Range(0f, 100f)]
+        public float forcePercent = 100f;
+        public int force = 200;
+        public int maxForce = 2000;
+
         [Header("Player Grounded")]
         public bool Grounded = true;
         public float GroundedOffset = -0.14f;
@@ -90,6 +108,7 @@ namespace StarterAssets
         private int _animIDEquipped;
         private int _animIDAttack;
         private int _animIDAttacking;
+        private int _animIDInAir;
 
         private PlayerInput _playerInput;
 
@@ -149,6 +168,7 @@ namespace StarterAssets
             JumpAndGravity();
             GroundedCheck();
             Move();
+            HandleStadistics();
         }
 
         private void LateUpdate()
@@ -168,6 +188,7 @@ namespace StarterAssets
             _animIDEquipped = Animator.StringToHash("Equipped");
             _animIDAttack = Animator.StringToHash("Attack");
             _animIDAttacking = Animator.StringToHash("Attacking");
+            _animIDInAir = Animator.StringToHash("InAir");
         }
 
         private void GroundedCheck()
@@ -310,6 +331,7 @@ namespace StarterAssets
                     if (_hasAnimator)
                     {
                         _animator.SetBool(_animIDJump, true);
+                        _animator.SetBool(_animIDInAir, true);
                     }
                 }
 
@@ -335,6 +357,7 @@ namespace StarterAssets
                     if (_hasAnimator)
                     {
                         _animator.SetBool(_animIDFreeFall, true);
+                        _animator.SetBool(_animIDInAir, true);
                     }
                 }
 
@@ -347,6 +370,15 @@ namespace StarterAssets
             {
                 _verticalVelocity += Gravity * Time.deltaTime;
             }
+        }
+
+        private void HandleStadistics()
+        {
+            healthPercent = (health * 100) / maxHealth;
+
+            staminaPercent = (stamina * 100) / maxStamina;
+
+            forcePercent = (force * 100) / maxForce;
         }
 
         private void DrawSheathSword()
@@ -418,6 +450,12 @@ namespace StarterAssets
             Gizmos.DrawSphere(
                 new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z),
                 GroundedRadius);
+        }
+
+        // Animation Events
+        public void EndLandAnimation()
+        {
+            _animator.SetBool(_animIDInAir, false);
         }
 
         private void OnFootstep(AnimationEvent animationEvent)
