@@ -32,6 +32,24 @@ namespace StarterAssets
         [Space(10)]
         public float JumpTimeout = 0.50f;
         public float FallTimeout = 0.15f;
+        [Header("Stadistics")]
+
+        [Range(0f, 100f)]
+        public float healthPercent = 100f;
+        public int health = 1000;
+        public int maxHealth = 2000;
+
+        [Space(10)]
+        [Range(0f, 100f)]
+        public float staminaPercent = 100f;
+        public int stamina = 100;
+        public int maxStamina = 2000;
+
+        [Space(10)]
+        [Range(0f, 100f)]
+        public float forcePercent = 100f;
+        public int force = 200;
+        public int maxForce = 2000;
 
         [Header("Player Grounded")]
         public bool Grounded = true;
@@ -157,6 +175,7 @@ namespace StarterAssets
             JumpAndGravity();
             GroundedCheck();
             Move();
+            HandleStadistics();
         }
 
         private void LateUpdate()
@@ -357,6 +376,14 @@ namespace StarterAssets
             }
         }
 
+        private void HandleStadistics()
+        {
+            healthPercent = (health * 100) / maxHealth;
+
+            staminaPercent = (stamina * 100) / maxStamina;
+
+            forcePercent = (force * 100) / maxForce;
+        }
         private void DrawSheathSword()
         {
             if (Grounded)
