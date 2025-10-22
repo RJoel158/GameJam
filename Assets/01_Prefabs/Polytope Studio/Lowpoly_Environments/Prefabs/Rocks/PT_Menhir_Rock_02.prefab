@@ -143,7 +143,7 @@ LODGroup:
     fadeTransitionWidth: 0
     renderers:
     - renderer: {fileID: 1848920933074918554}
-  - screenRelativeHeight: 0.062123436
+  - screenRelativeHeight: 0.085044436
     fadeTransitionWidth: 0
     renderers:
     - renderer: {fileID: 2656451562331225545}
@@ -340,7 +340,7 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.6802754
-  m_Height: 2.8007505
+  m_Radius: 0.76472646
+  m_Height: 3.3730474
   m_Direction: 1
-  m_Center: {x: -0.16178173, y: 1.3193775, z: 0.13982798}
+  m_Center: {x: -0.09563166, y: 1.2327111, z: 0.08691406}
