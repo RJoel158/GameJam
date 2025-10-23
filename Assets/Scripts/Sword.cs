@@ -4,7 +4,7 @@ using UnityEngine;
 public class Sword : MonoBehaviour
 {
     [SerializeField] ThirdPersonController thirdPersonController;
-    public float damage = 10f;
+    public int damage = 10;
 
     [Header("Raycast Settings")]
     public Transform originPoint;       // 🔹 Punto desde donde parte el Raycast
@@ -15,7 +15,7 @@ public class Sword : MonoBehaviour
     private RaycastHit hitInfo;
     private bool hitDetected;
 
-    void Update()
+    void FixedUpdate()
     {
         if (originPoint == null)
             return;

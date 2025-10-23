@@ -38,6 +38,7 @@ namespace StarterAssets
         public float healthPercent = 100f;
         public int health = 1000;
         public int maxHealth = 2000;
+        public bool death = false;
 
         [Space(10)]
         [Range(0f, 100f)]
@@ -379,6 +380,26 @@ namespace StarterAssets
             staminaPercent = (stamina * 100) / maxStamina;
 
             forcePercent = (force * 100) / maxForce;
+        }
+
+        public void TakeDamage(int damageAmount)
+        {
+            health -= damageAmount;
+            _animator.SetTrigger("Damage");
+            //CameraShake.Instance.ShakeCamera(2f, 0.2f);
+
+            if (health <= 0)
+            {
+                death = true;
+                Die();
+            }
+        }
+
+        void Die()
+        {
+            //Instantiate(ragdoll, transform.position, transform.rotation);
+            _animator.SetTrigger("Death");
+            //Destroy(this.gameObject);
         }
 
         private void DrawSheathSword()
