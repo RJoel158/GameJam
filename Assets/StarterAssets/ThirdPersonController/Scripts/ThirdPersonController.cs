@@ -38,7 +38,8 @@ namespace StarterAssets
         public float healthPercent = 100f;
         public int health = 1000;
         public int maxHealth = 2000;
-        public bool death = false;
+        public bool dead = false;
+        public bool hitting = false;
 
         [Space(10)]
         [Range(0f, 100f)]
@@ -110,6 +111,8 @@ namespace StarterAssets
         private int _animIDAttack;
         private int _animIDAttacking;
         private int _animIDInAir;
+        private int _animIDDeath;
+        private int _animIDHitting;
 
         private PlayerInput _playerInput;
 
@@ -190,6 +193,8 @@ namespace StarterAssets
             _animIDAttack = Animator.StringToHash("Attack");
             _animIDAttacking = Animator.StringToHash("Attacking");
             _animIDInAir = Animator.StringToHash("InAir");
+            _animIDDeath = Animator.StringToHash("Dead");
+            _animIDHitting = Animator.StringToHash("Hitting");
         }
 
         private void GroundedCheck()
@@ -230,6 +235,11 @@ namespace StarterAssets
 
         private void Move()
         {
+            if (dead)
+            {
+                return;
+            }
+
             // ELIMINAR, RESTRINGE EL MOVIMIENTO EN LA EQUIPACION Y BLOQUEO
             //if (playerController.isEquipping || playerController.isBlocking)
             //{
@@ -308,6 +318,7 @@ namespace StarterAssets
             {
                 // reset the fall timeout timer
                 _fallTimeoutDelta = FallTimeout;
+                _animator.SetBool(_animIDInAir, false);
 
                 // update animator if using character
                 if (_hasAnimator)
@@ -375,6 +386,9 @@ namespace StarterAssets
 
         private void HandleStadistics()
         {
+            _animator.SetBool(_animIDDeath, dead);
+            _animator.SetBool(_animIDHitting, hitting);
+            
             healthPercent = (health * 100) / maxHealth;
 
             staminaPercent = (stamina * 100) / maxStamina;
@@ -384,13 +398,16 @@ namespace StarterAssets
 
         public void TakeDamage(int damageAmount)
         {
-            health -= damageAmount;
-            _animator.SetTrigger("Damage");
-            //CameraShake.Instance.ShakeCamera(2f, 0.2f);
+            if (!dead)
+            {
+                health -= damageAmount;
+                _animator.SetTrigger("Damage");
+                //CameraShake.Instance.ShakeCamera(2f, 0.2f);
+            }
 
             if (health <= 0)
             {
-                death = true;
+                dead = true;
                 Die();
             }
         }
@@ -439,7 +456,7 @@ namespace StarterAssets
             if (Grounded)
             {
                 // Attack
-                if (_input.attack && isEquipped && !isAttacking)
+                if (_input.attack && isEquipped && !isAttacking && !hitting)
                 {
                     // update animator if using character
                     if (_hasAnimator)
@@ -477,6 +494,16 @@ namespace StarterAssets
         public void EndLandAnimation()
         {
             _animator.SetBool(_animIDInAir, false);
+        }
+
+        public void StartPlayerDamage()
+        {
+            hitting = true;
+        }
+
+        public void EndPlayerDamage()
+        {
+            hitting = false;
         }
 
         private void OnFootstep(AnimationEvent animationEvent)

@@ -133,6 +133,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 100
+  enemyScript: {fileID: 5074653416928591724}
+  hitTimer: 0
+  timeBwtHit: 1
+  canHit: 0
   originPoint: {fileID: 2760625196713350589}
   castDirection: {x: 0.5, y: 0, z: 1.5}
   castDistance: 0.65
@@ -213,7 +217,6 @@ GameObject:
   - component: {fileID: 3048728097158430001}
   - component: {fileID: 906120243789933982}
   - component: {fileID: 5074653416928591724}
-  - component: {fileID: 8627361954869958600}
   - component: {fileID: 6674780880897665663}
   - component: {fileID: 2035612768290334559}
   m_Layer: 6
@@ -232,7 +235,7 @@ Transform:
   m_GameObject: {fileID: 2226931901822740858}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.39, z: -1.57}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -280,6 +283,9 @@ MonoBehaviour:
   playerDetected: 0
   targetSpeed: 0
   playerThirdPersonController: {fileID: 0}
+  inAttackAnimation: 0
+  isAttacking: 0
+  dead: 0
   health: 100
   attackCD: 3
   attackRange: 1
@@ -287,33 +293,6 @@ MonoBehaviour:
   player: {fileID: 0}
   agent: {fileID: 0}
   animator: {fileID: 906120243789933982}
---- !u!54 &8627361954869958600
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2226931901822740858}
-  serializedVersion: 4
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 1
-  m_Interpolate: 0
-  m_Constraints: 112
-  m_CollisionDetection: 0
 --- !u!136 &6674780880897665663
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -719,8 +698,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5632347794367217589}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
-  m_LocalPosition: {x: -33.07, y: -18.364, z: 73.6}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

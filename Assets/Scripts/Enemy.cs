@@ -1,4 +1,4 @@
-using StarterAssets;
+﻿using StarterAssets;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Windows;
@@ -11,6 +11,10 @@ public class Enemy : MonoBehaviour
     public bool playerDetected = false;
     public float targetSpeed = 0f;
     public ThirdPersonController playerThirdPersonController;
+    public CapsuleCollider CapsuleEnemyCollider;
+    public bool inAttackAnimation = false;
+    public bool isAttacking = false;
+    public bool dead = false;
 
     public int health = 100;
     //[SerializeField] GameObject hitVFX;
@@ -29,10 +33,11 @@ public class Enemy : MonoBehaviour
 
     void Start()
     {
-        agent = GetComponent<NavMeshAgent>();
+        //agent = GetComponent<NavMeshAgent>();
         //animator = GetComponent<Animator>();
+        //CapsuleEnemyCollider = GetComponent<CapsuleCollider>();
         player = GameObject.FindGameObjectWithTag("Player");
-        playerThirdPersonController = player.GetComponent<ThirdPersonController>();
+        //playerThirdPersonController = player.GetComponent<ThirdPersonController>();
     }
 
     // Update is called once per frame
@@ -40,37 +45,53 @@ public class Enemy : MonoBehaviour
     {
         Move();
 
-        
-
-        if (player == null)
+        if (player == null && playerThirdPersonController.dead)
         {
             return;
         }
 
         if (health > 0)
         {
-            if (timePassed >= attackCD)
-            {
-                attackPlayer = Vector3.Distance(player.transform.position, transform.position) <= attackRange;
-
-                if (attackPlayer && !playerThirdPersonController.death)
-                {
-                    animator.SetTrigger("Attack");
-                    timePassed = 0;
-                }
-            }
-            timePassed += Time.deltaTime;
-
-            playerDetected = newDestinationCD <= 0 && Vector3.Distance(player.transform.position, transform.position) <= aggroRange;
-
-            if (playerDetected)
-            {
-                //newDestinationCD = 0.5f;
-                agent.SetDestination(player.transform.position);
-            }
-            newDestinationCD -= Time.deltaTime;
-            transform.LookAt(player.transform);
+            dead = false;
         }
+        else
+        {
+            dead = true;
+        }
+
+        if (timePassed >= attackCD)
+        {
+            attackPlayer = Vector3.Distance(player.transform.position, transform.position) <= attackRange;
+
+            if (attackPlayer && !playerThirdPersonController.dead)
+            {
+                animator.SetTrigger("Attack");
+                timePassed = 0;
+            }
+        }
+        timePassed += Time.deltaTime;
+
+        playerDetected = newDestinationCD <= 0 && Vector3.Distance(player.transform.position, transform.position) <= aggroRange;
+
+        if (playerDetected && !isAttacking && !inAttackAnimation && !dead)
+        {
+            //newDestinationCD = 0.5f;
+            agent.SetDestination(player.transform.position);
+        }
+        newDestinationCD -= Time.deltaTime;
+        //transform.LookAt(player.transform);
+
+        if (!dead && playerDetected)
+        {
+            Vector3 direction = player.transform.position - transform.position;
+            direction.y = 0f; // 🔹 ignora la altura
+            if (direction.sqrMagnitude > 0.001f)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(direction);
+                // 🔹 solo rota el eje Y
+                transform.rotation = Quaternion.Euler(0f, targetRotation.eulerAngles.y, 0f);
+            }
+        }       
     }
 
     void Move()
@@ -107,6 +128,36 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    
+
+    public void TakeDamage(int damageAmount)
+    {
+        health -= damageAmount;
+
+        //if (health <= 0)
+        //{
+        //    Die();
+        //}
+        //else
+        //{
+        //    animator.SetTrigger("Damage");
+        //    //CameraShake.Instance.ShakeCamera(2f, 0.2f);
+        //}
+
+        if (!dead)
+        {
+            animator.SetTrigger("Damage");
+            //CameraShake.Instance.ShakeCamera(2f, 0.2f);
+        }
+
+        if (health <= 0)
+        {
+            dead = true;
+            CapsuleEnemyCollider.enabled = false;
+            Die();
+        }
+    }
+
     void Die()
     {
         //Instantiate(ragdoll, transform.position, transform.rotation);
@@ -114,17 +165,28 @@ public class Enemy : MonoBehaviour
         //Destroy(this.gameObject);
     }
 
-    public void TakeDamage(int damageAmount)
+    // Animation Events
+    public void StartBasicEnemyAttack()
     {
-        health -= damageAmount;
-        animator.SetTrigger("Damage");
-        //CameraShake.Instance.ShakeCamera(2f, 0.2f);
-
-        if (health <= 0)
-        {
-            Die();
-        }
+        inAttackAnimation = true;
     }
+
+    public void EndBasicEnemyAttack()
+    {
+        inAttackAnimation = false;
+    }
+
+    public void EnterBasicEnemyAttack()
+    {
+        isAttacking = true;
+    }
+
+    public void ExitBasicEnemyAttack()
+    {
+        isAttacking = false;
+    }
+
+
     //public void StartDealDamage()
     //{
     //    GetComponentInChildren<EnemyDamageDealer>().StartDealDamage();

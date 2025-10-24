@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class AttackSystem : MonoBehaviour
 {
+    [HideInInspector] public bool exitComboTriggered = false;
+    
     [SerializeField] float timePassed = 0f;
     [SerializeField] float clipLength = 0f;
     [SerializeField] float clipSpeed = 0f;
@@ -25,14 +27,14 @@ public class AttackSystem : MonoBehaviour
     public void EnterAttack()
     {
         thirdPersonController.isAttacking = true;
-        thirdPersonController._animator.applyRootMotion = true;
+        //thirdPersonController._animator.applyRootMotion = true;
         //timePassed = 0;
     }
 
     public void ExitAttack()
     {
         thirdPersonController.isAttacking = false;
-        thirdPersonController._animator.applyRootMotion = false;
+        //thirdPersonController._animator.applyRootMotion = false;
         //timePassed = 0;
     }
 
@@ -64,6 +66,7 @@ public class AttackSystem : MonoBehaviour
             if (timePassed >= (clipLength / clipSpeed) || thirdPersonController._animationBlend >= 0.01f)
             {
                 thirdPersonController._animator.SetTrigger("ExitCombo");
+                exitComboTriggered = true;
                 timePassed = 0f;
             }
         }
