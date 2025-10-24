@@ -100,11 +100,11 @@ public class InventoryHUD : MonoBehaviour
     }
 
     // Editor convenient: menú de contexto para buscar filas manualmente desde el Inspector
-    [ContextMenu("Auto Find StatRows")] 
+    [ContextMenu("Auto Find StatRows")]
     public void AutoFindStatRows()
     {
         statRows = GetComponentsInChildren<StatRow>(true);
-        Debug.Log($"InventoryHUD: AutoFind StatRows found { (statRows==null?0:statRows.Length) } rows.");
+        Debug.Log($"InventoryHUD: AutoFind StatRows found {(statRows == null ? 0 : statRows.Length)} rows.");
     }
 
     // Petición desde una StatRow para incrementar. Aquí se valida y aplican efectos adicionales si es necesario.
