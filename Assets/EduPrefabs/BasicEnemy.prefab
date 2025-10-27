@@ -1180,7 +1180,7 @@ MonoBehaviour:
   castDistance: -0.23
   layerMask:
     serializedVersion: 2
-    m_Bits: 8
+    m_Bits: 0
   boxHalfExtents: {x: 0.5, y: 0.5, z: 0.5}
   boxCastDistance: 0.1
 --- !u!1 &8561842331801038218

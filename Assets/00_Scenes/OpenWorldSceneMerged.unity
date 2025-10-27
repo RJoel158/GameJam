@@ -355,7 +355,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -5.4, y: 26.8}
+  m_AnchoredPosition: {x: -5.4, y: -18.1}
   m_SizeDelta: {x: 165.1721, y: 45.6318}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &226370430
@@ -375,7 +375,9 @@ MonoBehaviour:
   labelTMP: {fileID: 0}
   valueTMP: {fileID: 0}
   plusButton: {fileID: 1319516996}
-  statType: 0
+  statType: 2
+  playerStats: {fileID: 0}
+  parentHud: {fileID: 0}
 --- !u!1 &353023649 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 671ca475c17625b48a992a98a59e7525, type: 3}
@@ -655,6 +657,8 @@ MonoBehaviour:
   valueTMP: {fileID: 0}
   plusButton: {fileID: 155691187}
   statType: 0
+  playerStats: {fileID: 0}
+  parentHud: {fileID: 0}
 --- !u!4 &445738002 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7762193421038833466, guid: 81f69acf013368042b24f250ea367625, type: 3}
@@ -891,7 +895,7 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: 671ca475c17625b48a992a98a59e7525, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: a34bf527c752c3b42ae0aea9e38492ae, type: 2}
+      objectReference: {fileID: 2100000, guid: a6293f1b654703743b15c23c24b16836, type: 2}
     - target: {fileID: 919132149155446097, guid: 671ca475c17625b48a992a98a59e7525, type: 3}
       propertyPath: m_Name
       value: Enchanted_Luminance_A_1020011608_texture
@@ -1835,7 +1839,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -5.4, y: 26.8}
+  m_AnchoredPosition: {x: -5.4, y: 73}
   m_SizeDelta: {x: 165.1721, y: 45.6318}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1292592467
@@ -1856,6 +1860,8 @@ MonoBehaviour:
   valueTMP: {fileID: 0}
   plusButton: {fileID: 1315412023}
   statType: 1
+  playerStats: {fileID: 0}
+  parentHud: {fileID: 0}
 --- !u!1 &1309562530 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3376341071538768666, guid: ec80908d46a396c40873b1097cd7104b, type: 3}
@@ -2922,7 +2928,7 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: 07f2aead5e5857549b3b12b35debed07, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: f275d9952ed151942914cb306aa125c3, type: 2}
+      objectReference: {fileID: 2100000, guid: 3a8c6f7266b7e1b4bb2eb667ea112d76, type: 2}
     - target: {fileID: 919132149155446097, guid: 07f2aead5e5857549b3b12b35debed07, type: 3}
       propertyPath: m_Name
       value: Volcanic_Fortress_1024010020_texture (1)
