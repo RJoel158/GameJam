@@ -456,7 +456,7 @@ namespace StarterAssets
             if (Grounded)
             {
                 // Attack
-                if (_input.attack && isEquipped && !isAttacking && !hitting)
+                if (_input.attack && isEquipped && !isAttacking && !hitting && !dead)
                 {
                     // update animator if using character
                     if (_hasAnimator)

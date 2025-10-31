@@ -8,7 +8,6 @@ public class Sword : MonoBehaviour
     public float hitTimer = 0;
     public float timeBwtHit = 1f;
     public bool canHit = false;
-    public LayerMask layerMask;
 
     void Update()
     {
@@ -31,7 +30,7 @@ public class Sword : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Enemy") && canHit)
+        if (other.CompareTag("Enemy") && canHit && !thirdPersonController.dead && thirdPersonController.isAttacking)
         {
             Enemy enemy = other.GetComponentInChildren<Enemy>();
             enemy.TakeDamage(damage);

@@ -59,6 +59,11 @@ public class Enemy : MonoBehaviour
             dead = true;
         }
 
+        if (dead)
+        {
+            return;
+        }
+
         if (timePassed >= attackCD)
         {
             attackPlayer = Vector3.Distance(player.transform.position, transform.position) <= attackRange;
