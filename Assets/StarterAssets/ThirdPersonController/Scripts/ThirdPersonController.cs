@@ -1,4 +1,5 @@
-﻿ using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.UI;
 #if ENABLE_INPUT_SYSTEM 
 using UnityEngine.InputSystem;
 #endif
@@ -9,9 +10,9 @@ using UnityEngine.InputSystem;
 namespace StarterAssets
 {
     [RequireComponent(typeof(CharacterController))]
-
+#if ENABLE_INPUT_SYSTEM
     [RequireComponent(typeof(PlayerInput))]
-
+#endif
     public class ThirdPersonController : MonoBehaviour
     {
         [Header("Player")]
@@ -26,6 +27,10 @@ namespace StarterAssets
         [Range(0, 1)] public float FootstepAudioVolume = 0.5f;
 
         [Space(10)]
+        public AudioClip DrawSwordSound;
+        public float DrawSwordVolume = 1f;
+
+        [Space(10)]
         public float JumpHeight = 1.2f;
         public float Gravity = -15.0f;
 
@@ -38,14 +43,9 @@ namespace StarterAssets
         public float healthPercent = 100f;
         public int health = 1000;
         public int maxHealth = 2000;
+        public bool death = false;
         public bool dead = false;
         public bool hitting = false;
-
-        [Space(10)]
-        [Range(0f, 100f)]
-        public float staminaPercent = 100f;
-        public int stamina = 100;
-        public int maxStamina = 2000;
 
         [Space(10)]
         [Range(0f, 100f)]
@@ -114,12 +114,15 @@ namespace StarterAssets
         private int _animIDDeath;
         private int _animIDHitting;
 
+#if ENABLE_INPUT_SYSTEM
         private PlayerInput _playerInput;
+#endif
 
         public Animator _animator;
         private CharacterController _controller;
-        private StarterAssetsInputs _input;
+        public StarterAssetsInputs _input;
         private GameObject _mainCamera;
+        private AudioSource audioSource;
 
         private const float _threshold = 0.01f;
 
@@ -129,17 +132,23 @@ namespace StarterAssets
         {
             get
             {
+#if ENABLE_INPUT_SYSTEM
                 return _playerInput.currentControlScheme == "KeyboardMouse";
+#else
+                return true;
+#endif
             }
         }
 
         // PlayerControllerParameters
         private PlayerController playerController;
+        private FaseColorController faseColorController;
 
         private void Awake()
         {
             playerController = GetComponent<PlayerController>();
-            
+            faseColorController = FindFirstObjectByType<FaseColorController>();
+
             // get a reference to our main camera
             if (_mainCamera == null)
             {
@@ -150,11 +159,14 @@ namespace StarterAssets
         private void Start()
         {
             _cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
-            
+
             _hasAnimator = TryGetComponent(out _animator);
             _controller = GetComponent<CharacterController>();
             _input = GetComponent<StarterAssetsInputs>();
+            audioSource = GetComponent<AudioSource>();
+#if ENABLE_INPUT_SYSTEM
             _playerInput = GetComponent<PlayerInput>();
+#endif
 
             AssignAnimationIDs();
 
@@ -235,7 +247,8 @@ namespace StarterAssets
 
         private void Move()
         {
-            if (dead)
+            // Prevenir movimiento si está muerto
+            if (dead || death)
             {
                 return;
             }
@@ -245,9 +258,18 @@ namespace StarterAssets
             //{
             //    return;
             //}
-            
+
             // set target speed based on move speed, sprint speed and if sprint is pressed
-            float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
+            // NO permite correr si el stamina está en 0
+            bool canSprint = (faseColorController != null) ? faseColorController.CanSprint() : true;
+            
+            // Si stamina llegó a 0, fuerza cancelar sprint
+            if (!canSprint)
+            {
+                _input.sprint = false;
+            }
+            
+            float targetSpeed = (_input.sprint && canSprint) ? SprintSpeed : MoveSpeed;
 
             // a simplistic acceleration and deceleration designed to be easy to remove, replace, or iterate upon
 
@@ -386,19 +408,18 @@ namespace StarterAssets
 
         private void HandleStadistics()
         {
-            _animator.SetBool(_animIDDeath, dead);
+            // Actualizar animator con estados de muerte y golpe
+            _animator.SetBool(_animIDDeath, dead || death);
             _animator.SetBool(_animIDHitting, hitting);
-            
-            healthPercent = (health * 100) / maxHealth;
 
-            staminaPercent = (stamina * 100) / maxStamina;
+            healthPercent = (health * 100) / maxHealth;
 
             forcePercent = (force * 100) / maxForce;
         }
 
         public void TakeDamage(int damageAmount)
         {
-            if (!dead)
+            if (!dead && !death)
             {
                 health -= damageAmount;
                 _animator.SetTrigger("Damage");
@@ -407,6 +428,7 @@ namespace StarterAssets
 
             if (health <= 0)
             {
+                death = true;
                 dead = true;
                 Die();
             }
@@ -433,6 +455,12 @@ namespace StarterAssets
                         _animator.SetTrigger(_animIDDrawSword);
                         _animator.SetBool(_animIDEquipped, true);
                         _input.draw = false;
+                        
+                        // Reproducir sonido de desenvaina
+                        if (audioSource != null && DrawSwordSound != null)
+                        {
+                            audioSource.PlayOneShot(DrawSwordSound, DrawSwordVolume);
+                        }
                     }
                 }
                 else if (_input.draw && isEquipped)
@@ -444,6 +472,12 @@ namespace StarterAssets
                         _animator.SetTrigger(_animIDSheathSword);
                         _animator.SetBool(_animIDEquipped, false);
                         _input.draw = false;
+                        
+                        // Reproducir sonido de vaina
+                        if (audioSource != null && DrawSwordSound != null)
+                        {
+                            audioSource.PlayOneShot(DrawSwordSound, DrawSwordVolume);
+                        }
                     }
                 }
             }
@@ -455,15 +489,24 @@ namespace StarterAssets
 
             if (Grounded)
             {
-                // Attack
+                // NO permite atacar si stamina es 0 o no hay suficiente o está siendo golpeado
                 if (_input.attack && isEquipped && !isAttacking && !hitting)
                 {
                     // update animator if using character
                     if (_hasAnimator)
                     {
-                        _animator.SetTrigger(_animIDAttack);
-                        _animator.SetFloat(_animIDSpeed, 0);
-                        _input.attack = false;
+                        // Intentar consumir stamina para atacar
+                        if (faseColorController != null && faseColorController.TryConsumeStaminaForAttack())
+                        {
+                            _animator.SetTrigger(_animIDAttack);
+                            _animator.SetFloat(_animIDSpeed, 0);
+                            _input.attack = false;
+                        }
+                        else
+                        {
+                            // No hay stamina suficiente - cancelar ataque
+                            _input.attack = false;
+                        }
                     }
                 }
             }
