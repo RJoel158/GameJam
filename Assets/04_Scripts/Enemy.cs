@@ -106,7 +106,7 @@ public class Enemy : MonoBehaviour
                 // 🔹 solo rota el eje Y
                 transform.rotation = Quaternion.Euler(0f, targetRotation.eulerAngles.y, 0f);
             }
-        }       
+        }
     }
 
     void Move()
@@ -143,7 +143,7 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    
+
 
     public void TakeDamage(int damageAmount)
     {
