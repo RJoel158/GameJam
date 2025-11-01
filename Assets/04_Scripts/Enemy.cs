@@ -38,6 +38,21 @@ public class Enemy : MonoBehaviour
         //CapsuleEnemyCollider = GetComponent<CapsuleCollider>();
         player = GameObject.FindGameObjectWithTag("Player");
         //playerThirdPersonController = player.GetComponent<ThirdPersonController>();
+        // Ensure a health bar is present at runtime (adds component if prefab wasn't edited)
+        // Use reflection to avoid a hard compile-time dependency on the healthbar script symbol order
+        System.Type hbType = null;
+        foreach (var asm in System.AppDomain.CurrentDomain.GetAssemblies())
+        {
+            hbType = asm.GetType("EnemyHealthBar");
+            if (hbType != null) break;
+        }
+        if (hbType != null)
+        {
+            if (gameObject.GetComponent(hbType) == null)
+            {
+                gameObject.AddComponent(hbType);
+            }
+        }
     }
 
     // Update is called once per frame

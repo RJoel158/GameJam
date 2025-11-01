@@ -432,6 +432,28 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2222910864243262332, guid: 5e5cb3b669c8b274296e52f5afe89820, type: 3}
   m_PrefabInstance: {fileID: 769921575}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &625540147 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3799545845586785563, guid: 93071e979dd127d40badf3ff7a485b76, type: 3}
+  m_PrefabInstance: {fileID: 1104398339}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &625540152
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 625540147}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa595753d7bab7e468b0a46d66b309b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  localOffset: {x: 0, y: 2, z: 0}
+  barWidth: 1.2
+  barHeight: 0.12
+  backgroundColor: {r: 0, g: 0, b: 0, a: 0.6}
+  fillColor: {r: 0.8, g: 0.1, b: 0.1, a: 1}
 --- !u!4 &634938066 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8752168385036901246, guid: ec80908d46a396c40873b1097cd7104b, type: 3}
@@ -826,6 +848,10 @@ PrefabInstance:
       propertyPath: playerThirdPersonController
       value: 
       objectReference: {fileID: 1309562541}
+    - target: {fileID: 8877964436539007449, guid: 93071e979dd127d40badf3ff7a485b76, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 22.59
+      objectReference: {fileID: 0}
     - target: {fileID: 9184609457075906820, guid: 93071e979dd127d40badf3ff7a485b76, type: 3}
       propertyPath: layerMask.m_Bits
       value: 8
@@ -833,7 +859,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3799545845586785563, guid: 93071e979dd127d40badf3ff7a485b76, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 625540152}
   m_SourcePrefab: {fileID: 100100000, guid: 93071e979dd127d40badf3ff7a485b76, type: 3}
 --- !u!1 &1112947372
 GameObject:
