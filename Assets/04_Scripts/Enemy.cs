@@ -5,6 +5,9 @@ using UnityEngine.Windows;
 
 public class Enemy : MonoBehaviour
 {
+    // Event for mission system - fires when enemy is defeated with position
+    public static event System.Action<Vector3> OnEnemyDefeated;
+
     public float _animationBlend;
     public float SpeedChangeRate = 10.0f;
     public bool attackPlayer = false;
@@ -38,7 +41,7 @@ public class Enemy : MonoBehaviour
         //CapsuleEnemyCollider = GetComponent<CapsuleCollider>();
         player = GameObject.FindGameObjectWithTag("Player");
         //playerThirdPersonController = player.GetComponent<ThirdPersonController>();
-        
+
         // Asegurar que EnemyPowerUpDropper existe
         var dropperType = System.Type.GetType("EnemyPowerUpDropper");
         if (dropperType != null && GetComponent(dropperType) == null)
@@ -46,7 +49,7 @@ public class Enemy : MonoBehaviour
             gameObject.AddComponent(dropperType);
             Debug.Log($"[ENEMY] EnemyPowerUpDropper agregado automáticamente a {gameObject.name}");
         }
-        
+
         // Ensure a health bar is present at runtime (adds component if prefab wasn't edited)
         // Use reflection to avoid a hard compile-time dependency on the healthbar script symbol order
         System.Type hbType = null;
@@ -186,7 +189,12 @@ public class Enemy : MonoBehaviour
     {
         //Instantiate(ragdoll, transform.position, transform.rotation);
         animator.SetTrigger("Death");
-        
+
+        // Fire mission event with enemy position
+        Debug.Log($"<color=red>[Enemy] Firing OnEnemyDefeated event at position: {transform.position}</color>");
+        Debug.Log($"<color=red>[Enemy] Event has {(OnEnemyDefeated != null ? OnEnemyDefeated.GetInvocationList().Length : 0)} subscribers</color>");
+        OnEnemyDefeated?.Invoke(transform.position);
+
         // Soltar poder-up al morir usando reflection para evitar dependencias
         var dropperType = System.Type.GetType("EnemyPowerUpDropper");
         if (dropperType != null)
