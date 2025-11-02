@@ -8,6 +8,12 @@ public class Enemy : MonoBehaviour
     // Event for mission system - fires when enemy is defeated with position
     public static event System.Action<Vector3> OnEnemyDefeated;
 
+    // Public method for testing - simulates enemy defeat
+    public static void TEST_TriggerEnemyDefeated(Vector3 position)
+    {
+        OnEnemyDefeated?.Invoke(position);
+    }
+
     public float _animationBlend;
     public float SpeedChangeRate = 10.0f;
     public bool attackPlayer = false;

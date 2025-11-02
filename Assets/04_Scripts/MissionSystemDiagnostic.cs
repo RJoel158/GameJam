@@ -82,7 +82,7 @@ public class MissionSystemDiagnostic : MonoBehaviour
     {
         Debug.Log("\n--- Checking MissionUI ---");
 
-        var missionUI = FindObjectOfType<MissionUI>();
+        var missionUI = FindAnyObjectByType<MissionUI>();
         if (missionUI == null)
         {
             Debug.LogError("❌ MissionUI component not found in scene!");
@@ -165,7 +165,7 @@ public class MissionSystemDiagnostic : MonoBehaviour
     {
         Debug.Log("\n--- Checking Enemy Event ---");
 
-        var enemies = FindObjectsOfType<Enemy>();
+        var enemies = FindObjectsByType<Enemy>(FindObjectsSortMode.None);
         if (enemies.Length == 0)
         {
             Debug.LogWarning("⚠️ No Enemy objects found in scene!");
@@ -233,7 +233,7 @@ public class MissionSystemDiagnostic : MonoBehaviour
     public void TestKillEnemy()
     {
         Debug.Log("<color=yellow>Testing manual enemy defeat event...</color>");
-        Enemy.OnEnemyDefeated?.Invoke(transform.position);
+        Enemy.TEST_TriggerEnemyDefeated(transform.position);
         Debug.Log("<color=yellow>Manual event fired!</color>");
     }
 

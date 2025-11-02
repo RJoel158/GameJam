@@ -134,7 +134,7 @@ public class MissionDebugHelper : MonoBehaviour
 
         // 2. Check MissionUI
         Debug.Log("\n--- ✅ MissionUI ---");
-        var missionUI = FindObjectOfType<MissionUI>();
+        var missionUI = FindAnyObjectByType<MissionUI>();
         if (missionUI == null)
         {
             Debug.LogError("❌ NO se encontró MissionUI en la escena!");
@@ -161,7 +161,7 @@ public class MissionDebugHelper : MonoBehaviour
 
         // 3. Check Enemy event
         Debug.Log("\n--- ✅ Enemy Event ---");
-        var enemies = FindObjectsOfType<Enemy>();
+        var enemies = FindObjectsByType<Enemy>(FindObjectsSortMode.None);
         Debug.Log($"   Enemigos en escena: {enemies.Length}");
 
         var fieldInfo = typeof(Enemy).GetField("OnEnemyDefeated",
@@ -190,7 +190,7 @@ public class MissionDebugHelper : MonoBehaviour
     public void TestKillEnemy()
     {
         Debug.Log("<color=yellow>🧪 Simulando muerte de enemigo...</color>");
-        Enemy.OnEnemyDefeated?.Invoke(transform.position);
+        Enemy.TEST_TriggerEnemyDefeated(transform.position);
         Debug.Log("<color=green>✅ Evento Enemy.OnEnemyDefeated disparado manualmente!</color>");
     }
 

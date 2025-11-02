@@ -60,12 +60,17 @@ public class DefeatEnemiesMission : ScriptableObject
 
         Debug.Log($"<color=cyan>[DefeatEnemiesMission] Enemy defeated at position: {position}. Progress: {enemiesDefeated}/{enemiesRequired}</color>");
 
-        CheckProgress();
-    }
+        // Notify MissionManager IMMEDIATELY of progress change
+        var manager = UnityEngine.Object.FindAnyObjectByType<MissionManager>();
+        if (manager != null)
+        {
+            manager.OnMissionProgressChanged?.Invoke(enemiesDefeated, enemiesRequired);
+        }
 
-    /// <summary>
-    /// Checks if mission is complete
-    /// </summary>
+        CheckProgress();
+    }    /// <summary>
+         /// Checks if mission is complete
+         /// </summary>
     private void CheckProgress()
     {
         if (enemiesDefeated >= enemiesRequired)
