@@ -14,6 +14,9 @@ public class FaseColorController : MonoBehaviour
     private Image staminaImage;
     
     [SerializeField]
+    private Image healthImage;
+    
+    [SerializeField]
     private Color startColor = new Color(1f, 0f, 0f, 1f); // Rojo (FF0000)
     
     [SerializeField]
@@ -37,6 +40,7 @@ public class FaseColorController : MonoBehaviour
     private float staminaTickTimer = 0f; // Timer para controlar cuándo bajar stamina
     private bool lastAttackInputState = false; // Guardar el estado anterior del input de ataque
     private float attackCooldownTimer = 0f; // Cooldown entre ataques
+    public bool unlimitedStaminaActive = false; // Flag para poder-up de estamina infinita
 
     [Header("Mana")]
     [Range(0f, 100f)]
@@ -82,6 +86,19 @@ public class FaseColorController : MonoBehaviour
             }
         }
 
+        if (healthImage == null)
+        {
+            healthImage = GameObject.Find("health")?.GetComponent<Image>();
+            if (healthImage == null)
+            {
+                healthImage = GameObject.Find("vida")?.GetComponent<Image>();
+            }
+            if (healthImage == null)
+            {
+                Debug.LogWarning("No se encontró la imagen 'health' o 'vida'. Busca manualmente en el Inspector.");
+            }
+        }
+
         // Inicializar color en rojo
         if (faseImage != null)
         {
@@ -109,27 +126,44 @@ public class FaseColorController : MonoBehaviour
         {
             HandleStaminaConsumption();
             HandleManaRegeneration();
+            UpdateHealthUI();
             UpdateUI();
         }
     }
 
     private void HandleStaminaConsumption()
     {
+        // Si está activo el poder-up de estamina infinita, no consumir stamina
+        if (unlimitedStaminaActive)
+        {
+            currentStamina = maxStamina;
+            stamina = maxStamina;
+            staminaPercent = 100f;
+            return;
+        }
+        
+        // DESPUÉS DE QUE TERMINA EL PODER-UP, CONSUMIR NORMALMENTE
         // Consume stamina when sprinting de forma fluida
         if (thirdPersonController._input.sprint && thirdPersonController._input.move != Vector2.zero && currentStamina > 0)
         {
             // Velocidad de consumo: 400 stamina por segundo (fluido y continuo)
             currentStamina -= sprintStaminaCost * Time.deltaTime;
-            if (currentStamina < 0) currentStamina = 0;
+            if (currentStamina < 0) 
+            {
+                currentStamina = 0;
+            }
         }
-        // NO regenerate si sigue presionando Shift o atacando
+        // Regenerate stamina cuando no está presionando Shift ni atacando
         else if (!thirdPersonController._input.sprint && !thirdPersonController._input.attack)
         {
             // Regenerate stamina cuando no está presionando Shift ni atacando
             float regenRate = sprintStaminaCost * 0.5f;
             currentStamina += regenRate * Time.deltaTime;
             
-            if (currentStamina > maxStamina) currentStamina = maxStamina;
+            if (currentStamina > maxStamina) 
+            {
+                currentStamina = maxStamina;
+            }
         }
 
         // Convertir float a int para el stamina público
@@ -180,6 +214,29 @@ public class FaseColorController : MonoBehaviour
         }
     }
 
+    private void UpdateHealthUI()
+    {
+        if (healthImage != null && thirdPersonController != null)
+        {
+            // Calcular el porcentaje de vida
+            float healthPercent = (thirdPersonController.health * 100f) / thirdPersonController.maxHealth;
+            float fillAmount = Mathf.Clamp01(healthPercent / 100f);
+            healthImage.fillAmount = fillAmount;
+            
+            // Verificar si el jugador está muerto
+            if (thirdPersonController.health <= 0)
+            {
+                thirdPersonController.dead = true;
+                if (!thirdPersonController.death)
+                {
+                    thirdPersonController.death = true;
+                    thirdPersonController._animator.SetTrigger("Death");
+                    Debug.Log("[MUERTE] ¡El jugador ha muerto!");
+                }
+            }
+        }
+    }
+
     // Método público para consumir stamina en ataques
     public bool TryConsumeStaminaForAttack()
     {
@@ -208,6 +265,6 @@ public class FaseColorController : MonoBehaviour
     // Propiedad pública para acceder a la capacidad de sprint
     public bool CanSprint()
     {
-        return currentStamina > 0;
+        return unlimitedStaminaActive || currentStamina > 0;
     }
 }

@@ -38,6 +38,15 @@ public class Enemy : MonoBehaviour
         //CapsuleEnemyCollider = GetComponent<CapsuleCollider>();
         player = GameObject.FindGameObjectWithTag("Player");
         //playerThirdPersonController = player.GetComponent<ThirdPersonController>();
+        
+        // Asegurar que EnemyPowerUpDropper existe
+        var dropperType = System.Type.GetType("EnemyPowerUpDropper");
+        if (dropperType != null && GetComponent(dropperType) == null)
+        {
+            gameObject.AddComponent(dropperType);
+            Debug.Log($"[ENEMY] EnemyPowerUpDropper agregado automáticamente a {gameObject.name}");
+        }
+        
         // Ensure a health bar is present at runtime (adds component if prefab wasn't edited)
         // Use reflection to avoid a hard compile-time dependency on the healthbar script symbol order
         System.Type hbType = null;
@@ -177,6 +186,21 @@ public class Enemy : MonoBehaviour
     {
         //Instantiate(ragdoll, transform.position, transform.rotation);
         animator.SetTrigger("Death");
+        
+        // Soltar poder-up al morir usando reflection para evitar dependencias
+        var dropperType = System.Type.GetType("EnemyPowerUpDropper");
+        if (dropperType != null)
+        {
+            var dropper = GetComponent(dropperType);
+            if (dropper != null)
+            {
+                var method = dropperType.GetMethod("DropPowerUp");
+                if (method != null)
+                {
+                    method.Invoke(dropper, null);
+                }
+            }
+        }
         //Destroy(this.gameObject);
     }
 

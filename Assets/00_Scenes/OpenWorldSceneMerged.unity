@@ -155,15 +155,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 663673648741330653, guid: ec80908d46a396c40873b1097cd7104b, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.20000005
+      value: 88.7
       objectReference: {fileID: 0}
     - target: {fileID: 663673648741330653, guid: ec80908d46a396c40873b1097cd7104b, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.44500005
+      value: 0.4449997
       objectReference: {fileID: 0}
     - target: {fileID: 663673648741330653, guid: ec80908d46a396c40873b1097cd7104b, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -4
+      value: 35.299988
       objectReference: {fileID: 0}
     - target: {fileID: 903541418019024774, guid: ec80908d46a396c40873b1097cd7104b, type: 3}
       propertyPath: m_Name
@@ -217,9 +217,25 @@ PrefabInstance:
       propertyPath: weapon
       value: 
       objectReference: {fileID: 8210614286784809593, guid: 81f69acf013368042b24f250ea367625, type: 3}
+    - target: {fileID: 2706941537376342432, guid: ec80908d46a396c40873b1097cd7104b, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 88.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2706941537376342432, guid: ec80908d46a396c40873b1097cd7104b, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 39.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3282100670969023339, guid: ec80908d46a396c40873b1097cd7104b, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 88.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3282100670969023339, guid: ec80908d46a396c40873b1097cd7104b, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.4449997
+      objectReference: {fileID: 0}
     - target: {fileID: 3282100670969023339, guid: ec80908d46a396c40873b1097cd7104b, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -4
+      value: 35.299988
       objectReference: {fileID: 0}
     - target: {fileID: 3376341071538768657, guid: ec80908d46a396c40873b1097cd7104b, type: 3}
       propertyPath: force
@@ -227,7 +243,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3376341071538768657, guid: ec80908d46a396c40873b1097cd7104b, type: 3}
       propertyPath: health
-      value: 1000
+      value: 2000
       objectReference: {fileID: 0}
     - target: {fileID: 3376341071538768657, guid: ec80908d46a396c40873b1097cd7104b, type: 3}
       propertyPath: stamina
@@ -633,6 +649,39 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5e5cb3b669c8b274296e52f5afe89820, type: 3}
+--- !u!1 &906060247 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5927216175153386694, guid: 93071e979dd127d40badf3ff7a485b76, type: 3}
+  m_PrefabInstance: {fileID: 1104398339}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &906060251
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 906060247}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7b713227d225a34f82e008d83bbcc98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  powerUpPrefab: {fileID: 3966392473492572528, guid: 28f813b6862045f408c463f53e2bd035, type: 3}
+  dropHeight: 1
+--- !u!114 &906060252
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 906060247}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7b713227d225a34f82e008d83bbcc98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  powerUpPrefab: {fileID: 3966392473492572528, guid: 28f813b6862045f408c463f53e2bd035, type: 3}
+  dropHeight: 1
 --- !u!1 &1022168220
 GameObject:
   m_ObjectHideFlags: 0
@@ -845,6 +894,10 @@ PrefabInstance:
       value: -0.0000076293945
       objectReference: {fileID: 0}
     - target: {fileID: 6505729276652366362, guid: 93071e979dd127d40badf3ff7a485b76, type: 3}
+      propertyPath: health
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6505729276652366362, guid: 93071e979dd127d40badf3ff7a485b76, type: 3}
       propertyPath: playerThirdPersonController
       value: 
       objectReference: {fileID: 1309562541}
@@ -863,6 +916,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 3799545845586785563, guid: 93071e979dd127d40badf3ff7a485b76, type: 3}
       insertIndex: -1
       addedObject: {fileID: 625540152}
+    - targetCorrespondingSourceObject: {fileID: 5927216175153386694, guid: 93071e979dd127d40badf3ff7a485b76, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 906060251}
+    - targetCorrespondingSourceObject: {fileID: 5927216175153386694, guid: 93071e979dd127d40badf3ff7a485b76, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 906060252}
   m_SourcePrefab: {fileID: 100100000, guid: 93071e979dd127d40badf3ff7a485b76, type: 3}
 --- !u!1 &1112947372
 GameObject:
@@ -1078,6 +1137,7 @@ MonoBehaviour:
   faseImage: {fileID: 1803617458}
   manaImage: {fileID: 1975331902}
   staminaImage: {fileID: 0}
+  healthImage: {fileID: 1327167747}
   startColor: {r: 1, g: 0, b: 0, a: 1}
   endColor: {r: 1, g: 1, b: 1, a: 1}
   staminaPercent: 100
@@ -1086,9 +1146,21 @@ MonoBehaviour:
   sprintStaminaCost: 400
   attackStaminaCost: 500
   staminaDecrementStep: 200
+  unlimitedStaminaActive: 0
   manaPercent: 0
   mana: 0
   maxMana: 100
+--- !u!114 &1327167747 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5177252450369497500, guid: f7510b5963f59b14898711a0c8c3faee, type: 3}
+  m_PrefabInstance: {fileID: 1752308822}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1418466974
 PrefabInstance:
   m_ObjectHideFlags: 0
