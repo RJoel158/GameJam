@@ -117,7 +117,7 @@ public class MissionDebugHelper : MonoBehaviour
         {
             Debug.Log($"✅ MissionManager encontrado");
             Debug.Log($"   - Misiones disponibles: {missionManager.availableMissions.Count}");
-            
+
             if (missionManager.currentMission == null)
             {
                 Debug.LogWarning("⚠️ NO hay misión activa actualmente");
@@ -148,7 +148,7 @@ public class MissionDebugHelper : MonoBehaviour
             if (missionUI.missionNameText == null) { Debug.LogError("  ❌ missionNameText es NULL"); nullRefs++; }
             if (missionUI.progressText == null) { Debug.LogError("  ❌ progressText es NULL"); nullRefs++; }
             if (missionUI.progressSlider == null) { Debug.LogError("  ❌ progressSlider es NULL"); nullRefs++; }
-            
+
             if (nullRefs == 0)
             {
                 Debug.Log("✅ Todas las referencias de MissionUI están asignadas");
@@ -163,10 +163,10 @@ public class MissionDebugHelper : MonoBehaviour
         Debug.Log("\n--- ✅ Enemy Event ---");
         var enemies = FindObjectsOfType<Enemy>();
         Debug.Log($"   Enemigos en escena: {enemies.Length}");
-        
-        var fieldInfo = typeof(Enemy).GetField("OnEnemyDefeated", 
+
+        var fieldInfo = typeof(Enemy).GetField("OnEnemyDefeated",
             System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-        
+
         if (fieldInfo != null)
         {
             var eventDelegate = fieldInfo.GetValue(null) as System.Delegate;
