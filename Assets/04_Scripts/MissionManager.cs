@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -9,6 +10,12 @@ public class MissionManager : MonoBehaviour
     [Header("Mission Settings")]
     public List<DefeatEnemiesMission> availableMissions = new List<DefeatEnemiesMission>();
     public DefeatEnemiesMission currentMission;
+
+    [Header("Mission Queue Settings")]
+    public bool autoStartNextMission = true;
+    public float delayBeforeNextMission = 2f;
+
+    private Queue<DefeatEnemiesMission> missionQueue = new Queue<DefeatEnemiesMission>();
 
     [Header("Events")]
     public UnityEvent<DefeatEnemiesMission> OnMissionStarted;
@@ -49,14 +56,8 @@ public class MissionManager : MonoBehaviour
                 OnMissionProgressChanged?.Invoke(currentMission.enemiesDefeated, currentMission.enemiesRequired);
             }
 
-            // Check if completed
-            if (currentMission.isCompleted)
-            {
-                Debug.Log($"<color=green>[MissionManager] Invoking OnMissionCompleted event!</color>");
-                OnMissionCompleted?.Invoke(currentMission);
-                Debug.Log($"<color=green>Mission Completed: {currentMission.missionName}</color>");
-                currentMission = null;
-            }
+            // Note: Completion is now handled immediately in OnMissionComplete() 
+            // called by DefeatEnemiesMission.CompleteMission()
         }
     }
 
@@ -115,6 +116,28 @@ public class MissionManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Called by DefeatEnemiesMission when it completes
+    /// </summary>
+    public void OnMissionComplete(DefeatEnemiesMission mission)
+    {
+        if (mission == currentMission)
+        {
+            Debug.Log($"<color=green>[MissionManager] OnMissionComplete called for: {mission.missionName}</color>");
+            Debug.Log($"<color=green>[MissionManager] Invoking OnMissionCompleted event IMMEDIATELY!</color>");
+            OnMissionCompleted?.Invoke(currentMission);
+            Debug.Log($"<color=green>Mission Completed: {currentMission.missionName}</color>");
+            currentMission = null;
+
+            // Check if there are more missions in queue
+            CheckAndStartNextMission();
+        }
+        else
+        {
+            Debug.LogWarning($"<color=orange>[MissionManager] Received completion for mission '{mission.missionName}' but it's not the current mission!</color>");
+        }
+    }
+
+    /// <summary>
     /// Gets current mission progress percentage
     /// </summary>
     public float GetCurrentMissionProgress()
@@ -160,5 +183,114 @@ public class MissionManager : MonoBehaviour
                 Gizmos.DrawLine(pos, pos + Vector3.up * 2f);
             }
         }
+    }
+
+    /// <summary>
+    /// Adds a mission to the queue
+    /// </summary>
+    public void QueueMission(DefeatEnemiesMission mission)
+    {
+        if (mission == null)
+        {
+            Debug.LogError("[MissionManager] Cannot queue null mission!");
+            return;
+        }
+
+        missionQueue.Enqueue(mission);
+        Debug.Log($"<color=cyan>[MissionManager] Mission '{mission.missionName}' added to queue. Queue size: {missionQueue.Count}</color>");
+
+        // If no mission is active, start this one
+        if (currentMission == null)
+        {
+            CheckAndStartNextMission();
+        }
+    }
+
+    /// <summary>
+    /// Queues all available missions
+    /// </summary>
+    public void QueueAllMissions()
+    {
+        foreach (var mission in availableMissions)
+        {
+            if (mission != null)
+            {
+                missionQueue.Enqueue(mission);
+            }
+        }
+        Debug.Log($"<color=cyan>[MissionManager] All missions queued. Total: {missionQueue.Count}</color>");
+
+        // Start first mission if none is active
+        if (currentMission == null)
+        {
+            CheckAndStartNextMission();
+        }
+    }
+
+    /// <summary>
+    /// Checks if there's a next mission and starts it
+    /// </summary>
+    public void CheckAndStartNextMission()
+    {
+        if (!autoStartNextMission)
+        {
+            Debug.Log("[MissionManager] Auto-start is disabled. Call StartNextMission() manually.");
+            return;
+        }
+
+        if (missionQueue.Count > 0)
+        {
+            Debug.Log($"<color=cyan>[MissionManager] Next mission in queue. Starting in {delayBeforeNextMission}s...</color>");
+            StartCoroutine(StartNextMissionDelayed());
+        }
+        else
+        {
+            Debug.Log("<color=yellow>[MissionManager] No more missions in queue.</color>");
+        }
+    }
+
+    private IEnumerator StartNextMissionDelayed()
+    {
+        yield return new WaitForSeconds(delayBeforeNextMission);
+
+        if (missionQueue.Count > 0)
+        {
+            DefeatEnemiesMission nextMission = missionQueue.Dequeue();
+            Debug.Log($"<color=cyan>[MissionManager] Starting next mission: {nextMission.missionName}</color>");
+            StartMission(nextMission);
+        }
+    }
+
+    /// <summary>
+    /// Manually starts the next mission in queue
+    /// </summary>
+    public void StartNextMission()
+    {
+        if (missionQueue.Count > 0)
+        {
+            DefeatEnemiesMission nextMission = missionQueue.Dequeue();
+            StartMission(nextMission);
+        }
+        else
+        {
+            Debug.LogWarning("[MissionManager] No missions in queue!");
+        }
+    }
+
+    /// <summary>
+    /// Gets the number of missions in queue
+    /// </summary>
+    public int GetQueueCount()
+    {
+        return missionQueue.Count;
+    }
+
+    /// <summary>
+    /// Clears all missions from queue
+    /// </summary>
+    public void ClearQueue()
+    {
+        missionQueue.Clear();
+        Debug.Log("[MissionManager] Mission queue cleared.");
     }
 }

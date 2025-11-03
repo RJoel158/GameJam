@@ -228,4 +228,56 @@ public class MissionDebugHelper : MonoBehaviour
             }
         }
     }
+
+    [ContextMenu("📋 Queue All Available Missions")]
+    public void QueueAllMissions()
+    {
+        if (missionManager == null)
+        {
+            missionManager = MissionManager.Instance;
+        }
+
+        if (missionManager != null)
+        {
+            missionManager.QueueAllMissions();
+            Debug.Log("<color=cyan>All missions added to queue!</color>");
+        }
+        else
+        {
+            Debug.LogError("MissionManager not found!");
+        }
+    }
+
+    [ContextMenu("▶️ Start Next Mission in Queue")]
+    public void StartNextQueuedMission()
+    {
+        if (missionManager == null)
+        {
+            missionManager = MissionManager.Instance;
+        }
+
+        if (missionManager != null)
+        {
+            missionManager.StartNextMission();
+        }
+        else
+        {
+            Debug.LogError("MissionManager not found!");
+        }
+    }
+
+    [ContextMenu("ℹ️ Show Queue Info")]
+    public void ShowQueueInfo()
+    {
+        if (missionManager == null)
+        {
+            missionManager = MissionManager.Instance;
+        }
+
+        if (missionManager != null)
+        {
+            Debug.Log($"<color=cyan>Missions in queue: {missionManager.GetQueueCount()}</color>");
+        }
+    }
 }
+

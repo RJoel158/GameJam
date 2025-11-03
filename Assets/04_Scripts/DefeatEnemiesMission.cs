@@ -101,6 +101,18 @@ public class DefeatEnemiesMission : ScriptableObject
         {
             Debug.Log($"<color=lime>Enemy {i + 1} defeated at: {defeatPositions[i]}</color>");
         }
+
+        // Notify MissionManager that mission is complete
+        var manager = Object.FindAnyObjectByType<MissionManager>();
+        if (manager != null)
+        {
+            Debug.Log($"<color=green>[DefeatEnemiesMission] Notifying MissionManager of completion...</color>");
+            manager.OnMissionComplete(this);
+        }
+        else
+        {
+            Debug.LogError($"<color=red>[DefeatEnemiesMission] ERROR: Could not find MissionManager to notify completion!</color>");
+        }
     }
 
     /// <summary>
