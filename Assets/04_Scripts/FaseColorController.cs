@@ -30,12 +30,11 @@ public class FaseColorController : MonoBehaviour
     public int stamina = 2000;
     public int maxStamina = 2000;
     
-    [SerializeField]
-    private float sprintStaminaCost = 400f; // Stamina consumed per second while sprinting
-    [SerializeField]
-    private float attackStaminaCost = 500f; // Stamina consumed per attack (1.25x más que correr)
-    [SerializeField]
-    private int staminaDecrementStep = 200; // Stamina baja en incrementos de este valor
+    public float sprintStaminaCost = 400f; // Stamina consumed per second while sprinting
+    public float attackStaminaCost = 500f; // Stamina consumed per attack (1.25x más que correr)
+    public int staminaDecrementStep = 200; // Stamina baja en incrementos de este valor
+    public float staminaRegenRate = 200f; // Stamina regeneration per second (sprintStaminaCost * 0.5f)
+    
     private float currentStamina; // Usar float interno para precisión
     private float staminaTickTimer = 0f; // Timer para controlar cuándo bajar stamina
     private bool lastAttackInputState = false; // Guardar el estado anterior del input de ataque
@@ -157,8 +156,7 @@ public class FaseColorController : MonoBehaviour
         else if (!thirdPersonController._input.sprint && !thirdPersonController._input.attack)
         {
             // Regenerate stamina cuando no está presionando Shift ni atacando
-            float regenRate = sprintStaminaCost * 0.5f;
-            currentStamina += regenRate * Time.deltaTime;
+            currentStamina += staminaRegenRate * Time.deltaTime;
             
             if (currentStamina > maxStamina) 
             {

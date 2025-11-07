@@ -14,6 +14,7 @@ namespace StarterAssets
 		public bool sprint;
 		public bool draw;
 		public bool attack;
+		public bool interactF; // Tecla F para interactuar/hacer sonido
 
 		[Header("Movement Settings")]
 		public bool analogMovement;
@@ -78,6 +79,11 @@ namespace StarterAssets
 	{
 		AttackInput(value.isPressed);
 	}
+
+	public void OnInteractF(InputValue value)
+	{
+		InteractFInput(value.isPressed);
+	}
 #endif
 
 		public void DrawInput(bool newDrawState)
@@ -89,6 +95,12 @@ namespace StarterAssets
 		{
 			attack = newDrawState;
 		}
+
+		public void InteractFInput(bool newInteractFState)
+		{
+			interactF = newInteractFState;
+		}
+
 		private void OnApplicationFocus(bool hasFocus)
 		{
 			SetCursorState(cursorLocked);

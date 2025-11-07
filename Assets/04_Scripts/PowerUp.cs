@@ -11,6 +11,10 @@ public class PowerUp : MonoBehaviour
     [SerializeField] float bobSpeed = 2f;
     [SerializeField] float bobHeight = 0.5f;
 
+    [Header("Power-Up Duration")]
+    [SerializeField] float healthRegenDuration = 30f;
+    [SerializeField] float unlimitedStaminaDuration = 30f;
+
     private Vector3 startPosition;
     private ThirdPersonController playerController;
     private FaseColorController faseColorController;
@@ -70,10 +74,10 @@ public class PowerUp : MonoBehaviour
 
     IEnumerator AutoRegenHealthEffect()
     {
-        float duration = 30f;
+        float duration = healthRegenDuration;
         float elapsed = 0f;
 
-        Debug.Log("[POWER-UP] ¡Regeneración de vida activada por 30 segundos!");
+        Debug.Log($"[POWER-UP] ¡Regeneración de vida activada por {duration} segundos!");
 
         while (elapsed < duration && playerController != null)
         {
@@ -89,15 +93,15 @@ public class PowerUp : MonoBehaviour
 
     IEnumerator UnlimitedStaminaEffect()
     {
-        float duration = 30f;
+        float duration = unlimitedStaminaDuration;
         float elapsed = 0f;
 
-        Debug.Log("[POWER-UP] ¡Estamina infinita activada por 30 segundos!");
+        Debug.Log($"[POWER-UP] ¡Estamina infinita activada por {duration} segundos!");
         
         // Activar el flag de estamina infinita
         faseColorController.unlimitedStaminaActive = true;
 
-        // Esperar exactamente 30 segundos
+        // Esperar exactamente la duración configurada
         while (elapsed < duration)
         {
             if (faseColorController == null)

@@ -1468,7 +1468,7 @@ MonoBehaviour:
   toggleKey: 27
   pauseTimescale: 1
   cameraBrains:
-  - {fileID: 1181442357}
+  - {fileID: 4668801097672879668}
 --- !u!4 &721154356
 Transform:
   m_ObjectHideFlags: 0
@@ -2570,17 +2570,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
---- !u!114 &1181442357 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3286033219121526680, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
-  m_PrefabInstance: {fileID: 4668801097672879667}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 72ece51f2901e7445ab60da3685d6b5f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1226738813 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8559166738041579888, guid: 93071e979dd127d40badf3ff7a485b76, type: 3}
@@ -3719,6 +3708,22 @@ PrefabInstance:
       propertyPath: healthImage
       value: 
       objectReference: {fileID: 1327167747}
+    - target: {fileID: 1792395015654831956, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
+      propertyPath: DrawSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 02dc6bda1b604544fba8809332627caf, type: 3}
+    - target: {fileID: 1792395015654831956, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
+      propertyPath: FSoundClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 19064d35e4205f34fbef0a50c8f0ba46, type: 3}
+    - target: {fileID: 1792395015654831956, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
+      propertyPath: SheathSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 02dc6bda1b604544fba8809332627caf, type: 3}
+    - target: {fileID: 1792395015654831956, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
+      propertyPath: AmbientSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 195eb9ffd14e37742aa545f3ae0bc27a, type: 3}
     - target: {fileID: 4393703759652859024, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
       propertyPath: m_LocalPosition.x
       value: -47.5
@@ -3784,6 +3789,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
+--- !u!114 &4668801097672879668 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3286033219121526680, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
+  m_PrefabInstance: {fileID: 4668801097672879667}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72ece51f2901e7445ab60da3685d6b5f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
