@@ -14,6 +14,7 @@ namespace StarterAssets
 		public bool sprint;
 		public bool draw;
 		public bool attack;
+		public bool block;
 
 		[Header("Movement Settings")]
 		public bool analogMovement;
@@ -22,8 +23,28 @@ namespace StarterAssets
 		public bool cursorLocked = true;
 		public bool cursorInputForLook = true;
 
-		#if ENABLE_INPUT_SYSTEM
-		public void OnMove(InputValue value)
+#if ENABLE_INPUT_SYSTEM
+		private InputAction blockAction;
+
+        private void Awake()
+        {
+            var playerInput = GetComponent<PlayerInput>();
+            blockAction = playerInput.actions["Block"]; // Usa el mismo nombre de la acción en tu Input Actions
+
+            // Escucha los eventos del sistema de entrada
+            blockAction.started += OnBlockStarted;
+            blockAction.canceled += OnBlockCanceled;
+        }
+
+        private void OnDestroy()
+        {
+            // Limpieza de eventos
+            blockAction.started -= OnBlockStarted;
+            blockAction.canceled -= OnBlockCanceled;
+        }
+
+
+        public void OnMove(InputValue value)
 		{
 			MoveInput(value.Get<Vector2>());
 		}
@@ -87,6 +108,27 @@ namespace StarterAssets
         {
             attack = newDrawState;
         }
+
+        private void OnBlockStarted(InputAction.CallbackContext context)
+        {
+            BlockInput(true); // Mantiene tu misma estructura
+        }
+
+        private void OnBlockCanceled(InputAction.CallbackContext context)
+        {
+            BlockInput(false);
+        }
+
+        public void OnBlock(InputValue value)
+        {
+            BlockInput(value.isPressed);
+        }
+
+        public void BlockInput(bool newBlockState)
+        {
+            block = newBlockState;
+        }
+
 
         private void OnApplicationFocus(bool hasFocus)
 		{

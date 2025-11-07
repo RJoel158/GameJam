@@ -18,7 +18,6 @@ public class Enemy : MonoBehaviour
 
     public int health = 100;
     //[SerializeField] GameObject hitVFX;
-    //[SerializeField] GameObject ragdoll;
 
     [Header("Combat")]
     [SerializeField] float attackCD = 3f;
@@ -37,7 +36,7 @@ public class Enemy : MonoBehaviour
         //animator = GetComponent<Animator>();
         //CapsuleEnemyCollider = GetComponent<CapsuleCollider>();
         player = GameObject.FindGameObjectWithTag("Player");
-        //playerThirdPersonController = player.GetComponent<ThirdPersonController>();
+        playerThirdPersonController = player.GetComponent<ThirdPersonController>();
     }
 
     // Update is called once per frame
@@ -78,13 +77,12 @@ public class Enemy : MonoBehaviour
 
         playerDetected = newDestinationCD <= 0 && Vector3.Distance(player.transform.position, transform.position) <= aggroRange;
 
-        if (playerDetected && !isAttacking && !inAttackAnimation && !dead)
+        if (playerDetected && !isAttacking && !inAttackAnimation && !dead && !attackPlayer)
         {
             //newDestinationCD = 0.5f;
             agent.SetDestination(player.transform.position);
         }
         newDestinationCD -= Time.deltaTime;
-        //transform.LookAt(player.transform);
 
         if (!dead && playerDetected)
         {

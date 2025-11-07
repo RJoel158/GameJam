@@ -39,7 +39,7 @@ namespace StarterAssets
         public int health = 1000;
         public int maxHealth = 2000;
         public bool dead = false;
-        public bool hitting = false;
+        public bool inHitAnimation = false;
 
         [Space(10)]
         [Range(0f, 100f)]
@@ -66,6 +66,9 @@ namespace StarterAssets
         [Header("Attack")]
         public bool isAttacking;
         public bool inAttackAnimation = false;
+
+        [Header("Block")]
+        public bool isBlocking;
 
         [Header("Cinemachine")]
         [Tooltip("The follow target set in the Cinemachine Virtual Camera that the camera will follow")]
@@ -111,8 +114,11 @@ namespace StarterAssets
         private int _animIDAttack;
         private int _animIDAttacking;
         private int _animIDInAir;
+        private int _animIDDamage;
         private int _animIDDeath;
         private int _animIDHitting;
+        private int _animIDBlock;
+        private int _animIDBlocked;
 
         private PlayerInput _playerInput;
 
@@ -173,6 +179,7 @@ namespace StarterAssets
             GroundedCheck();
             Move();
             HandleStadistics();
+            HandleBlock();
         }
 
         private void LateUpdate()
@@ -193,8 +200,11 @@ namespace StarterAssets
             _animIDAttack = Animator.StringToHash("Attack");
             _animIDAttacking = Animator.StringToHash("Attacking");
             _animIDInAir = Animator.StringToHash("InAir");
+            _animIDDamage = Animator.StringToHash("Damage");
             _animIDDeath = Animator.StringToHash("Dead");
             _animIDHitting = Animator.StringToHash("Hitting");
+            _animIDBlock = Animator.StringToHash("Block");
+            _animIDBlocked = Animator.StringToHash("Blocked");
         }
 
         private void GroundedCheck()
@@ -235,7 +245,7 @@ namespace StarterAssets
 
         private void Move()
         {
-            if (dead)
+            if (dead || isBlocking)
             {
                 return;
             }
@@ -387,22 +397,34 @@ namespace StarterAssets
         private void HandleStadistics()
         {
             _animator.SetBool(_animIDDeath, dead);
-            _animator.SetBool(_animIDHitting, hitting);
-            
+            _animator.SetBool(_animIDHitting, inHitAnimation);
+
             healthPercent = (health * 100) / maxHealth;
 
             staminaPercent = (stamina * 100) / maxStamina;
 
             forcePercent = (force * 100) / maxForce;
+
+            // Si la estamina no esta completa, esta en animacion de bloqueo o ataque, no esta corriendo y no esta en el aire no incrementa
+            if (staminaPercent != 100 && !isBlocking && !inAttackAnimation && Grounded && _animationBlend <= MoveSpeed)
+            {
+                // Incrementar la estamina durante el tiempo
+                stamina += 1;
+            }
         }
 
         public void TakeDamage(int damageAmount)
         {
-            if (!dead)
+            if (!dead && !isBlocking)
             {
                 health -= damageAmount;
-                _animator.SetTrigger("Damage");
+                _animator.SetTrigger(_animIDDamage);
                 //CameraShake.Instance.ShakeCamera(2f, 0.2f);
+            }
+            else if (!dead && isBlocking)
+            {
+                stamina -= maxHealth / 2;
+                _animator.SetTrigger(_animIDBlocked);
             }
 
             if (health <= 0)
@@ -429,7 +451,6 @@ namespace StarterAssets
                     // update animator if using character
                     if (_hasAnimator)
                     {
-                        isEquipping = true;
                         _animator.SetTrigger(_animIDDrawSword);
                         _animator.SetBool(_animIDEquipped, true);
                         _input.draw = false;
@@ -440,7 +461,6 @@ namespace StarterAssets
                     // update animator if using character
                     if (_hasAnimator)
                     {
-                        isEquipping = false;
                         _animator.SetTrigger(_animIDSheathSword);
                         _animator.SetBool(_animIDEquipped, false);
                         _input.draw = false;
@@ -456,7 +476,7 @@ namespace StarterAssets
             if (Grounded)
             {
                 // Attack
-                if (_input.attack && isEquipped && !isAttacking && !hitting && !dead)
+                if (_input.attack && isEquipped && !isAttacking && !inHitAnimation)
                 {
                     // update animator if using character
                     if (_hasAnimator)
@@ -465,6 +485,26 @@ namespace StarterAssets
                         _animator.SetFloat(_animIDSpeed, 0);
                         _input.attack = false;
                     }
+                }
+            }
+        }
+
+        private void HandleBlock()
+        {
+            if (Grounded && !isAttacking && !isEquipping && _animationBlend <= 0.01f)
+            {
+                if (_input.block && !isBlocking)
+                {
+                    if (_hasAnimator)
+                    {
+                        _animator.SetBool(_animIDBlock, true);
+                        isBlocking = true;
+                    }
+                }
+                else if (!_input.block && isBlocking)
+                {
+                    _animator.SetBool(_animIDBlock, false);
+                    isBlocking = false;
                 }
             }
         }
@@ -485,7 +525,7 @@ namespace StarterAssets
             else Gizmos.color = transparentRed;
 
             // when selected, draw a gizmo in the position of, and matching radius of, the grounded collider
-            Gizmos.DrawSphere(
+            Gizmos.DrawWireSphere(
                 new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z),
                 GroundedRadius);
         }
@@ -498,12 +538,22 @@ namespace StarterAssets
 
         public void StartPlayerDamage()
         {
-            hitting = true;
+            inHitAnimation = true;
         }
 
         public void EndPlayerDamage()
         {
-            hitting = false;
+            inHitAnimation = false;
+        }
+
+        public void StartEquipping()
+        {
+            isEquipping = true;
+        }
+
+        public void EndEquipping()
+        {
+            isEquipping = false;
         }
 
         private void OnFootstep(AnimationEvent animationEvent)
