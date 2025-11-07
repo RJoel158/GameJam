@@ -44,10 +44,17 @@ namespace StarterAssets
         public float AmbientSoundVolume = 0.3f;
         private AudioSource ambientAudioSource;
 
-        [Header("F Key Sound")]
-        public AudioClip FSoundClip;
-        [Range(0f, 1f)]
-        public float FSoundVolume = 1f;
+       [Header("F Key Sound")]
+[Tooltip("Array de clips de audio para reproducir")]
+public AudioClip[] FSoundClips;
+[Range(0f, 1f)]
+public float FSoundVolume = 1f;
+
+[Tooltip("Modo de selección: 0=Random, 1=Sequential, 2=RandomNoRepeat")]
+public int soundPlayMode = 0; // 0: Random, 1: Sequential, 2: RandomNoRepeat
+
+private int currentSoundIndex = 0;
+private int lastPlayedSoundIndex = -1;
 
         [Space(10)]
         public float JumpHeight = 1.2f;
@@ -514,13 +521,13 @@ namespace StarterAssets
         }
 
         private void HandleFKeySound()
-        {
-            if (_input.interactF)
-            {
-                PlayFSound();
-                _input.interactF = false; // Consumir el input
-            }
-        }
+{
+    // Click izquierdo del mouse solo si tiene la espada equipada
+    if (Input.GetMouseButtonDown(0) && isEquipped)
+    {
+        PlayFSound();
+    }
+}
 
         private void PlayDrawSound()
         {
@@ -595,35 +602,70 @@ namespace StarterAssets
         }
 
         private void PlayFSound()
+{
+    // Intentar obtener o crear AudioSource
+    if (audioSource == null)
+    {
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
         {
-            // Intentar obtener o crear AudioSource
-            if (audioSource == null)
-            {
-                audioSource = GetComponent<AudioSource>();
-                if (audioSource == null)
-                {
-                    audioSource = gameObject.AddComponent<AudioSource>();
-                    Debug.Log("[F SOUND] AudioSource creado en tiempo de ejecución");
-                }
-            }
-
-            if (audioSource != null)
-            {
-                if (FSoundClip != null)
-                {
-                    audioSource.PlayOneShot(FSoundClip, Mathf.Clamp01(FSoundVolume));
-                    Debug.Log($"[F SOUND] ✓ Reproduciendo F Sound con volumen {FSoundVolume}");
-                }
-                else
-                {
-                    Debug.LogWarning("[F SOUND] ❌ No hay sonido asignado para la tecla F");
-                }
-            }
-            else
-            {
-                Debug.LogError("[F SOUND] ❌ No se pudo crear AudioSource");
-            }
+            audioSource = gameObject.AddComponent<AudioSource>();
+            Debug.Log("[F SOUND] AudioSource creado en tiempo de ejecución");
         }
+    }
+
+    // Verificar que hay sonidos en el array
+    if (FSoundClips == null || FSoundClips.Length == 0)
+    {
+        Debug.LogWarning("[F SOUND] ❌ No hay sonidos asignados en el array");
+        return;
+    }
+
+    // Seleccionar el índice según el modo
+    int selectedIndex = SelectSoundIndex();
+
+    // Verificar que el clip no es nulo
+    if (FSoundClips[selectedIndex] != null)
+    {
+        audioSource.PlayOneShot(FSoundClips[selectedIndex], Mathf.Clamp01(FSoundVolume));
+        Debug.Log($"[F SOUND] ✓ Reproduciendo sonido {selectedIndex + 1}/{FSoundClips.Length} - Modo: {soundPlayMode}");
+    }
+    else
+    {
+        Debug.LogWarning($"[F SOUND] ❌ El clip en índice {selectedIndex} es nulo");
+    }
+}
+
+private int SelectSoundIndex()
+{
+    switch (soundPlayMode)
+    {
+        case 0: // Random
+            return Random.Range(0, FSoundClips.Length);
+
+        case 1: // Sequential
+            int seqIndex = currentSoundIndex;
+            currentSoundIndex = (currentSoundIndex + 1) % FSoundClips.Length;
+            return seqIndex;
+
+        case 2: // RandomNoRepeat
+            if (FSoundClips.Length == 1)
+                return 0;
+            
+            int randomIndex;
+            do
+            {
+                randomIndex = Random.Range(0, FSoundClips.Length);
+            }
+            while (randomIndex == lastPlayedSoundIndex);
+            
+            lastPlayedSoundIndex = randomIndex;
+            return randomIndex;
+
+        default:
+            return 0;
+    }
+}
 
         private void StartAmbientSound()
         {
