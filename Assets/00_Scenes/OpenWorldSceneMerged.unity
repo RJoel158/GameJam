@@ -3708,6 +3708,22 @@ PrefabInstance:
       propertyPath: healthImage
       value: 
       objectReference: {fileID: 1327167747}
+    - target: {fileID: 1792395015654831956, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
+      propertyPath: DrawSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 02dc6bda1b604544fba8809332627caf, type: 3}
+    - target: {fileID: 1792395015654831956, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
+      propertyPath: FSoundClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 19064d35e4205f34fbef0a50c8f0ba46, type: 3}
+    - target: {fileID: 1792395015654831956, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
+      propertyPath: SheathSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 02dc6bda1b604544fba8809332627caf, type: 3}
+    - target: {fileID: 1792395015654831956, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
+      propertyPath: AmbientSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 195eb9ffd14e37742aa545f3ae0bc27a, type: 3}
     - target: {fileID: 4393703759652859024, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
       propertyPath: m_LocalPosition.x
       value: -47.5

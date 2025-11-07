@@ -38,6 +38,17 @@ namespace StarterAssets
         [Range(0f, 1f)]
         public float SheathSoundVolume = 1f;
 
+        [Header("Ambient Sound")]
+        public AudioClip AmbientSound;
+        [Range(0f, 1f)]
+        public float AmbientSoundVolume = 0.3f;
+        private AudioSource ambientAudioSource;
+
+        [Header("F Key Sound")]
+        public AudioClip FSoundClip;
+        [Range(0f, 1f)]
+        public float FSoundVolume = 1f;
+
         [Space(10)]
         public float JumpHeight = 1.2f;
         public float Gravity = -15.0f;
@@ -180,6 +191,14 @@ namespace StarterAssets
                 Debug.Log("[AUDIO] AudioSource creado automáticamente en el jugador");
             }
             
+            // Crear un segundo AudioSource para el sonido ambiental
+            ambientAudioSource = gameObject.AddComponent<AudioSource>();
+            ambientAudioSource.loop = true; // Loop infinito
+            ambientAudioSource.spatialBlend = 0f; // 2D, no 3D
+            
+            // Iniciar el sonido ambiental
+            StartAmbientSound();
+            
 #if ENABLE_INPUT_SYSTEM
             _playerInput = GetComponent<PlayerInput>();
 #endif
@@ -197,6 +216,7 @@ namespace StarterAssets
 
             Attack();
             DrawSheathSword();
+            HandleFKeySound();
             JumpAndGravity();
             GroundedCheck();
             Move();
@@ -493,6 +513,15 @@ namespace StarterAssets
             }
         }
 
+        private void HandleFKeySound()
+        {
+            if (_input.interactF)
+            {
+                PlayFSound();
+                _input.interactF = false; // Consumir el input
+            }
+        }
+
         private void PlayDrawSound()
         {
             // Intentar obtener o crear AudioSource
@@ -562,6 +591,91 @@ namespace StarterAssets
             else
             {
                 Debug.LogError("[SHEATH SOUND] ❌ No se pudo crear AudioSource");
+            }
+        }
+
+        private void PlayFSound()
+        {
+            // Intentar obtener o crear AudioSource
+            if (audioSource == null)
+            {
+                audioSource = GetComponent<AudioSource>();
+                if (audioSource == null)
+                {
+                    audioSource = gameObject.AddComponent<AudioSource>();
+                    Debug.Log("[F SOUND] AudioSource creado en tiempo de ejecución");
+                }
+            }
+
+            if (audioSource != null)
+            {
+                if (FSoundClip != null)
+                {
+                    audioSource.PlayOneShot(FSoundClip, Mathf.Clamp01(FSoundVolume));
+                    Debug.Log($"[F SOUND] ✓ Reproduciendo F Sound con volumen {FSoundVolume}");
+                }
+                else
+                {
+                    Debug.LogWarning("[F SOUND] ❌ No hay sonido asignado para la tecla F");
+                }
+            }
+            else
+            {
+                Debug.LogError("[F SOUND] ❌ No se pudo crear AudioSource");
+            }
+        }
+
+        private void StartAmbientSound()
+        {
+            if (ambientAudioSource == null)
+            {
+                ambientAudioSource = gameObject.AddComponent<AudioSource>();
+                ambientAudioSource.loop = true;
+                ambientAudioSource.spatialBlend = 0f;
+                Debug.Log("[AMBIENT] AudioSource para sonido ambiental creado");
+            }
+
+            if (ambientAudioSource != null && AmbientSound != null)
+            {
+                ambientAudioSource.clip = AmbientSound;
+                ambientAudioSource.volume = Mathf.Clamp01(AmbientSoundVolume);
+                ambientAudioSource.Play();
+                Debug.Log($"[AMBIENT] ✓ Sonido ambiental iniciado con volumen {AmbientSoundVolume}");
+            }
+            else if (AmbientSound == null)
+            {
+                Debug.LogWarning("[AMBIENT] ⚠️ No hay sonido ambiental asignado. Asigna un clip en el Inspector.");
+            }
+            else
+            {
+                Debug.LogError("[AMBIENT] ❌ No se pudo crear AudioSource para sonido ambiental");
+            }
+        }
+
+        public void StopAmbientSound()
+        {
+            if (ambientAudioSource != null && ambientAudioSource.isPlaying)
+            {
+                ambientAudioSource.Stop();
+                Debug.Log("[AMBIENT] Sonido ambiental detenido");
+            }
+        }
+
+        public void PauseAmbientSound()
+        {
+            if (ambientAudioSource != null && ambientAudioSource.isPlaying)
+            {
+                ambientAudioSource.Pause();
+                Debug.Log("[AMBIENT] Sonido ambiental pausado");
+            }
+        }
+
+        public void ResumeAmbientSound()
+        {
+            if (ambientAudioSource != null && !ambientAudioSource.isPlaying)
+            {
+                ambientAudioSource.Play();
+                Debug.Log("[AMBIENT] Sonido ambiental reanudado");
             }
         }
 
