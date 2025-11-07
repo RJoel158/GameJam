@@ -3724,6 +3724,22 @@ PrefabInstance:
       propertyPath: AmbientSound
       value: 
       objectReference: {fileID: 8300000, guid: 195eb9ffd14e37742aa545f3ae0bc27a, type: 3}
+    - target: {fileID: 1792395015654831956, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
+      propertyPath: FSoundClips.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1792395015654831956, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
+      propertyPath: 'FSoundClips.Array.data[0]'
+      value: 
+      objectReference: {fileID: 8300000, guid: bc3a2cc1f8197e14d832a7bfc83ec148, type: 3}
+    - target: {fileID: 1792395015654831956, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
+      propertyPath: 'FSoundClips.Array.data[1]'
+      value: 
+      objectReference: {fileID: 8300000, guid: b341cd93b546d2d4898777ecd3cb0253, type: 3}
+    - target: {fileID: 1792395015654831956, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
+      propertyPath: 'FSoundClips.Array.data[2]'
+      value: 
+      objectReference: {fileID: 8300000, guid: f322b18338aa75446ba948e686f94440, type: 3}
     - target: {fileID: 4393703759652859024, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
       propertyPath: m_LocalPosition.x
       value: -47.5

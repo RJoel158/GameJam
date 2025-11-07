@@ -223,7 +223,6 @@ private int lastPlayedSoundIndex = -1;
 
             Attack();
             DrawSheathSword();
-            HandleFKeySound();
             JumpAndGravity();
             GroundedCheck();
             Move();
@@ -722,33 +721,36 @@ private int SelectSoundIndex()
         }
 
         private void Attack()
-        {
-            _animator.SetBool(_animIDAttacking, inAttackAnimation);
+{
+    _animator.SetBool(_animIDAttacking, inAttackAnimation);
 
-            if (Grounded)
+    if (Grounded)
+    {
+        // NO permite atacar si stamina es 0 o no hay suficiente o está siendo golpeado
+        if (_input.attack && isEquipped && !isAttacking && !hitting)
+        {
+            // update animator if using character
+            if (_hasAnimator)
             {
-                // NO permite atacar si stamina es 0 o no hay suficiente o está siendo golpeado
-                if (_input.attack && isEquipped && !isAttacking && !hitting)
+                // Intentar consumir stamina para atacar
+                if (faseColorController != null && faseColorController.TryConsumeStaminaForAttack())
                 {
-                    // update animator if using character
-                    if (_hasAnimator)
-                    {
-                        // Intentar consumir stamina para atacar
-                        if (faseColorController != null && faseColorController.TryConsumeStaminaForAttack())
-                        {
-                            _animator.SetTrigger(_animIDAttack);
-                            _animator.SetFloat(_animIDSpeed, 0);
-                            _input.attack = false;
-                        }
-                        else
-                        {
-                            // No hay stamina suficiente - cancelar ataque
-                            _input.attack = false;
-                        }
-                    }
+                    _animator.SetTrigger(_animIDAttack);
+                    _animator.SetFloat(_animIDSpeed, 0);
+                    _input.attack = false;
+                    
+                    // ✅ REPRODUCIR SONIDO AL ATACAR
+                    PlayFSound();
+                }
+                else
+                {
+                    // No hay stamina suficiente - cancelar ataque
+                    _input.attack = false;
                 }
             }
         }
+    }
+}
 
         private static float ClampAngle(float lfAngle, float lfMin, float lfMax)
         {
