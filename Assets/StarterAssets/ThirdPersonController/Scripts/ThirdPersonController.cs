@@ -29,6 +29,14 @@ namespace StarterAssets
         [Space(10)]
         public AudioClip DrawSwordSound;
         public float DrawSwordVolume = 1f;
+        
+        [Header("Draw & Sheath Sounds")]
+        public AudioClip DrawSound;
+        [Range(0f, 1f)]
+        public float DrawSoundVolume = 1f;
+        public AudioClip SheathSound;
+        [Range(0f, 1f)]
+        public float SheathSoundVolume = 1f;
 
         [Space(10)]
         public float JumpHeight = 1.2f;
@@ -164,6 +172,14 @@ namespace StarterAssets
             _controller = GetComponent<CharacterController>();
             _input = GetComponent<StarterAssetsInputs>();
             audioSource = GetComponent<AudioSource>();
+            
+            // Si no hay AudioSource, crear uno automáticamente
+            if (audioSource == null)
+            {
+                audioSource = gameObject.AddComponent<AudioSource>();
+                Debug.Log("[AUDIO] AudioSource creado automáticamente en el jugador");
+            }
+            
 #if ENABLE_INPUT_SYSTEM
             _playerInput = GetComponent<PlayerInput>();
 #endif
@@ -445,7 +461,7 @@ namespace StarterAssets
         {
             if (Grounded)
             {
-                // Draw
+                // Draw (Tecla 1 - Sacar espada)
                 if (_input.draw && !isEquipped)
                 {
                     // update animator if using character
@@ -456,11 +472,8 @@ namespace StarterAssets
                         _animator.SetBool(_animIDEquipped, true);
                         _input.draw = false;
                         
-                        // Reproducir sonido de desenvaina
-                        if (audioSource != null && DrawSwordSound != null)
-                        {
-                            audioSource.PlayOneShot(DrawSwordSound, DrawSwordVolume);
-                        }
+                        // Reproducir sonido personalizado de Draw (tecla 1)
+                        PlayDrawSound();
                     }
                 }
                 else if (_input.draw && isEquipped)
@@ -473,13 +486,82 @@ namespace StarterAssets
                         _animator.SetBool(_animIDEquipped, false);
                         _input.draw = false;
                         
-                        // Reproducir sonido de vaina
-                        if (audioSource != null && DrawSwordSound != null)
-                        {
-                            audioSource.PlayOneShot(DrawSwordSound, DrawSwordVolume);
-                        }
+                        // Reproducir sonido personalizado de Sheath (guardar)
+                        PlaySheathSound();
                     }
                 }
+            }
+        }
+
+        private void PlayDrawSound()
+        {
+            // Intentar obtener o crear AudioSource
+            if (audioSource == null)
+            {
+                audioSource = GetComponent<AudioSource>();
+                if (audioSource == null)
+                {
+                    audioSource = gameObject.AddComponent<AudioSource>();
+                    Debug.Log("[DRAW SOUND] AudioSource creado en tiempo de ejecución");
+                }
+            }
+
+            if (audioSource != null)
+            {
+                if (DrawSound != null)
+                {
+                    audioSource.PlayOneShot(DrawSound, Mathf.Clamp01(DrawSoundVolume));
+                    Debug.Log($"[DRAW SOUND] ✓ Reproduciendo Draw Sound con volumen {DrawSoundVolume}");
+                }
+                else if (DrawSwordSound != null)
+                {
+                    audioSource.PlayOneShot(DrawSwordSound, DrawSwordVolume);
+                    Debug.Log($"[DRAW SOUND] ✓ Reproduciendo DrawSwordSound (fallback) con volumen {DrawSwordVolume}");
+                }
+                else
+                {
+                    Debug.LogWarning("[DRAW SOUND] ❌ No hay sonido asignado para Draw");
+                }
+            }
+            else
+            {
+                Debug.LogError("[DRAW SOUND] ❌ No se pudo crear AudioSource");
+            }
+        }
+
+        private void PlaySheathSound()
+        {
+            // Intentar obtener o crear AudioSource
+            if (audioSource == null)
+            {
+                audioSource = GetComponent<AudioSource>();
+                if (audioSource == null)
+                {
+                    audioSource = gameObject.AddComponent<AudioSource>();
+                    Debug.Log("[SHEATH SOUND] AudioSource creado en tiempo de ejecución");
+                }
+            }
+
+            if (audioSource != null)
+            {
+                if (SheathSound != null)
+                {
+                    audioSource.PlayOneShot(SheathSound, Mathf.Clamp01(SheathSoundVolume));
+                    Debug.Log($"[SHEATH SOUND] ✓ Reproduciendo Sheath Sound con volumen {SheathSoundVolume}");
+                }
+                else if (DrawSwordSound != null)
+                {
+                    audioSource.PlayOneShot(DrawSwordSound, DrawSwordVolume);
+                    Debug.Log($"[SHEATH SOUND] ✓ Reproduciendo DrawSwordSound (fallback) con volumen {DrawSwordVolume}");
+                }
+                else
+                {
+                    Debug.LogWarning("[SHEATH SOUND] ❌ No hay sonido asignado para Sheath");
+                }
+            }
+            else
+            {
+                Debug.LogError("[SHEATH SOUND] ❌ No se pudo crear AudioSource");
             }
         }
 
