@@ -2369,7 +2369,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a98f7dae1830be48aab8fa272cb7c0f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  runtimeProfile: {fileID: 11400000, guid: 79e4db43798932943a0e84f91ae7a92e, type: 2}
+  runtimeProfile: {fileID: 11400000, guid: b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2, type: 2}
   openWorldSceneName: OpenWorldSceneMerged
   saveFileName: savegame.json
   loadOnNextOpenWorld: 0

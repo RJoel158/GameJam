@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-using Cinemachine; // importante si usas Cinemachine
+using Cinemachine;
 
 public class PauseManager : MonoBehaviour
 {
@@ -14,7 +14,7 @@ public class PauseManager : MonoBehaviour
     public bool pauseTimescale = true;
 
     [Header("Camera Control")]
-    public CinemachineBrain[] cameraBrains; // arrastra tus cámaras con CinemachineBrain aquí
+    public CinemachineBrain[] cameraBrains;
 
     bool isPaused = false;
 
@@ -49,15 +49,12 @@ public class PauseManager : MonoBehaviour
         if (pauseTimescale)
             Time.timeScale = 0f;
 
-        // 🔹 Detener cámaras
         SetCamerasEnabled(false);
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
         isPaused = true;
-        
-
     }
 
     public void ResumeGame()
@@ -71,7 +68,6 @@ public class PauseManager : MonoBehaviour
         if (pauseTimescale)
             Time.timeScale = 1f;
 
-        // 🔹 Reactivar cámaras
         SetCamerasEnabled(true);
 
         Cursor.lockState = CursorLockMode.Locked;
@@ -93,24 +89,27 @@ public class PauseManager : MonoBehaviour
 
     public void OnContinueButton() => ResumeGame();
     public void OnOptionsButton() => optionsPanel?.SetActive(true);
+    
+    // 🔹 Método actualizado para guardar el estado completo
     public void OnSaveButton() => SaveGame();
 
     public void OnQuitButton()
     {
-                // 🔹 Reanudar el tiempo antes de cambiar de escena
         Time.timeScale = 1f;
-
-        // 🔹 Guardar antes de salir (opcional)
-
-        // o si quieres volver al menú principal:
         SceneManager.LoadScene("MainMenu");
     }
 
     void SaveGame()
     {
-        PlayerPrefs.SetInt("dummy_saved", 1);
-        PlayerPrefs.Save();
-        Debug.Log("Implementación del guardado aquí.");
-        SaveManager.Instance?.SaveCurrentPlayerPosition();
+        if (SaveManager.Instance != null)
+        {
+            // 🔹 Ahora guarda posición Y estadísticas
+            SaveManager.Instance.SaveCurrentPlayerState();
+            Debug.Log("[PauseManager] ✅ Juego guardado (posición + stats)");
+        }
+        else
+        {
+            Debug.LogWarning("[PauseManager] SaveManager no encontrado.");
+        }
     }
 }
