@@ -40,6 +40,7 @@ namespace StarterAssets
         public int maxHealth = 2000;
         public bool dead = false;
         public bool inHitAnimation = false;
+        public bool hardModeEnabled = false;
 
         [Space(10)]
         [Range(0f, 100f)]
@@ -69,6 +70,9 @@ namespace StarterAssets
 
         [Header("Block")]
         public bool isBlocking;
+        public float timeBtwResetBlock = 2f;
+        public float resetBlockTimer = 0f;
+        public bool canBlock = true;
 
         [Header("Cinemachine")]
         [Tooltip("The follow target set in the Cinemachine Virtual Camera that the camera will follow")]
@@ -117,8 +121,10 @@ namespace StarterAssets
         private int _animIDDamage;
         private int _animIDDeath;
         private int _animIDHitting;
-        private int _animIDBlock;
+        public int _animIDBlock;
         private int _animIDBlocked;
+        private int _animIDStamina;
+        private int _animIDHardMode;
 
         private PlayerInput _playerInput;
 
@@ -180,6 +186,8 @@ namespace StarterAssets
             Move();
             HandleStadistics();
             HandleBlock();
+            HandleHardMode();
+            HandleResetBlock();
         }
 
         private void LateUpdate()
@@ -205,6 +213,8 @@ namespace StarterAssets
             _animIDHitting = Animator.StringToHash("Hitting");
             _animIDBlock = Animator.StringToHash("Block");
             _animIDBlocked = Animator.StringToHash("Blocked");
+            _animIDStamina = Animator.StringToHash("Stamina");
+            _animIDHardMode = Animator.StringToHash("HardMode");
         }
 
         private void GroundedCheck()
@@ -398,6 +408,7 @@ namespace StarterAssets
         {
             _animator.SetBool(_animIDDeath, dead);
             _animator.SetBool(_animIDHitting, inHitAnimation);
+            _animator.SetInteger(_animIDStamina, (int)staminaPercent);
 
             healthPercent = (health * 100) / maxHealth;
 
@@ -406,10 +417,22 @@ namespace StarterAssets
             forcePercent = (force * 100) / maxForce;
 
             // Si la estamina no esta completa, esta en animacion de bloqueo o ataque, no esta corriendo y no esta en el aire no incrementa
-            if (staminaPercent != 100 && !isBlocking && !inAttackAnimation && Grounded && _animationBlend <= MoveSpeed)
+            if (staminaPercent != 100 && !isBlocking && !inAttackAnimation && Grounded && _animationBlend <= MoveSpeed && canBlock)
             {
                 // Incrementar la estamina durante el tiempo
                 stamina += 1;
+            }
+            else if (isBlocking && stamina > 0)
+            {
+                stamina -= 1;
+
+                if (stamina <= 0)
+                {
+                    stamina = 0;
+                    _animator.SetBool(_animIDBlock, false);
+                    isBlocking = false;
+                    canBlock = false;
+                }
             }
         }
 
@@ -423,7 +446,19 @@ namespace StarterAssets
             }
             else if (!dead && isBlocking)
             {
-                stamina -= maxHealth / 2;
+                if (stamina > 0)
+                {
+                    stamina -= maxHealth / 2;
+
+                    if (stamina <= 0)
+                    {
+                        stamina = 0;
+                        _animator.SetBool(_animIDBlock, false);
+                        isBlocking = false;
+                        canBlock = false;
+                    }
+                }
+
                 _animator.SetTrigger(_animIDBlocked);
             }
 
@@ -491,20 +526,52 @@ namespace StarterAssets
 
         private void HandleBlock()
         {
-            if (Grounded && !isAttacking && !isEquipping && _animationBlend <= 0.01f)
+            if (Grounded && !isAttacking && !isEquipping && _animationBlend <= 0.01f && staminaPercent > 10)
             {
                 if (_input.block && !isBlocking)
                 {
                     if (_hasAnimator)
                     {
                         _animator.SetBool(_animIDBlock, true);
-                        isBlocking = true;
                     }
                 }
                 else if (!_input.block && isBlocking)
                 {
+                    // IMPLEMENTAR ESTO PARA CUANDO SE ACABE LA ESTAMINA
                     _animator.SetBool(_animIDBlock, false);
                     isBlocking = false;
+                }
+            }
+        }
+
+        private void HandleResetBlock()
+        {
+            if (!canBlock)
+            {
+                if (resetBlockTimer <= timeBtwResetBlock)
+                {
+                    isBlocking = false;
+                    resetBlockTimer += Time.deltaTime;
+                }
+                else
+                {
+                    canBlock = true;
+                    resetBlockTimer = 0;
+                }
+            }
+        }
+
+        private void HandleHardMode()
+        {
+            if (Grounded && !isAttacking && !isEquipping && _animationBlend <= 0.01f)
+            {
+                if (_input.hardMode && !hardModeEnabled)
+                {
+                    if (_hasAnimator)
+                    {
+                        _animator.SetTrigger(_animIDHardMode);
+                        hardModeEnabled = true;
+                    }
                 }
             }
         }
@@ -554,6 +621,11 @@ namespace StarterAssets
         public void EndEquipping()
         {
             isEquipping = false;
+        }
+
+        public void StartBlocking()
+        {
+            isBlocking = true;
         }
 
         private void OnFootstep(AnimationEvent animationEvent)

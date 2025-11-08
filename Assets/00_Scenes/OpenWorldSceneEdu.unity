@@ -407,6 +407,22 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6310211116362032691, guid: b0bf364354e744746892cf9d8f6f6ffd, type: 3}
+      propertyPath: stamina
+      value: 750
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310211116362032691, guid: b0bf364354e744746892cf9d8f6f6ffd, type: 3}
+      propertyPath: maxStamina
+      value: 1000
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310211116362032691, guid: b0bf364354e744746892cf9d8f6f6ffd, type: 3}
+      propertyPath: forcePercent
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310211116362032691, guid: b0bf364354e744746892cf9d8f6f6ffd, type: 3}
+      propertyPath: timeBtwResetBlock
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 8061265364545564703, guid: b0bf364354e744746892cf9d8f6f6ffd, type: 3}
       propertyPath: m_Name
       value: PlayerWarrior

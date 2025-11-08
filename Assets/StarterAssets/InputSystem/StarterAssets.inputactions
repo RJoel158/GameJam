@@ -68,6 +68,15 @@
                     "processors": "",
                     "interactions": "Hold",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "HardMode",
+                    "type": "Button",
+                    "id": "e9e9fd51-d948-44c9-b442-028e7ad3eb5e",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -277,6 +286,28 @@
                     "processors": "",
                     "groups": ";KeyboardMouse",
                     "action": "Block",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "be6097c7-3256-4e5e-acf9-a2839d49f2fa",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "HardMode",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a64e12d7-9a57-4fde-84d8-3e5743ea42e5",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";KeyboardMouse",
+                    "action": "HardMode",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

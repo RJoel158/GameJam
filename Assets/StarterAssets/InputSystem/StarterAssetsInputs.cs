@@ -15,6 +15,7 @@ namespace StarterAssets
 		public bool draw;
 		public bool attack;
 		public bool block;
+		public bool hardMode;
 
 		[Header("Movement Settings")]
 		public bool analogMovement;
@@ -122,13 +123,22 @@ namespace StarterAssets
         public void OnBlock(InputValue value)
         {
             BlockInput(value.isPressed);
-        }
+		}
 
-        public void BlockInput(bool newBlockState)
+		public void BlockInput(bool newBlockState)
+		{
+			block = newBlockState;
+		}
+
+        public void OnHardMode(InputValue value)
         {
-            block = newBlockState;
+            HardModeInput(value.isPressed);
         }
 
+        public void HardModeInput(bool newDrawState)
+        {
+            hardMode = newDrawState;
+        }
 
         private void OnApplicationFocus(bool hasFocus)
 		{
