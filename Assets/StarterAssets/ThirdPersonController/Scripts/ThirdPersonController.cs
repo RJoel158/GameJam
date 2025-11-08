@@ -88,6 +88,11 @@ private int lastPlayedSoundIndex = -1;
         [Header("Equipment")]
         public bool isEquipping;
         public bool isEquipped;
+        private bool drawSoundPlayed = false;  // Prevenir múltiples sonidos de Draw
+        private bool sheathSoundPlayed = false;  // Prevenir múltiples sonidos de Sheath
+        private float drawSoundCooldown = 0f;  // Cooldown para Draw
+        private float sheathSoundCooldown = 0f;  // Cooldown para Sheath
+        private const float SOUND_COOLDOWN_DURATION = 5f;  // 1 segundo de cooldown
 
         [Header("Attack")]
         public bool isAttacking;
@@ -220,6 +225,12 @@ private int lastPlayedSoundIndex = -1;
         private void Update()
         {
             _hasAnimator = TryGetComponent(out _animator);
+
+            // Actualizar cooldowns de sonido
+            if (drawSoundCooldown > 0f)
+                drawSoundCooldown -= Time.deltaTime;
+            if (sheathSoundCooldown > 0f)
+                sheathSoundCooldown -= Time.deltaTime;
 
             Attack();
             DrawSheathSword();
@@ -488,7 +499,7 @@ private int lastPlayedSoundIndex = -1;
             if (Grounded)
             {
                 // Draw (Tecla 1 - Sacar espada)
-                if (_input.draw && !isEquipped)
+                if (_input.draw && !isEquipped && drawSoundCooldown <= 0f)
                 {
                     // update animator if using character
                     if (_hasAnimator)
@@ -500,9 +511,10 @@ private int lastPlayedSoundIndex = -1;
                         
                         // Reproducir sonido personalizado de Draw (tecla 1)
                         PlayDrawSound();
+                        drawSoundCooldown = SOUND_COOLDOWN_DURATION;  // Iniciar cooldown
                     }
                 }
-                else if (_input.draw && isEquipped)
+                else if (_input.draw && isEquipped && sheathSoundCooldown <= 0f)
                 {
                     // update animator if using character
                     if (_hasAnimator)
@@ -514,6 +526,7 @@ private int lastPlayedSoundIndex = -1;
                         
                         // Reproducir sonido personalizado de Sheath (guardar)
                         PlaySheathSound();
+                        sheathSoundCooldown = SOUND_COOLDOWN_DURATION;  // Iniciar cooldown
                     }
                 }
             }
