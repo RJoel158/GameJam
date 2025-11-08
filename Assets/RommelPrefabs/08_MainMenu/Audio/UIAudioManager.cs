@@ -101,4 +101,20 @@ public class UIAudioManager : MonoBehaviour
     {
         if (musicSource.isPlaying) musicSource.Stop();
     }
+
+        // Pausar y reanudar música sin perder clip/posicion
+    public void PauseMusic()
+    {
+        if (musicSource == null) return;
+        if (musicSource.isPlaying)
+            musicSource.Pause();
+    }
+
+    public void ResumeMusic()
+    {
+        if (musicSource == null) return;
+        if (!musicSource.isPlaying && musicSource.clip != null)
+            musicSource.UnPause();
+    }
+
 }

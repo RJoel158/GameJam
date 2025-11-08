@@ -63,7 +63,7 @@
                 {
                     "name": "InteractF",
                     "type": "Button",
-                    "id": "a1b2c3d4-e5f6-4789-b1c2-d3e4f5a6b7c8",
+                    "id": "a1b2c3d4-e5f6-47g8-h9i0-j1k2l3m4n5o6",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -249,7 +249,7 @@
                 },
                 {
                     "name": "",
-                    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                    "id": "fe8b6cb0-d7bb-435d-894e-a4ad222133ce",
                     "path": "<Mouse>/leftButton",
                     "interactions": "",
                     "processors": "",

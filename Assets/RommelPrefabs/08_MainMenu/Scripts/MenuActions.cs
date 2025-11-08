@@ -4,19 +4,21 @@ using UnityEngine.SceneManagement;
 public class MenuActions : MonoBehaviour
 {
     public void NewGame()
+{
+    Debug.Log("Insertar lógica New Game aquí");
+    if (CinematicManager.Instance != null)
     {
-        Debug.Log("Insertar lógica New Game aquí");
-        // inicia fade y carga LoadingScreen_1
-        if (FadeTransition.Instance != null)
-        {
-            FadeTransition.Instance.FadeToScene("LoadingScreen_1");
-        }
-        else
-        {
-            // fallback directo
-            SceneManager.LoadScene("LoadingScreen_1");
-        }
+        CinematicManager.Instance.PlayCinematicThenLoad();
     }
+    else
+    {
+        if (FadeTransition.Instance != null)
+            FadeTransition.Instance.FadeToScene("LoadingScreen_1");
+        else
+            SceneManager.LoadScene("LoadingScreen_1");
+    }
+}
+
 
 
 
