@@ -119,6 +119,11 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &741288886 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5051156202604901, guid: b0bf364354e744746892cf9d8f6f6ffd, type: 3}
+  m_PrefabInstance: {fileID: 1701143639691943024}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &974270240
 GameObject:
   m_ObjectHideFlags: 0
@@ -407,9 +412,37 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6301115112722339621, guid: b0bf364354e744746892cf9d8f6f6ffd, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6301115112722339621, guid: b0bf364354e744746892cf9d8f6f6ffd, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: fd08d6257488e864d8a70422c82f2121, type: 2}
+    - target: {fileID: 6301115112722339621, guid: b0bf364354e744746892cf9d8f6f6ffd, type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 455fcb1a8a5a1db4583ab4879437929e, type: 2}
+    - target: {fileID: 6310211116362032691, guid: b0bf364354e744746892cf9d8f6f6ffd, type: 3}
+      propertyPath: force
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310211116362032691, guid: b0bf364354e744746892cf9d8f6f6ffd, type: 3}
+      propertyPath: health
+      value: 400
+      objectReference: {fileID: 0}
     - target: {fileID: 6310211116362032691, guid: b0bf364354e744746892cf9d8f6f6ffd, type: 3}
       propertyPath: stamina
       value: 750
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310211116362032691, guid: b0bf364354e744746892cf9d8f6f6ffd, type: 3}
+      propertyPath: Grounded
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310211116362032691, guid: b0bf364354e744746892cf9d8f6f6ffd, type: 3}
+      propertyPath: maxForce
+      value: 250
       objectReference: {fileID: 0}
     - target: {fileID: 6310211116362032691, guid: b0bf364354e744746892cf9d8f6f6ffd, type: 3}
       propertyPath: maxStamina
@@ -420,9 +453,25 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6310211116362032691, guid: b0bf364354e744746892cf9d8f6f6ffd, type: 3}
+      propertyPath: hardModeTime
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310211116362032691, guid: b0bf364354e744746892cf9d8f6f6ffd, type: 3}
+      propertyPath: hardModeMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 455fcb1a8a5a1db4583ab4879437929e, type: 2}
+    - target: {fileID: 6310211116362032691, guid: b0bf364354e744746892cf9d8f6f6ffd, type: 3}
+      propertyPath: originalMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: fd08d6257488e864d8a70422c82f2121, type: 2}
+    - target: {fileID: 6310211116362032691, guid: b0bf364354e744746892cf9d8f6f6ffd, type: 3}
       propertyPath: timeBtwResetBlock
       value: 4
       objectReference: {fileID: 0}
+    - target: {fileID: 6310211116362032691, guid: b0bf364354e744746892cf9d8f6f6ffd, type: 3}
+      propertyPath: playerTextureObject
+      value: 
+      objectReference: {fileID: 741288886}
     - target: {fileID: 8061265364545564703, guid: b0bf364354e744746892cf9d8f6f6ffd, type: 3}
       propertyPath: m_Name
       value: PlayerWarrior

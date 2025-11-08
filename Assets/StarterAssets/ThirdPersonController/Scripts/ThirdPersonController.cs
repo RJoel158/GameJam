@@ -40,7 +40,12 @@ namespace StarterAssets
         public int maxHealth = 2000;
         public bool dead = false;
         public bool inHitAnimation = false;
+
+        [Space(10)]
         public bool hardModeEnabled = false;
+        public float hardModeTime = 30f;
+        public float hardModeTimer = 0f;
+        public bool inHardModeAnimation = false;
 
         [Space(10)]
         [Range(0f, 100f)]
@@ -73,6 +78,11 @@ namespace StarterAssets
         public float timeBtwResetBlock = 2f;
         public float resetBlockTimer = 0f;
         public bool canBlock = true;
+
+        [Header("Materials")]
+        public Material hardModeMaterial;
+        public Material originalMaterial;
+        public GameObject playerTextureObject;
 
         [Header("Cinemachine")]
         [Tooltip("The follow target set in the Cinemachine Virtual Camera that the camera will follow")]
@@ -125,6 +135,7 @@ namespace StarterAssets
         private int _animIDBlocked;
         private int _animIDStamina;
         private int _animIDHardMode;
+        private int _animIDForce;
 
         private PlayerInput _playerInput;
 
@@ -215,6 +226,7 @@ namespace StarterAssets
             _animIDBlocked = Animator.StringToHash("Blocked");
             _animIDStamina = Animator.StringToHash("Stamina");
             _animIDHardMode = Animator.StringToHash("HardMode");
+            _animIDForce = Animator.StringToHash("Force");
         }
 
         private void GroundedCheck()
@@ -255,7 +267,7 @@ namespace StarterAssets
 
         private void Move()
         {
-            if (dead || isBlocking)
+            if (dead || isBlocking || inHardModeAnimation)
             {
                 return;
             }
@@ -409,12 +421,19 @@ namespace StarterAssets
             _animator.SetBool(_animIDDeath, dead);
             _animator.SetBool(_animIDHitting, inHitAnimation);
             _animator.SetInteger(_animIDStamina, (int)staminaPercent);
+            _animator.SetInteger(_animIDForce, (int)forcePercent);
 
             healthPercent = (health * 100) / maxHealth;
 
             staminaPercent = (stamina * 100) / maxStamina;
 
             forcePercent = (force * 100) / maxForce;
+
+            if (hardModeEnabled)
+            {
+                stamina = maxStamina;
+                health = maxHealth;
+            }
 
             // Si la estamina no esta completa, esta en animacion de bloqueo o ataque, no esta corriendo y no esta en el aire no incrementa
             if (staminaPercent != 100 && !isBlocking && !inAttackAnimation && Grounded && _animationBlend <= MoveSpeed && canBlock)
@@ -565,7 +584,7 @@ namespace StarterAssets
         {
             if (Grounded && !isAttacking && !isEquipping && _animationBlend <= 0.01f)
             {
-                if (_input.hardMode && !hardModeEnabled)
+                if (_input.hardMode && !hardModeEnabled && forcePercent == 100)
                 {
                     if (_hasAnimator)
                     {
@@ -573,6 +592,22 @@ namespace StarterAssets
                         hardModeEnabled = true;
                     }
                 }
+            }
+
+            if (hardModeEnabled)
+            {
+                if (forcePercent >= 0)
+                {
+                    force -= 1;
+                }
+                else
+                {
+                    DeactivateHardMode();
+                }
+            }
+            else if (force < maxForce)
+            {
+                force += 1;
             }
         }
 
@@ -626,6 +661,51 @@ namespace StarterAssets
         public void StartBlocking()
         {
             isBlocking = true;
+        }
+
+        public void StartHardMode()
+        {
+            inHardModeAnimation = true;
+        }
+
+        public void EndHardMode()
+        {
+            inHardModeAnimation= false;
+        }
+
+        public void ActiveHardMode()
+        {
+            Debug.Log("Hard Mode Active");
+            _input.hardMode = false;
+
+            // Guardar el material original la primera vez
+            if (originalMaterial == null && playerTextureObject != null)
+            {
+                var renderer = playerTextureObject.GetComponent<Renderer>();
+                if (renderer != null)
+                    originalMaterial = renderer.material;
+            }
+
+            // Cambiar al material de modo difícil
+            if (playerTextureObject != null && hardModeMaterial != null)
+            {
+                var renderer = playerTextureObject.GetComponent<Renderer>();
+                if (renderer != null)
+                    renderer.material = hardModeMaterial;
+            }
+        }
+
+        public void DeactivateHardMode()
+        {
+            if (playerTextureObject != null && originalMaterial != null)
+            {
+                var renderer = playerTextureObject.GetComponent<Renderer>();
+                if (renderer != null)
+                    renderer.material = originalMaterial;
+            }
+
+            hardModeEnabled = false;
+            Debug.Log("Hard Mode Deactivated");
         }
 
         private void OnFootstep(AnimationEvent animationEvent)
