@@ -16,6 +16,9 @@ public class God : MonoBehaviour
     [SerializeField] float timer = 0;
     public float timeBtwShoot = 1f;
 
+    // Referencia al BossController
+    private BossController bossController;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -33,6 +36,9 @@ public class God : MonoBehaviour
                 }
             }
         }
+
+        // Obtener referencia al BossController
+        bossController = GetComponent<BossController>();
     }
 
     // Update is called once per frame
@@ -77,8 +83,20 @@ public class God : MonoBehaviour
         else
         {
             timer = 0;
-            //AudioManager.instance.PlayRandomPitchSFX(shootSFX);
-            Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+
+            // NUEVO: Verificar si el boss tiene energía suficiente
+            bool canShoot = true;
+            if (bossController != null)
+            {
+                canShoot = bossController.TryUseEnergy();
+            }
+
+            // Solo disparar si tiene energía (o si no tiene BossController)
+            if (canShoot)
+            {
+                //AudioManager.instance.PlayRandomPitchSFX(shootSFX);
+                Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+            }
         }
     }
 

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Playables;
 using StarterAssets;
@@ -47,6 +48,10 @@ public class BossSpawner : MonoBehaviour
     [Range(5f, 20f)]
     public float teleportDistance = 8f;
 
+    [Tooltip("Height offset for boss teleport (to prevent clipping into ground)")]
+    [Range(0f, 5f)]
+    public float teleportHeightOffset = 1.5f;
+
     [Header("Audio Settings")]
     [Tooltip("Audio to play when boss appears")]
     public AudioClip bossAppearSound;
@@ -54,6 +59,12 @@ public class BossSpawner : MonoBehaviour
     private AudioSource audioSource;
     private GameObject spawnedBoss;
     private bool bossSpawned = false;
+
+    // Lista para guardar los Canvas que desactivamos
+    private List<Canvas> disabledCanvases = new List<Canvas>();
+
+    // Referencia a la UI del boss
+    private BossHealthBarUI bossUI;
 
     private void Awake()
     {
@@ -87,6 +98,15 @@ public class BossSpawner : MonoBehaviour
         if (cinematicTimeline != null)
         {
             cinematicTimeline.stopped += OnCinematicFinished;
+        }
+
+        // Buscar la UI del boss
+        bossUI = FindAnyObjectByType<BossHealthBarUI>();
+        if (bossUI != null)
+        {
+            // Ocultar la UI al inicio
+            bossUI.HideBossUI();
+            Debug.Log("<color=cyan>[BossSpawner] Boss UI found and hidden</color>");
         }
     }
 
@@ -193,6 +213,9 @@ public class BossSpawner : MonoBehaviour
             TeleportBossToPlayer();
         }
 
+        // IMPORTANTE: Habilitar el combate del boss
+        EnableBossCombat();
+
         // Re-enable player controls
         if (disablePlayerControls)
         {
@@ -204,6 +227,67 @@ public class BossSpawner : MonoBehaviour
         {
             SpawnBoss();
         }
+    }
+
+    /// <summary>
+    /// Habilita el combate del boss (NavMeshAgent, Enemy script, etc.)
+    /// </summary>
+    private void EnableBossCombat()
+    {
+        if (spawnedBoss == null)
+        {
+            Debug.LogWarning("<color=orange>[BossSpawner] No boss to enable combat!</color>");
+            return;
+        }
+
+        // Habilitar el componente Enemy
+        var enemy = spawnedBoss.GetComponent<Enemy>();
+        if (enemy != null)
+        {
+            enemy.enabled = true;
+            Debug.Log("<color=cyan>[BossSpawner] Boss Enemy component enabled</color>");
+        }
+
+        // Habilitar NavMeshAgent
+        var navAgent = spawnedBoss.GetComponent<UnityEngine.AI.NavMeshAgent>();
+        if (navAgent != null)
+        {
+            navAgent.enabled = true;
+            Debug.Log("<color=cyan>[BossSpawner] Boss NavMeshAgent enabled</color>");
+        }
+
+        // Habilitar Animator
+        var animator = spawnedBoss.GetComponent<Animator>();
+        if (animator != null)
+        {
+            animator.enabled = true;
+            Debug.Log("<color=cyan>[BossSpawner] Boss Animator enabled</color>");
+        }
+
+        // NUEVO: Mostrar la UI del boss
+        if (bossUI == null)
+        {
+            bossUI = FindAnyObjectByType<BossHealthBarUI>();
+        }
+
+        if (bossUI != null)
+        {
+            // Conectar el boss con la UI si no está conectado
+            BossController bossController = spawnedBoss.GetComponent<BossController>();
+            if (bossController != null)
+            {
+                bossUI.bossController = bossController;
+            }
+
+            bossUI.ShowBossUI();
+            Debug.Log("<color=cyan>[BossSpawner] Boss UI shown</color>");
+        }
+        else
+        {
+            Debug.LogWarning("<color=orange>[BossSpawner] No BossHealthBarUI found! Run 'Game Jam > Quick Setup > Boss Health & Energy'</color>");
+        }
+
+        Debug.Log("<color=green>[BossSpawner] Boss combat systems enabled!</color>");
     }
 
     /// <summary>
@@ -237,8 +321,9 @@ public class BossSpawner : MonoBehaviour
 
         Vector3 teleportPosition = playerPos + direction * teleportDistance;
 
-        // Mantener la misma altura Y del jugador
-        teleportPosition.y = playerPos.y;
+        // ARREGLO: Elevar el boss para que no se entierre
+        // Usar la altura del jugador + un offset adicional para bosses grandes
+        teleportPosition.y = playerPos.y + teleportHeightOffset;
 
         // Teletransportar el boss
         spawnedBoss.transform.position = teleportPosition;
@@ -251,7 +336,7 @@ public class BossSpawner : MonoBehaviour
             spawnedBoss.transform.rotation = Quaternion.LookRotation(lookDirection);
         }
 
-        Debug.Log($"<color=magenta>[BossSpawner] Boss teleported near player! Distance: {Vector3.Distance(playerPos, teleportPosition):F2}m</color>");
+        Debug.Log($"<color=magenta>[BossSpawner] Boss teleported near player! Distance: {Vector3.Distance(playerPos, teleportPosition):F2}m, Height: {teleportPosition.y}</color>");
 
         // Efecto visual de teletransporte (opcional)
         PlaySpawnEffects(teleportPosition);
@@ -338,17 +423,26 @@ public class BossSpawner : MonoBehaviour
     {
         Debug.Log("<color=yellow>[BossSpawner] Disabling player controls...</color>");
 
-        // Desactivar TODAS las UI Canvas
+        // Limpiar la lista anterior
+        disabledCanvases.Clear();
+
+        // Desactivar TODAS las UI Canvas y guardar referencias
         Canvas[] allCanvas = FindObjectsByType<Canvas>(FindObjectsSortMode.None);
         foreach (Canvas canvas in allCanvas)
         {
             // Solo desactivar canvas de UI (no de World Space)
             if (canvas.renderMode == RenderMode.ScreenSpaceOverlay || canvas.renderMode == RenderMode.ScreenSpaceCamera)
             {
-                canvas.gameObject.SetActive(false);
-                Debug.Log($"<color=yellow>[BossSpawner] UI Canvas disabled: {canvas.gameObject.name}</color>");
+                if (canvas.gameObject.activeSelf) // Solo guardar si estaba activo
+                {
+                    disabledCanvases.Add(canvas);
+                    canvas.gameObject.SetActive(false);
+                    Debug.Log($"<color=yellow>[BossSpawner] UI Canvas disabled: {canvas.gameObject.name}</color>");
+                }
             }
         }
+
+        Debug.Log($"<color=yellow>[BossSpawner] Disabled {disabledCanvases.Count} UI Canvas</color>");
 
         // NO desactivamos la Main Camera porque Cinemachine la necesita activa
         // En su lugar, desactivamos la cámara virtual del jugador si existe
@@ -442,16 +536,18 @@ public class BossSpawner : MonoBehaviour
     {
         Debug.Log("<color=cyan>[BossSpawner] Enabling player controls...</color>");
 
-        // Reactivar TODAS las UI Canvas que desactivamos
-        Canvas[] allCanvas = FindObjectsByType<Canvas>(FindObjectsSortMode.None);
-        foreach (Canvas canvas in allCanvas)
+        // Reactivar SOLO las UI Canvas que desactivamos (usando la lista guardada)
+        foreach (Canvas canvas in disabledCanvases)
         {
-            if (canvas.renderMode == RenderMode.ScreenSpaceOverlay || canvas.renderMode == RenderMode.ScreenSpaceCamera)
+            if (canvas != null) // Verificar que no se haya destruido
             {
                 canvas.gameObject.SetActive(true);
                 Debug.Log($"<color=cyan>[BossSpawner] UI Canvas enabled: {canvas.gameObject.name}</color>");
             }
         }
+
+        Debug.Log($"<color=cyan>[BossSpawner] Re-enabled {disabledCanvases.Count} UI Canvas</color>");
+        disabledCanvases.Clear();
 
         // Restaurar el tiempo (comentado porque no lo estamos congelando ahora)
         // Time.timeScale = 1f;
@@ -509,7 +605,18 @@ public class BossSpawner : MonoBehaviour
         if (playerAnimator != null)
         {
             playerAnimator.enabled = true;
-            Debug.Log("<color=cyan>[BossSpawner] Player Animator enabled</color>");
+
+            // Resetear triggers que puedan estar activos
+            playerAnimator.ResetTrigger("Attack");
+            playerAnimator.ResetTrigger("Damage");
+            playerAnimator.ResetTrigger("Death");
+            playerAnimator.ResetTrigger("DrawSword");
+
+            // Asegurar que está en estado base
+            playerAnimator.SetBool("Block", false);
+            playerAnimator.SetBool("Equipped", false);
+
+            Debug.Log("<color=cyan>[BossSpawner] Player Animator enabled and reset</color>");
         }
 
         // Reactivar TODOS los enemigos después de la cinemática

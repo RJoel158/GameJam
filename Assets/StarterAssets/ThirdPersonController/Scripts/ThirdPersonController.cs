@@ -561,9 +561,13 @@ namespace StarterAssets
 
             if (health <= 0)
             {
-                death = true;
-                dead = true;
-                Die();
+                // ARREGLO: Solo morir una vez
+                if (!dead && !death)
+                {
+                    death = true;
+                    dead = true;
+                    Die();
+                }
             }
         }
 
@@ -572,6 +576,8 @@ namespace StarterAssets
             //Instantiate(ragdoll, transform.position, transform.rotation);
             _animator.SetTrigger("Death");
             //Destroy(this.gameObject);
+
+            Debug.Log("<color=red>[Player] Player has died!</color>");
         }
 
         private void DrawSheathSword()
