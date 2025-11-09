@@ -11,20 +11,20 @@ public class BossSpawner : MonoBehaviour
     [Header("Boss Settings")]
     [Tooltip("The boss prefab or GameObject to activate")]
     public GameObject bossPrefab;
-    
+
     [Tooltip("Position where the boss will spawn")]
     public Transform spawnPoint;
-    
+
     [Tooltip("If true, uses the prefab. If false, just activates the boss GameObject")]
     public bool instantiateBoss = true;
 
     [Header("Cinematic Settings")]
     [Tooltip("The Timeline Playable Director for the boss introduction")]
     public PlayableDirector cinematicTimeline;
-    
+
     [Tooltip("If true, plays the cinematic before spawning the boss")]
     public bool playCinematicBeforeSpawn = true;
-    
+
     [Tooltip("Delay before spawning boss (if no cinematic)")]
     public float spawnDelay = 1f;
 
@@ -35,14 +35,14 @@ public class BossSpawner : MonoBehaviour
     [Header("Camera Settings")]
     [Tooltip("Reference to the player camera to disable during cinematic")]
     public GameObject playerCamera;
-    
+
     [Tooltip("If true, disables player controls during cinematic")]
     public bool disablePlayerControls = true;
 
     [Header("Boss Teleport Settings")]
     [Tooltip("If true, teleports boss near player after cinematic")]
     public bool teleportBossAfterCinematic = true;
-    
+
     [Tooltip("Distance from player to teleport the boss")]
     [Range(5f, 20f)]
     public float teleportDistance = 8f;
@@ -50,7 +50,7 @@ public class BossSpawner : MonoBehaviour
     [Header("Audio Settings")]
     [Tooltip("Audio to play when boss appears")]
     public AudioClip bossAppearSound;
-    
+
     private AudioSource audioSource;
     private GameObject spawnedBoss;
     private bool bossSpawned = false;
@@ -116,7 +116,7 @@ public class BossSpawner : MonoBehaviour
         }
 
         Debug.Log($"<color=green>[BossSpawner] Mission '{mission.missionName}' completed! Preparing boss spawn...</color>");
-        
+
         // IMPORTANTE: Esperar un momento para que la UI de misión completada se muestre
         StartCoroutine(DelayedCinematicStart());
     }
@@ -129,7 +129,7 @@ public class BossSpawner : MonoBehaviour
         // Esperar el tiempo configurado para que la animación de "Misión Completada" termine
         Debug.Log($"<color=cyan>[BossSpawner] Waiting {missionCompleteDelay}s for mission complete UI...</color>");
         yield return new WaitForSeconds(missionCompleteDelay);
-        
+
         if (playCinematicBeforeSpawn && cinematicTimeline != null)
         {
             StartCinematic();
@@ -186,13 +186,13 @@ public class BossSpawner : MonoBehaviour
     private void OnCinematicFinished(PlayableDirector director)
     {
         Debug.Log("<color=magenta>[BossSpawner] Cinematic finished!</color>");
-        
+
         // Teletransportar el boss cerca del jugador (si está habilitado)
         if (teleportBossAfterCinematic)
         {
             TeleportBossToPlayer();
         }
-        
+
         // Re-enable player controls
         if (disablePlayerControls)
         {
@@ -228,7 +228,7 @@ public class BossSpawner : MonoBehaviour
         // Calcular posición cerca del jugador
         Vector3 playerPos = player.transform.position;
         Vector3 direction = (spawnedBoss.transform.position - playerPos).normalized;
-        
+
         // Si el boss está muy cerca o la dirección es inválida, usar dirección hacia adelante del jugador
         if (direction.magnitude < 0.1f)
         {
@@ -236,13 +236,13 @@ public class BossSpawner : MonoBehaviour
         }
 
         Vector3 teleportPosition = playerPos + direction * teleportDistance;
-        
+
         // Mantener la misma altura Y del jugador
         teleportPosition.y = playerPos.y;
 
         // Teletransportar el boss
         spawnedBoss.transform.position = teleportPosition;
-        
+
         // Hacer que el boss mire al jugador
         Vector3 lookDirection = (playerPos - teleportPosition).normalized;
         lookDirection.y = 0; // Mantener en plano horizontal
@@ -252,7 +252,7 @@ public class BossSpawner : MonoBehaviour
         }
 
         Debug.Log($"<color=magenta>[BossSpawner] Boss teleported near player! Distance: {Vector3.Distance(playerPos, teleportPosition):F2}m</color>");
-        
+
         // Efecto visual de teletransporte (opcional)
         PlaySpawnEffects(teleportPosition);
     }
@@ -321,7 +321,7 @@ public class BossSpawner : MonoBehaviour
     {
         // You can add particle effects, screen shake, etc. here
         Debug.Log($"<color=yellow>[BossSpawner] Playing spawn effects at {position}</color>");
-        
+
         // Example: Find and play a particle system
         // ParticleSystem spawnVFX = GetComponentInChildren<ParticleSystem>();
         // if (spawnVFX != null)
@@ -411,7 +411,7 @@ public class BossSpawner : MonoBehaviour
         foreach (Enemy enemy in allEnemies)
         {
             enemy.enabled = false;
-            
+
             // También desactivar el NavMeshAgent si existe
             var navAgent = enemy.GetComponent<UnityEngine.AI.NavMeshAgent>();
             if (navAgent != null)
@@ -426,7 +426,7 @@ public class BossSpawner : MonoBehaviour
                 animator.enabled = false;
             }
         }
-        
+
         Debug.Log($"<color=cyan>[BossSpawner] {allEnemies.Length} enemies frozen for cinematic</color>");
 
         // TEMPORAL: Comentado para probar si Timeline funciona sin congelar tiempo
@@ -517,7 +517,7 @@ public class BossSpawner : MonoBehaviour
         foreach (Enemy enemy in allEnemies)
         {
             enemy.enabled = true;
-            
+
             // Reactivar NavMeshAgent
             var navAgent = enemy.GetComponent<UnityEngine.AI.NavMeshAgent>();
             if (navAgent != null)
@@ -532,7 +532,7 @@ public class BossSpawner : MonoBehaviour
                 animator.enabled = true;
             }
         }
-        
+
         Debug.Log($"<color=cyan>[BossSpawner] {allEnemies.Length} enemies unfrozen, player combat enabled</color>");
     }
 
@@ -567,7 +567,7 @@ public class BossSpawner : MonoBehaviour
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(spawnPoint.position, 2f);
             Gizmos.DrawLine(spawnPoint.position, spawnPoint.position + spawnPoint.forward * 3f);
-            
+
             // Draw direction arrow
             Gizmos.color = Color.blue;
             Vector3 arrowEnd = spawnPoint.position + spawnPoint.forward * 3f;

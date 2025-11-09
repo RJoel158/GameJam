@@ -26,6 +26,7 @@ Esta guía te ayudará a configurar una cinemática profesional para la aparici�
 ### 1.2 Importar Scripts
 
 Los siguientes scripts ya están creados en `Assets/04_Scripts/`:
+
 - ✅ `BossSpawner.cs` - Controla el spawn del boss
 - ✅ `CinematicController.cs` - Controla la cinemática con Timeline
 - ✅ `BossCinematicEvents.cs` - Eventos llamables desde Timeline
@@ -37,10 +38,12 @@ Los siguientes scripts ya están creados en `Assets/04_Scripts/`:
 ### 2.1 Crear Timeline Asset
 
 1. En la escena **OpenWorldMerged 1**, crea un GameObject vacío:
+
    - Right-click en Hierarchy > Create Empty
    - Nómbralo: `BossCinematicTimeline`
 
 2. Con el GameObject seleccionado:
+
    - Ve a Window > Sequencing > Timeline
    - Click en "Create" en la ventana de Timeline
    - Guarda el asset como: `Assets/00_Scenes/OpenWorldSceneMerged/BossIntro_Timeline.playable`
@@ -55,16 +58,19 @@ Los siguientes scripts ya están creados en `Assets/04_Scripts/`:
 Ahora crearemos las pistas (tracks) para la cinemática:
 
 #### Track 1: Cinemachine Track (Para cámaras)
+
 1. En la ventana Timeline, click derecho > Cinemachine Track
 2. Nombra el track: "Cinematic Cameras"
 3. Este track controlará las cámaras durante la cinemática
 
 #### Track 2: Animation Track (Para animaciones del boss)
+
 1. Click derecho en Timeline > Animation Track
 2. Arrastra tu Boss prefab al campo del track
 3. Nombra el track: "Boss Animation"
 
 #### Track 3: Signal Track (Para eventos)
+
 1. Click derecho en Timeline > Signal Track
 2. Nombra el track: "Events"
 3. Aquí colocaremos las señales para eventos específicos
@@ -78,6 +84,7 @@ Ahora crearemos las pistas (tracks) para la cinemática:
 Crea 3-4 cámaras virtuales para diferentes ángulos:
 
 #### Cámara 1: Wide Shot (Plano General)
+
 1. Right-click en Hierarchy > Cinemachine > Virtual Camera
 2. Nombre: `CM_BossIntro_Wide`
 3. Posiciona la cámara para un plano amplio del área donde aparecerá el boss
@@ -87,17 +94,20 @@ Crea 3-4 cámaras virtuales para diferentes ángulos:
    - **Priority**: 0 (por defecto)
 
 #### Cámara 2: Boss Close-Up (Primer Plano del Boss)
+
 1. Crea otra Virtual Camera: `CM_BossIntro_CloseUp`
 2. Posiciónala cerca del punto de spawn del boss
 3. Apúntala hacia donde aparecerá el boss
 4. Ajusta el FOV a 40-50 para un plano más cerrado
 
 #### Cámara 3: Player Reaction (Reacción del Jugador)
+
 1. Crea otra Virtual Camera: `CM_BossIntro_PlayerReaction`
 2. Posiciónala mirando al jugador
 3. Muestra la reacción del jugador al ver al boss
 
 #### Cámara 4: Dramatic Angle (Ángulo Dramático)
+
 1. Crea otra Virtual Camera: `  `
 2. Posiciónala en un ángulo bajo mirando hacia arriba
 3. Da sensación épica y amenazante
@@ -106,6 +116,7 @@ Crea 3-4 cámaras virtuales para diferentes ángulos:
 
 1. En la ventana Timeline, en el track "Cinematic Cameras"
 2. Arrastra cada cámara virtual a diferentes momentos:
+
    ```
    0s-3s:    Wide Shot (mostrar área)
    3s-5s:    Boss Close-Up (boss aparece)
@@ -123,6 +134,7 @@ Crea 3-4 cámaras virtuales para diferentes ángulos:
 ### 4.1 Crear GameObject BossSpawner
 
 1. En Hierarchy, crea un GameObject vacío:
+
    - Nombre: `BossSpawner`
    - Posición: 0, 0, 0
 
@@ -131,25 +143,30 @@ Crea 3-4 cámaras virtuales para diferentes ángulos:
 3. Configura los campos:
 
    **Boss Settings:**
+
    - `Boss Prefab`: Arrastra tu boss prefab aquí
    - `Spawn Point`: Crea un Transform vacío donde aparecerá el boss
    - `Instantiate Boss`: ✅ True (si quieres instanciar) o ❌ False (si ya está en escena)
 
    **Cinematic Settings:**
+
    - `Cinematic Timeline`: Arrastra el GameObject `BossCinematicTimeline`
    - `Play Cinematic Before Spawn`: ✅ True
    - `Spawn Delay`: 1.0s
 
    **Camera Settings:**
+
    - `Player Camera`: Arrastra la cámara del jugador (o déjalo vacío)
    - `Disable Player Controls`: ✅ True
 
    **Audio Settings:**
+
    - `Boss Appear Sound`: Arrastra un AudioClip épico (opcional)
 
 ### 4.2 Crear Spawn Point
 
 1. Crea un GameObject vacío:
+
    - Nombre: `BossSpawnPoint`
    - Posiciónalo donde quieres que aparezca el boss
    - El gizmo te mostrará una esfera roja y una flecha azul
@@ -163,6 +180,7 @@ Crea 3-4 cámaras virtuales para diferentes ángulos:
 ### 5.1 Crear GameObject para Eventos
 
 1. En el GameObject `BossCinematicTimeline`:
+
    - Add Component > **BossCinematicEvents** script
 
 2. Configura los campos:
@@ -177,18 +195,22 @@ Crea 3-4 cámaras virtuales para diferentes ángulos:
 En el track "Events" (Signal Track):
 
 1. **Segundo 2**: Spawn Boss
+
    - Crea un Signal Emitter
    - Conecta a `BossCinematicEvents.SpawnBoss()`
 
 2. **Segundo 3**: Ground Impact Effect
+
    - Signal Emitter
    - Conecta a `BossCinematicEvents.PlayGroundImpactEffect()`
 
 3. **Segundo 4**: Boss Roar
+
    - Signal Emitter
    - Conecta a `BossCinematicEvents.PlayBossRoar()`
 
 4. **Segundo 5**: Dramatic Music
+
    - Signal Emitter
    - Conecta a `BossCinematicEvents.PlayDramaticMusic()`
 
@@ -202,6 +224,7 @@ Si no sabes usar Signals en Timeline:
 
 1. En Unity, ve a: **Assets > Create > Signals**
 2. Crea estas señales:
+
    - `Signal_SpawnBoss`
    - `Signal_GroundImpact`
    - `Signal_BossRoar`
@@ -221,6 +244,7 @@ Si no sabes usar Signals en Timeline:
 ### 6.1 Añadir Particle Effects
 
 1. Crea particle systems para:
+
    - Boss appear effect (humo, energía, etc.)
    - Ground impact (polvo, rocas)
 
@@ -231,9 +255,11 @@ Si no sabes usar Signals en Timeline:
 ### 6.2 Añadir Camera Shake
 
 1. En cualquier cámara Cinemachine, Add Component:
+
    - **Cinemachine Impulse Source**
 
 2. Configura:
+
    - Amplitude Gain: 1.0
    - Frequency Gain: 1.0
    - Duration: 0.3s
@@ -247,6 +273,7 @@ Si no sabes usar Signals en Timeline:
 ### 7.1 Boss Audio
 
 En el `BossCinematicEvents`, asigna:
+
 - `Boss Roar Sound`: Rugido épico del boss
 - `Ground Impact Sound`: Sonido de impacto
 - `Dramatic Music`: Música dramática de fondo
@@ -270,14 +297,15 @@ También puedes usar un Audio Track en el Timeline:
    - Expande `On Mission Completed`
    - Click en `+` para agregar un nuevo evento
    - Arrastra el GameObject `BossSpawner`
-   - Selecciona: `BossSpawner > PlayCinematic()` 
+   - Selecciona: `BossSpawner > PlayCinematic()`
    - ⚠️ **NOTA**: El BossSpawner ya está suscrito al evento, pero puedes usar UnityEvents también
 
 ### 8.2 Verificar Configuración
 
 El flujo completo debe ser:
+
 ```
-Misión Completada 
+Misión Completada
    ↓
 OnMissionCompleted Event (MissionManager)
    ↓
@@ -347,15 +375,18 @@ Si algo no funciona, revisa los logs:
 ### 10.1 Letterbox Bars (Barras Negras Cinemáticas)
 
 1. Crea un Canvas UI:
+
    - Right-click Hierarchy > UI > Canvas
    - Nombre: `CinematicUI`
 
 2. Dentro del Canvas, crea 2 Images negras:
+
    - Top Bar: Altura 100px, anclada arriba
    - Bottom Bar: Altura 100px, anclada abajo
    - Color: Negro (R:0, G:0, B:0, A:255)
 
 3. Agrupa en un GameObject:
+
    - Nombre: `LetterboxBars`
    - Desactívalo por defecto
 
@@ -390,6 +421,7 @@ void Update()
 ## 📊 RESUMEN DE CONFIGURACIÓN
 
 ### GameObjects Necesarios:
+
 ```
 Scene Hierarchy:
 ├── MissionManager (ya existe)
@@ -409,6 +441,7 @@ Scene Hierarchy:
 ```
 
 ### Scripts Configurados:
+
 - ✅ `BossSpawner.cs` - En GameObject BossSpawner
 - ✅ `CinematicController.cs` - (opcional, si quieres control extra)
 - ✅ `BossCinematicEvents.cs` - En GameObject BossCinematicTimeline
@@ -418,26 +451,31 @@ Scene Hierarchy:
 ## 🐛 TROUBLESHOOTING (Solución de Problemas)
 
 ### El boss no aparece:
+
 - ✅ Verifica que `BossSpawner` esté suscrito al evento
 - ✅ Revisa que el prefab esté asignado
 - ✅ Verifica los logs en la Console
 
 ### La cinemática no inicia:
+
 - ✅ Verifica que `Cinematic Timeline` esté asignado en BossSpawner
 - ✅ Asegúrate de que `Play Cinematic Before Spawn` esté en True
 - ✅ Verifica que el Timeline tenga un Playable Director
 
 ### Las cámaras no cambian:
+
 - ✅ Verifica que las Virtual Cameras tengan diferentes priorities durante el Timeline
 - ✅ Asegúrate de que el Cinemachine Brain esté en la Main Camera
 - ✅ Verifica que las cámaras estén en el Cinemachine Track del Timeline
 
 ### Los controles no se reactivan:
+
 - ✅ Verifica que el Timeline termine correctamente
 - ✅ Revisa el método `OnTimelineStopped()` en CinematicController
 - ✅ Asegúrate de que no haya errores en la Console
 
 ### Los eventos no se disparan:
+
 - ✅ Verifica que los Signals estén creados
 - ✅ Asegúrate de que los Signal Receivers estén configurados
 - ✅ Verifica que `BossCinematicEvents` tenga las referencias correctas

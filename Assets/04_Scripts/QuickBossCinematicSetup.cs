@@ -10,7 +10,7 @@ public class QuickBossCinematicSetup : MonoBehaviour
     [Header("⚠️ CONFIGURACIÓN RÁPIDA")]
     [Tooltip("El prefab del boss que aparecerá")]
     public GameObject bossPrefab;
-    
+
     [Tooltip("Posición donde aparecerá el boss")]
     public Vector3 bossSpawnPosition = new Vector3(0, 0, 50);
 
@@ -40,10 +40,10 @@ public class QuickBossCinematicSetup : MonoBehaviour
 
         // 1. Crear BossSpawner
         GameObject spawner = CreateBossSpawner();
-        
+
         // 2. Crear punto de spawn
         CreateSpawnPoint(spawner);
-        
+
         // 3. Buscar o crear MissionManager
         ConnectToMissionManager(spawner);
 
@@ -69,7 +69,7 @@ public class QuickBossCinematicSetup : MonoBehaviour
         // Crear nuevo spawner
         GameObject spawnerObj = new GameObject("BossSpawner");
         BossSpawner spawner = spawnerObj.AddComponent<BossSpawner>();
-        
+
         // Configuración básica sin cinemática
         spawner.bossPrefab = bossPrefab;
         spawner.instantiateBoss = true;
@@ -84,15 +84,15 @@ public class QuickBossCinematicSetup : MonoBehaviour
     private void CreateSpawnPoint(GameObject spawner)
     {
         BossSpawner spawnerScript = spawner.GetComponent<BossSpawner>();
-        
+
         if (spawnerScript.spawnPoint == null)
         {
             GameObject spawnPoint = new GameObject("BossSpawnPoint");
             spawnPoint.transform.position = bossSpawnPosition;
             spawnPoint.transform.SetParent(spawner.transform);
-            
+
             spawnerScript.spawnPoint = spawnPoint.transform;
-            
+
             Debug.Log($"<color=green>[Quick Setup] Spawn Point creado en {bossSpawnPosition} ✅</color>");
         }
         else
@@ -104,7 +104,7 @@ public class QuickBossCinematicSetup : MonoBehaviour
     private void ConnectToMissionManager(GameObject spawner)
     {
         MissionManager missionManager = FindAnyObjectByType<MissionManager>();
-        
+
         if (missionManager == null)
         {
             Debug.LogWarning("<color=orange>[Quick Setup] ⚠️ MissionManager no encontrado en la escena!</color>");
@@ -140,7 +140,7 @@ public class QuickBossCinematicSetup : MonoBehaviour
     public void TestSpawnBoss()
     {
         BossSpawner spawner = FindAnyObjectByType<BossSpawner>();
-        
+
         if (spawner == null)
         {
             Debug.LogError("<color=red>[Quick Setup] No se encontró BossSpawner. Ejecuta Setup primero.</color>");
@@ -160,7 +160,7 @@ public class QuickBossCinematicSetup : MonoBehaviour
         Debug.Log("<color=cyan>========================================</color>");
         Debug.Log("<color=cyan>[Quick Setup] INFORMACIÓN DEL SETUP</color>");
         Debug.Log("<color=cyan>========================================</color>");
-        
+
         BossSpawner spawner = FindAnyObjectByType<BossSpawner>();
         if (spawner != null)
         {
@@ -232,7 +232,7 @@ public class QuickBossCinematicSetup : MonoBehaviour
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(bossSpawnPosition, 2f);
         Gizmos.DrawLine(bossSpawnPosition, bossSpawnPosition + Vector3.up * 5f);
-        
+
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireCube(bossSpawnPosition + Vector3.up * 5.5f, Vector3.one * 0.5f);
 

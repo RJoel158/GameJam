@@ -11,7 +11,7 @@ public class TimelineDiagnostics : MonoBehaviour
 {
     [Header("Auto-detect")]
     [SerializeField] private PlayableDirector director;
-    
+
     [Header("Diagnostics")]
     [SerializeField] private bool runDiagnosticsOnStart = true;
     [SerializeField] private bool continuousDiagnostics = false;
@@ -41,20 +41,20 @@ public class TimelineDiagnostics : MonoBehaviour
     public void RunFullDiagnostics()
     {
         Debug.Log("<color=cyan>========== TIMELINE DIAGNOSTICS ==========</color>");
-        
+
         CheckDirector();
         CheckTimelineAsset();
         CheckCinemachineBrain();
         CheckVirtualCameras();
         CheckTimelineBindings();
-        
+
         Debug.Log("<color=cyan>========== END DIAGNOSTICS ==========</color>");
     }
 
     private void CheckDirector()
     {
         Debug.Log("<color=yellow>--- PlayableDirector Check ---</color>");
-        
+
         if (director == null)
         {
             Debug.LogError("<color=red>❌ No PlayableDirector found!</color>");
@@ -71,7 +71,7 @@ public class TimelineDiagnostics : MonoBehaviour
     private void CheckTimelineAsset()
     {
         Debug.Log("<color=yellow>--- Timeline Asset Check ---</color>");
-        
+
         if (director == null || director.playableAsset == null)
         {
             Debug.LogError("<color=red>❌ No Timeline Asset assigned!</color>");
@@ -87,11 +87,11 @@ public class TimelineDiagnostics : MonoBehaviour
 
         Debug.Log($"<color=green>✓ Timeline Asset: {timeline.name}</color>");
         Debug.Log($"  Track Count: {timeline.outputTrackCount}");
-        
+
         foreach (var track in timeline.GetOutputTracks())
         {
             Debug.Log($"  • Track: {track.name} (Type: {track.GetType().Name})");
-            
+
             if (track is CinemachineTrack)
             {
                 Debug.Log($"    <color=cyan>Cinemachine Track detected!</color>");
@@ -102,7 +102,7 @@ public class TimelineDiagnostics : MonoBehaviour
     private void CheckCinemachineBrain()
     {
         Debug.Log("<color=yellow>--- Cinemachine Brain Check ---</color>");
-        
+
         CinemachineBrain brain = FindAnyObjectByType<CinemachineBrain>();
         if (brain == null)
         {
@@ -121,9 +121,9 @@ public class TimelineDiagnostics : MonoBehaviour
     private void CheckVirtualCameras()
     {
         Debug.Log("<color=yellow>--- Virtual Cameras Check ---</color>");
-        
+
         CinemachineVirtualCamera[] vcams = FindObjectsByType<CinemachineVirtualCamera>(FindObjectsSortMode.None);
-        
+
         if (vcams.Length == 0)
         {
             Debug.LogWarning("<color=orange>⚠️ No CinemachineVirtualCameras found in scene!</color>");
@@ -131,7 +131,7 @@ public class TimelineDiagnostics : MonoBehaviour
         }
 
         Debug.Log($"<color=green>✓ Found {vcams.Length} Virtual Camera(s):</color>");
-        
+
         foreach (var vcam in vcams)
         {
             Debug.Log($"  • {vcam.name}");
@@ -145,7 +145,7 @@ public class TimelineDiagnostics : MonoBehaviour
     private void CheckTimelineBindings()
     {
         Debug.Log("<color=yellow>--- Timeline Bindings Check ---</color>");
-        
+
         if (director == null || director.playableAsset == null)
         {
             Debug.LogError("<color=red>❌ Cannot check bindings - no director or asset!</color>");
@@ -158,7 +158,7 @@ public class TimelineDiagnostics : MonoBehaviour
         foreach (var track in timeline.GetOutputTracks())
         {
             var binding = director.GetGenericBinding(track);
-            
+
             if (binding != null)
             {
                 Debug.Log($"<color=green>✓ Track '{track.name}' bound to: {binding}</color>");

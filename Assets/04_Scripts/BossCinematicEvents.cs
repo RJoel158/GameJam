@@ -11,34 +11,34 @@ public class BossCinematicEvents : MonoBehaviour
     [Header("References")]
     [Tooltip("Reference to the Boss Spawner")]
     public BossSpawner bossSpawner;
-    
+
     [Tooltip("Reference to the boss GameObject")]
     public GameObject boss;
-    
+
     [Header("Camera Shake")]
     [Tooltip("Enable camera shake on boss roar")]
     public bool enableCameraShake = true;
-    
+
     [Tooltip("Shake intensity")]
     public float shakeIntensity = 0.5f;
-    
+
     [Tooltip("Shake duration")]
     public float shakeDuration = 0.3f;
 
     [Header("Effects")]
     [Tooltip("Particle effect to play when boss appears")]
     public ParticleSystem bossAppearEffect;
-    
+
     [Tooltip("Ground impact effect")]
     public ParticleSystem groundImpactEffect;
 
     [Header("Audio")]
     [Tooltip("Boss roar sound")]
     public AudioClip bossRoarSound;
-    
+
     [Tooltip("Ground impact sound")]
     public AudioClip groundImpactSound;
-    
+
     [Tooltip("Dramatic music")]
     public AudioClip dramaticMusic;
 
@@ -62,7 +62,7 @@ public class BossCinematicEvents : MonoBehaviour
     public void SpawnBoss()
     {
         Debug.Log("<color=yellow>[BossCinematicEvents] Spawning boss from Timeline event...</color>");
-        
+
         if (bossSpawner != null)
         {
             bossSpawner.SpawnBoss();
@@ -79,7 +79,7 @@ public class BossCinematicEvents : MonoBehaviour
     public void PlayBossAppearEffect()
     {
         Debug.Log("<color=yellow>[BossCinematicEvents] Playing boss appear effect...</color>");
-        
+
         if (bossAppearEffect != null)
         {
             bossAppearEffect.Play();
@@ -92,7 +92,7 @@ public class BossCinematicEvents : MonoBehaviour
     public void PlayGroundImpactEffect()
     {
         Debug.Log("<color=yellow>[BossCinematicEvents] Playing ground impact effect...</color>");
-        
+
         if (groundImpactEffect != null)
         {
             groundImpactEffect.Play();
@@ -116,7 +116,7 @@ public class BossCinematicEvents : MonoBehaviour
     public void PlayBossRoar()
     {
         Debug.Log("<color=yellow>[BossCinematicEvents] Playing boss roar...</color>");
-        
+
         if (bossRoarSound != null && audioSource != null)
         {
             audioSource.PlayOneShot(bossRoarSound);
@@ -139,7 +139,7 @@ public class BossCinematicEvents : MonoBehaviour
     public void PlayDramaticMusic()
     {
         Debug.Log("<color=yellow>[BossCinematicEvents] Playing dramatic music...</color>");
-        
+
         if (dramaticMusic != null && audioSource != null)
         {
             audioSource.clip = dramaticMusic;
@@ -165,7 +165,7 @@ public class BossCinematicEvents : MonoBehaviour
     public void ShowMessage(string message)
     {
         Debug.Log($"<color=cyan>[BossCinematicEvents] MESSAGE: {message}</color>");
-        
+
         // You can implement UI text display here
         // Example: Find a TextMeshProUGUI component and update its text
         var textUI = FindAnyObjectByType<TMPro.TextMeshProUGUI>();
@@ -188,7 +188,7 @@ public class BossCinematicEvents : MonoBehaviour
                 Vector3 direction = (player.transform.position - boss.transform.position).normalized;
                 direction.y = 0; // Keep on horizontal plane
                 boss.transform.rotation = Quaternion.LookRotation(direction);
-                
+
                 Debug.Log("<color=yellow>[BossCinematicEvents] Boss looking at player</color>");
             }
         }
@@ -217,7 +217,7 @@ public class BossCinematicEvents : MonoBehaviour
     public void EnableBossAI()
     {
         Debug.Log("<color=yellow>[BossCinematicEvents] Enabling boss AI...</color>");
-        
+
         if (boss != null)
         {
             // Enable enemy script or AI component
@@ -242,7 +242,7 @@ public class BossCinematicEvents : MonoBehaviour
     public void FreezeBoss()
     {
         Debug.Log("<color=yellow>[BossCinematicEvents] Freezing boss...</color>");
-        
+
         if (boss != null)
         {
             // Disable enemy script or AI component

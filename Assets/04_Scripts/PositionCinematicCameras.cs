@@ -17,7 +17,7 @@ public class PositionCinematicCameras : MonoBehaviour
     [Header("Camera Positioning")]
     [SerializeField] private float cameraDistance = 10f;
     [SerializeField] private float cameraHeight = 2f;
-    
+
     [Header("Auto-Find")]
     [SerializeField] private bool autoFind = true;
 

@@ -16,13 +16,14 @@ public class AutoConfigureTimeline : MonoBehaviour
     [Header("Auto-Configuration")]
     [SerializeField] private PlayableDirector director;
     [SerializeField] private float clipDuration = 3f;
-    
+
     [Header("Quick Setup")]
     [Tooltip("Click this button to automatically configure the Timeline")]
     [SerializeField] private bool executeSetup = false;
-    
+
     [Header("Camera Names")]
-    [SerializeField] private string[] cameraNames = new string[]
+    [SerializeField]
+    private string[] cameraNames = new string[]
     {
         "CM_BossIntro_Wide",
         "CM_BossIntro_CloseUp",

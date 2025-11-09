@@ -17,37 +17,37 @@ public class CinematicController : MonoBehaviour
     [Header("Camera Settings")]
     [Tooltip("Cinemachine brain (usually on Main Camera)")]
     public CinemachineBrain cinemachineBrain;
-    
+
     [Tooltip("Virtual cameras used in the cinematic")]
     public CinemachineVirtualCamera[] cinematicCameras;
-    
+
     [Tooltip("Player camera to disable during cinematic")]
     public CinemachineVirtualCamera playerCamera;
 
     [Header("Player Control Settings")]
     [Tooltip("Disable player input during cinematic")]
     public bool disablePlayerInput = true;
-    
+
     [Tooltip("Disable player movement during cinematic")]
     public bool disablePlayerMovement = true;
-    
+
     [Tooltip("Hide player during cinematic")]
     public bool hidePlayer = false;
 
     [Header("UI Settings")]
     [Tooltip("Canvas or UI elements to hide during cinematic")]
     public GameObject[] uiElementsToHide;
-    
+
     [Tooltip("Show cinematic bars (letterbox)")]
     public bool showLetterbox = true;
-    
+
     [Tooltip("Letterbox bars (top and bottom black bars)")]
     public GameObject letterboxBars;
 
     [Header("Audio Settings")]
     [Tooltip("Audio to play when cinematic starts")]
     public AudioClip cinematicMusic;
-    
+
     [Tooltip("Fade in duration for music")]
     public float musicFadeInDuration = 1f;
 
@@ -130,7 +130,7 @@ public class CinematicController : MonoBehaviour
         }
 
         Debug.Log("<color=magenta>[CinematicController] Starting cinematic...</color>");
-        
+
         // Prepare for cinematic
         PrepareForCinematic();
 
@@ -321,7 +321,7 @@ public class CinematicController : MonoBehaviour
     }
 
     #region Timeline Callbacks
-    
+
     private void OnTimelinePlayed(PlayableDirector director)
     {
         Debug.Log("<color=magenta>[CinematicController] Timeline started playing</color>");

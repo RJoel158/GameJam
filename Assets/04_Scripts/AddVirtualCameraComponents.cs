@@ -31,10 +31,10 @@ public class AddVirtualCameraComponents : MonoBehaviour
             }
 
             GameObject camObj = camTransform.gameObject;
-            
+
             // Verificar si ya tiene el componente
             CinemachineVirtualCamera vcam = camObj.GetComponent<CinemachineVirtualCamera>();
-            
+
             if (vcam == null)
             {
                 // Agregar el componente
@@ -49,7 +49,7 @@ public class AddVirtualCameraComponents : MonoBehaviour
             // Configurar la cámara
             vcam.Priority = 10;
             vcam.m_Lens.FieldOfView = fovValues[i];
-            
+
             // Asegurar que esté activa
             camObj.SetActive(true);
 
@@ -66,7 +66,7 @@ public class AddVirtualCameraComponents : MonoBehaviour
                 brain = mainCam.gameObject.AddComponent<CinemachineBrain>();
                 Debug.Log("<color=green>[Camera Fix] ✅ Cinemachine Brain agregado a Main Camera</color>");
             }
-            
+
             brain.m_UpdateMethod = CinemachineBrain.UpdateMethod.SmartUpdate;
             brain.m_ShowDebugText = true; // Para ver qué cámara está activa
             brain.enabled = true;
@@ -99,7 +99,7 @@ public class AddVirtualCameraComponents : MonoBehaviour
         }
 
         CinemachineVirtualCamera[] vcams = camerasParent.GetComponentsInChildren<CinemachineVirtualCamera>();
-        
+
         if (vcams.Length == 0)
         {
             Debug.LogError("<color=red>❌ NO HAY componentes CinemachineVirtualCamera!</color>");

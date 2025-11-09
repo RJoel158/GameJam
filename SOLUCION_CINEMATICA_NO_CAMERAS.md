@@ -1,6 +1,7 @@
 # 🎬 SOLUCIÓN: "No cameras rendering" en Cinemática
 
 ## 🔴 PROBLEMA
+
 La cinemática se dispara pero aparece "Display 1 - No cameras rendering"
 
 ---
@@ -11,6 +12,7 @@ La cinemática se dispara pero aparece "Display 1 - No cameras rendering"
 
 1. **Selecciona tu Main Camera** en la Hierarchy
 2. **Verifica que tiene el componente `Cinemachine Brain`**:
+
    - Si NO lo tiene:
      - Click en **Add Component**
      - Busca: **Cinemachine Brain**
@@ -28,20 +30,22 @@ La cinemática se dispara pero aparece "Display 1 - No cameras rendering"
 1. **Selecciona** `BossCinematicTimeline` en la Hierarchy
 
 2. **Abre la ventana de Timeline**:
+
    - Window > Sequencing > Timeline
 
 3. **Busca el track "Cinemachine Track"** (debería estar vacío)
 
 4. **Arrastra las cámaras al track**:
+
    - En la Hierarchy, expande `BossCinematicCameras`
    - Verás las 4 cámaras virtuales
    - **ARRASTRA** cada una al Cinemachine Track en diferentes tiempos:
-   
+
    ```
    Timeline:
    [Cinemachine Track]
    ├─ 0s - 3s:   CM_BossIntro_Wide
-   ├─ 3s - 5s:   CM_BossIntro_CloseUp  
+   ├─ 3s - 5s:   CM_BossIntro_CloseUp
    ├─ 5s - 7s:   CM_BossIntro_Dramatic
    └─ 7s - 9s:   CM_BossIntro_PlayerReaction
    ```
@@ -60,17 +64,20 @@ La cinemática se dispara pero aparece "Display 1 - No cameras rendering"
 Para cada cámara en `BossCinematicCameras`:
 
 1. **CM_BossIntro_Wide**:
+
    - Priority: **10** (cuando esté activa en Timeline)
    - Body: **Transposer** o **Do Nothing**
    - Aim: **Composer** o **Do Nothing**
    - FOV: **60**
 
 2. **CM_BossIntro_CloseUp**:
+
    - Priority: **10**
    - Posiciónala cerca del boss spawn point
    - FOV: **45**
 
 3. **CM_BossIntro_Dramatic**:
+
    - Priority: **10**
    - Ángulo bajo mirando hacia arriba
    - FOV: **55**
@@ -95,12 +102,14 @@ Para cada cámara en `BossCinematicCameras`:
 ## 🧪 TESTING
 
 ### Test 1: Timeline solo (sin jugar)
+
 1. Selecciona `BossCinematicTimeline`
 2. Window > Sequencing > Timeline
 3. Click **Play ▶️** en la ventana de Timeline
 4. Deberías ver las cámaras cambiar en la Scene view
 
 ### Test 2: En runtime
+
 1. Asegúrate de que la Main Camera tenga Cinemachine Brain
 2. Play en Unity
 3. Completa la misión
@@ -138,16 +147,19 @@ BossCinematicTimeline
 ## ⚠️ ERRORES COMUNES
 
 ### "No cameras rendering"
+
 - ❌ Main Camera no tiene Cinemachine Brain
 - ❌ El Timeline no tiene cámaras en el Cinemachine Track
 - ❌ Las Virtual Cameras no existen o están desactivadas
 
 ### "Las cámaras no cambian"
+
 - ❌ Las cámaras no están en el Timeline
 - ❌ El Playable Director no tiene el asset asignado
 - ❌ Play On Awake está activado (debería estar desactivado)
 
 ### "Pantalla negra"
+
 - ❌ Las cámaras están mirando al vacío
 - ❌ Necesitas posicionar mejor las cámaras
 

@@ -11,29 +11,33 @@ Este método crea solo lo básico: el boss aparece después de la misión, **sin
 ### Pasos:
 
 1. **En Unity**, crea un GameObject vacío en la escena:
+
    - Right-click en Hierarchy > Create Empty
    - Nómbralo: `SetupHelper`
 
 2. **Agrega el script** `QuickBossCinematicSetup.cs`:
+
    - Selecciona `SetupHelper`
    - Add Component > Quick Boss Cinematic Setup
 
 3. **Configura en el Inspector**:
+
    - `Boss Prefab`: Arrastra tu prefab del boss
    - `Boss Spawn Position`: Ajusta la posición donde aparecerá (ej: 0, 0, 50)
    - (Opcional) Agrega AudioClips si los tienes
 
 4. **Click derecho en el script** en el Inspector:
    - Selecciona: **🚀 SETUP COMPLETO (1 CLICK)**
-   
 5. **¡LISTO!** 🎉
 
 ### Resultado:
+
 - ✅ Boss aparece cuando completes la misión
 - ✅ Se spawns en la posición que definiste
 - ⏭️ Sin cinemática (puedes agregar después con el Método 2)
 
 ### Comandos Útiles (click derecho en el script):
+
 - **🧪 TEST: Forzar Spawn del Boss** - Testear sin completar misión
 - **ℹ️ Mostrar Info del Setup** - Ver estado de la configuración
 - **🗑️ Limpiar Setup** - Borrar todo y empezar de nuevo
@@ -47,11 +51,13 @@ Este método crea **TODO**: Timeline, cámaras Cinemachine, UI, eventos, etc.
 ### Pasos:
 
 1. **En Unity**, ve al menú:
+
    ```
    Tools > Boss Cinematic Setup Wizard
    ```
 
 2. **Se abrirá una ventana**. Configura:
+
    - **Boss Prefab**: Arrastra tu boss prefab
    - **Boss Spawn Position**: Posición donde aparecerá
    - **Player GameObject**: Se detecta automáticamente (o arrástralo)
@@ -59,11 +65,13 @@ Este método crea **TODO**: Timeline, cámaras Cinemachine, UI, eventos, etc.
    - ✅ Todas las casillas marcadas
 
 3. **Audio Opcional**:
+
    - Boss Roar Sound
-   - Ground Impact Sound  
+   - Ground Impact Sound
    - Dramatic Music
 
 4. **Click en el botón verde**:
+
    ```
    🚀 CREAR SETUP COMPLETO
    ```
@@ -81,6 +89,7 @@ Este método crea **TODO**: Timeline, cámaras Cinemachine, UI, eventos, etc.
 2. Abre **Window > Sequencing > Timeline**
 3. Verás el timeline vacío con las pistas creadas
 4. **Arrastra las cámaras** al track "Cinemachine Track":
+
    - Busca en Hierarchy: `BossCinematicCameras`
    - Arrastra cada cámara al timeline en diferentes tiempos:
      ```
@@ -101,12 +110,14 @@ Este método crea **TODO**: Timeline, cámaras Cinemachine, UI, eventos, etc.
 ## 🔀 ¿CUÁL MÉTODO USAR?
 
 ### Usa **MÉTODO 1** si:
+
 - ✅ Quieres probar rápido
 - ✅ No necesitas cinemática aún
 - ✅ Quieres configurar manualmente después
 - ✅ Eres principiante con Unity Timeline
 
 ### Usa **MÉTODO 2** si:
+
 - ✅ Quieres la cinemática épica completa
 - ✅ Ya conoces Unity Timeline
 - ✅ Quieres todo configurado de una vez
@@ -119,10 +130,12 @@ Este método crea **TODO**: Timeline, cámaras Cinemachine, UI, eventos, etc.
 ### Probar sin completar la misión:
 
 **Método 1:**
+
 1. Click derecho en `QuickBossCinematicSetup` script
 2. Selecciona: **🧪 TEST: Forzar Spawn del Boss**
 
 **Método 2:**
+
 1. Encuentra `BossSpawner` en Hierarchy
 2. En el Inspector, click derecho en `BossSpawner` script
 3. Selecciona: **Force Spawn Boss**
@@ -139,22 +152,27 @@ Este método crea **TODO**: Timeline, cámaras Cinemachine, UI, eventos, etc.
 ## 🐛 SOLUCIÓN DE PROBLEMAS
 
 ### "Boss Prefab no asignado"
+
 - Asegúrate de arrastrar el prefab del boss en el campo correspondiente
 
 ### "MissionManager no encontrado"
+
 - Verifica que tengas el MissionManager en tu escena
 - El BossSpawner se conectará automáticamente cuando esté presente
 
 ### "El boss no aparece al completar la misión"
+
 - Abre la Console (Ctrl+Shift+C) y busca logs
 - Verifica que el MissionManager esté en la escena
 - Usa "Mostrar Info del Setup" para ver el estado
 
 ### "Las cámaras no cambian"
+
 - Verifica que la Main Camera tenga un Cinemachine Brain
 - Asegúrate de que las cámaras estén en el Cinemachine Track del Timeline
 
 ### "Quiero empezar de nuevo"
+
 - **Método 1**: Click derecho > **🗑️ Limpiar Setup**
 - **Método 2**: En el Wizard, click en **🗑️ Remove All Boss Cinematic Objects**
 
@@ -162,27 +180,29 @@ Este método crea **TODO**: Timeline, cámaras Cinemachine, UI, eventos, etc.
 
 ## 📊 COMPARACIÓN DE MÉTODOS
 
-| Característica | Método 1 (Rápido) | Método 2 (Completo) |
-|----------------|-------------------|---------------------|
-| Boss Spawn | ✅ | ✅ |
-| Cinemática | ❌ | ✅ |
-| Cámaras Cinemachine | ❌ | ✅ (4 cámaras) |
-| Timeline | ❌ | ✅ |
-| Letterbox UI | ❌ | ✅ |
-| Signals | ❌ | ✅ |
-| Tiempo de setup | 30 segundos | 5 minutos |
-| Configuración manual | Poca | Media |
+| Característica       | Método 1 (Rápido) | Método 2 (Completo) |
+| -------------------- | ----------------- | ------------------- |
+| Boss Spawn           | ✅                | ✅                  |
+| Cinemática           | ❌                | ✅                  |
+| Cámaras Cinemachine  | ❌                | ✅ (4 cámaras)      |
+| Timeline             | ❌                | ✅                  |
+| Letterbox UI         | ❌                | ✅                  |
+| Signals              | ❌                | ✅                  |
+| Tiempo de setup      | 30 segundos       | 5 minutos           |
+| Configuración manual | Poca              | Media               |
 
 ---
 
 ## 🎓 PASOS SIGUIENTES
 
 ### Después del Método 1:
+
 1. Completa una misión para ver al boss aparecer
 2. Si te gusta, agrega cinemática con Método 2
 3. Ajusta la posición del spawn point si es necesario
 
 ### Después del Método 2:
+
 1. Ajusta los tiempos de las cámaras en el Timeline
 2. Agrega efectos de partículas al `BossCinematicEvents`
 3. Conecta los Signal Emitters a los métodos
@@ -193,13 +213,16 @@ Este método crea **TODO**: Timeline, cámaras Cinemachine, UI, eventos, etc.
 
 ## 💡 TIPS PRO
 
-1. **Visualización del Spawn Point**: 
+1. **Visualización del Spawn Point**:
+
    - Con el `QuickBossCinematicSetup` en la escena, verás una esfera roja en Scene view mostrando dónde aparecerá el boss
 
 2. **Testing Rápido**:
+
    - Usa los comandos de Context Menu (click derecho) para testear sin jugar la escena completa
 
 3. **Combinar Métodos**:
+
    - Puedes empezar con Método 1 y luego ejecutar Método 2 para agregar la cinemática
 
 4. **Backup**:
@@ -210,10 +233,12 @@ Este método crea **TODO**: Timeline, cámaras Cinemachine, UI, eventos, etc.
 ## 📝 ARCHIVOS CREADOS
 
 ### Método 1:
+
 - `BossSpawner` GameObject en la escena
 - `BossSpawnPoint` como hijo del spawner
 
 ### Método 2:
+
 - `BossSpawner` GameObject
 - `BossCinematicTimeline` GameObject con PlayableDirector
 - `BossCinematicCameras` con 4 cámaras virtuales

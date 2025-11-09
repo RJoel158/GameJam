@@ -12,7 +12,7 @@ public class UnscaledAudioSource : MonoBehaviour
     private void Awake()
     {
         audioSource = GetComponent<AudioSource>();
-        
+
         // Asegurar que el audio ignore timeScale
         if (audioSource != null)
         {
