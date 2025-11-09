@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 847426018d1160349a2384c3d450f124, type: 3}
+  m_Name: SaveProfile_Default
+  m_EditorClassIdentifier: 
+  playerPosition: {x: 52.059616, y: -90.047005, z: 424.69437}
+  sceneName: OpenWorldSceneMerged
+  hasSave: 1
+  health: 2000
+  maxHealth: 2000
+  force: 100
+  maxForce: 2000

@@ -1,4 +1,5 @@
-﻿ using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.UI;
 #if ENABLE_INPUT_SYSTEM 
 using UnityEngine.InputSystem;
 #endif
@@ -9,9 +10,9 @@ using UnityEngine.InputSystem;
 namespace StarterAssets
 {
     [RequireComponent(typeof(CharacterController))]
-
+#if ENABLE_INPUT_SYSTEM
     [RequireComponent(typeof(PlayerInput))]
-
+#endif
     public class ThirdPersonController : MonoBehaviour
     {
         [Header("Player")]
@@ -26,6 +27,36 @@ namespace StarterAssets
         [Range(0, 1)] public float FootstepAudioVolume = 0.5f;
 
         [Space(10)]
+        public AudioClip DrawSwordSound;
+        public float DrawSwordVolume = 1f;
+        
+        [Header("Draw & Sheath Sounds")]
+        public AudioClip DrawSound;
+        [Range(0f, 1f)]
+        public float DrawSoundVolume = 1f;
+        public AudioClip SheathSound;
+        [Range(0f, 1f)]
+        public float SheathSoundVolume = 1f;
+
+        [Header("Ambient Sound")]
+        public AudioClip AmbientSound;
+        [Range(0f, 1f)]
+        public float AmbientSoundVolume = 0.3f;
+        private AudioSource ambientAudioSource;
+
+       [Header("F Key Sound")]
+[Tooltip("Array de clips de audio para reproducir")]
+public AudioClip[] FSoundClips;
+[Range(0f, 1f)]
+public float FSoundVolume = 1f;
+
+[Tooltip("Modo de selección: 0=Random, 1=Sequential, 2=RandomNoRepeat")]
+public int soundPlayMode = 0; // 0: Random, 1: Sequential, 2: RandomNoRepeat
+
+private int currentSoundIndex = 0;
+private int lastPlayedSoundIndex = -1;
+
+        [Space(10)]
         public float JumpHeight = 1.2f;
         public float Gravity = -15.0f;
 
@@ -38,6 +69,7 @@ namespace StarterAssets
         public float healthPercent = 100f;
         public int health = 1000;
         public int maxHealth = 2000;
+        public bool death = false;
         public bool dead = false;
         public bool inHitAnimation = false;
 
@@ -46,12 +78,6 @@ namespace StarterAssets
         public float hardModeTime = 30f;
         public float hardModeTimer = 0f;
         public bool inHardModeAnimation = false;
-
-        [Space(10)]
-        [Range(0f, 100f)]
-        public float staminaPercent = 100f;
-        public int stamina = 100;
-        public int maxStamina = 2000;
 
         [Space(10)]
         [Range(0f, 100f)]
@@ -68,6 +94,11 @@ namespace StarterAssets
         [Header("Equipment")]
         public bool isEquipping;
         public bool isEquipped;
+        private bool drawSoundPlayed = false;  // Prevenir múltiples sonidos de Draw
+        private bool sheathSoundPlayed = false;  // Prevenir múltiples sonidos de Sheath
+        private float drawSoundCooldown = 0f;  // Cooldown para Draw
+        private float sheathSoundCooldown = 0f;  // Cooldown para Sheath
+        private const float SOUND_COOLDOWN_DURATION = 5f;  // 1 segundo de cooldown
 
         [Header("Attack")]
         public bool isAttacking;
@@ -137,12 +168,15 @@ namespace StarterAssets
         private int _animIDHardMode;
         private int _animIDForce;
 
+#if ENABLE_INPUT_SYSTEM
         private PlayerInput _playerInput;
+#endif
 
         public Animator _animator;
         private CharacterController _controller;
-        private StarterAssetsInputs _input;
+        public StarterAssetsInputs _input;
         private GameObject _mainCamera;
+        private AudioSource audioSource;
 
         private const float _threshold = 0.01f;
 
@@ -152,17 +186,23 @@ namespace StarterAssets
         {
             get
             {
+#if ENABLE_INPUT_SYSTEM
                 return _playerInput.currentControlScheme == "KeyboardMouse";
+#else
+                return true;
+#endif
             }
         }
 
         // PlayerControllerParameters
         private PlayerController playerController;
+        private FaseColorController faseColorController;
 
         private void Awake()
         {
             playerController = GetComponent<PlayerController>();
-            
+            faseColorController = FindFirstObjectByType<FaseColorController>();
+
             // get a reference to our main camera
             if (_mainCamera == null)
             {
@@ -173,11 +213,30 @@ namespace StarterAssets
         private void Start()
         {
             _cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
-            
+
             _hasAnimator = TryGetComponent(out _animator);
             _controller = GetComponent<CharacterController>();
             _input = GetComponent<StarterAssetsInputs>();
+            audioSource = GetComponent<AudioSource>();
+            
+            // Si no hay AudioSource, crear uno automáticamente
+            if (audioSource == null)
+            {
+                audioSource = gameObject.AddComponent<AudioSource>();
+                Debug.Log("[AUDIO] AudioSource creado automáticamente en el jugador");
+            }
+            
+            // Crear un segundo AudioSource para el sonido ambiental
+            ambientAudioSource = gameObject.AddComponent<AudioSource>();
+            ambientAudioSource.loop = true; // Loop infinito
+            ambientAudioSource.spatialBlend = 0f; // 2D, no 3D
+            
+            // Iniciar el sonido ambiental
+            StartAmbientSound();
+            
+#if ENABLE_INPUT_SYSTEM
             _playerInput = GetComponent<PlayerInput>();
+#endif
 
             AssignAnimationIDs();
 
@@ -189,6 +248,12 @@ namespace StarterAssets
         private void Update()
         {
             _hasAnimator = TryGetComponent(out _animator);
+
+            // Actualizar cooldowns de sonido
+            if (drawSoundCooldown > 0f)
+                drawSoundCooldown -= Time.deltaTime;
+            if (sheathSoundCooldown > 0f)
+                sheathSoundCooldown -= Time.deltaTime;
 
             Attack();
             DrawSheathSword();
@@ -265,21 +330,29 @@ namespace StarterAssets
                 _cinemachineTargetYaw, 0.0f);
         }
 
-        private void Move()
+    private void Move()
+    {
+        // Prevenir movimiento si está muerto, bloqueando o en animación de hard mode
+        if (dead || death || isBlocking || inHardModeAnimation)
         {
-            if (dead || isBlocking || inHardModeAnimation)
-            {
-                return;
-            }
-
-            // ELIMINAR, RESTRINGE EL MOVIMIENTO EN LA EQUIPACION Y BLOQUEO
+            return;
+        }            // ELIMINAR, RESTRINGE EL MOVIMIENTO EN LA EQUIPACION Y BLOQUEO
             //if (playerController.isEquipping || playerController.isBlocking)
             //{
             //    return;
             //}
-            
+
             // set target speed based on move speed, sprint speed and if sprint is pressed
-            float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
+            // NO permite correr si el stamina está en 0
+            bool canSprint = (faseColorController != null) ? faseColorController.CanSprint() : true;
+            
+            // Si stamina llegó a 0, fuerza cancelar sprint
+            if (!canSprint)
+            {
+                _input.sprint = false;
+            }
+            
+            float targetSpeed = (_input.sprint && canSprint) ? SprintSpeed : MoveSpeed;
 
             // a simplistic acceleration and deceleration designed to be easy to remove, replace, or iterate upon
 
@@ -416,34 +489,62 @@ namespace StarterAssets
             }
         }
 
-        private void HandleStadistics()
+    private void HandleStadistics()
+    {
+        // Actualizar animator con estados de muerte y golpe
+        _animator.SetBool(_animIDDeath, dead || death);
+        _animator.SetBool(_animIDHitting, inHitAnimation);
+        // _animator.SetInteger(_animIDStamina, (int)staminaPercent);  // Comentado hasta que se agregue stamina
+        _animator.SetInteger(_animIDForce, (int)forcePercent);
+
+        healthPercent = (health * 100) / maxHealth;
+
+        forcePercent = (force * 100) / maxForce;
+
+        if (hardModeEnabled)
         {
-            _animator.SetBool(_animIDDeath, dead);
-            _animator.SetBool(_animIDHitting, inHitAnimation);
-            _animator.SetInteger(_animIDStamina, (int)staminaPercent);
-            _animator.SetInteger(_animIDForce, (int)forcePercent);
+            // stamina = maxStamina;  // Comentado hasta que se agregue stamina
+            health = maxHealth;
+        }
 
-            healthPercent = (health * 100) / maxHealth;
+        // Si la estamina no esta completa, esta en animacion de bloqueo o ataque, no esta corriendo y no esta en el aire no incrementa
+        // NOTA: Código de stamina comentado hasta que se agreguen las variables necesarias
+        /*
+        if (staminaPercent != 100 && !isBlocking && !inAttackAnimation && Grounded && _animationBlend <= MoveSpeed && canBlock)
+        {
+            // Incrementar la estamina durante el tiempo
+            stamina += 1;
+        }
+        else if (isBlocking && stamina > 0)
+        {
+            stamina -= 1;
 
-            staminaPercent = (stamina * 100) / maxStamina;
-
-            forcePercent = (force * 100) / maxForce;
-
-            if (hardModeEnabled)
+            if (stamina <= 0)
             {
-                stamina = maxStamina;
-                health = maxHealth;
+                stamina = 0;
+                _animator.SetBool(_animIDBlock, false);
+                isBlocking = false;
+                canBlock = false;
             }
+        }
+        */
+    }
 
-            // Si la estamina no esta completa, esta en animacion de bloqueo o ataque, no esta corriendo y no esta en el aire no incrementa
-            if (staminaPercent != 100 && !isBlocking && !inAttackAnimation && Grounded && _animationBlend <= MoveSpeed && canBlock)
+    public void TakeDamage(int damageAmount)
+    {
+        if (!dead && !death && !isBlocking)
+        {
+            health -= damageAmount;
+            _animator.SetTrigger(_animIDDamage);
+            //CameraShake.Instance.ShakeCamera(2f, 0.2f);
+        }
+        else if (!dead && !death && isBlocking)
+        {
+            // NOTA: Código de stamina comentado hasta que se agreguen las variables necesarias
+            /*
+            if (stamina > 0)
             {
-                // Incrementar la estamina durante el tiempo
-                stamina += 1;
-            }
-            else if (isBlocking && stamina > 0)
-            {
-                stamina -= 1;
+                stamina -= maxHealth / 2;
 
                 if (stamina <= 0)
                 {
@@ -453,40 +554,18 @@ namespace StarterAssets
                     canBlock = false;
                 }
             }
+            */
+
+            _animator.SetTrigger(_animIDBlocked);
         }
 
-        public void TakeDamage(int damageAmount)
+        if (health <= 0)
         {
-            if (!dead && !isBlocking)
-            {
-                health -= damageAmount;
-                _animator.SetTrigger(_animIDDamage);
-                //CameraShake.Instance.ShakeCamera(2f, 0.2f);
-            }
-            else if (!dead && isBlocking)
-            {
-                if (stamina > 0)
-                {
-                    stamina -= maxHealth / 2;
-
-                    if (stamina <= 0)
-                    {
-                        stamina = 0;
-                        _animator.SetBool(_animIDBlock, false);
-                        isBlocking = false;
-                        canBlock = false;
-                    }
-                }
-
-                _animator.SetTrigger(_animIDBlocked);
-            }
-
-            if (health <= 0)
-            {
-                dead = true;
-                Die();
-            }
+            death = true;
+            dead = true;
+            Die();
         }
+    }
 
         void Die()
         {
@@ -499,8 +578,8 @@ namespace StarterAssets
         {
             if (Grounded)
             {
-                // Draw
-                if (_input.draw && !isEquipped)
+                // Draw (Tecla 1 - Sacar espada)
+                if (_input.draw && !isEquipped && drawSoundCooldown <= 0f)
                 {
                     // update animator if using character
                     if (_hasAnimator)
@@ -508,9 +587,13 @@ namespace StarterAssets
                         _animator.SetTrigger(_animIDDrawSword);
                         _animator.SetBool(_animIDEquipped, true);
                         _input.draw = false;
+                        
+                        // Reproducir sonido personalizado de Draw (tecla 1)
+                        PlayDrawSound();
+                        drawSoundCooldown = SOUND_COOLDOWN_DURATION;  // Iniciar cooldown
                     }
                 }
-                else if (_input.draw && isEquipped)
+                else if (_input.draw && isEquipped && sheathSoundCooldown <= 0f)
                 {
                     // update animator if using character
                     if (_hasAnimator)
@@ -518,34 +601,258 @@ namespace StarterAssets
                         _animator.SetTrigger(_animIDSheathSword);
                         _animator.SetBool(_animIDEquipped, false);
                         _input.draw = false;
+                        
+                        // Reproducir sonido personalizado de Sheath (guardar)
+                        PlaySheathSound();
+                        sheathSoundCooldown = SOUND_COOLDOWN_DURATION;  // Iniciar cooldown
                     }
                 }
+            }
+        }
+
+        private void HandleFKeySound()
+{
+    // Click izquierdo del mouse solo si tiene la espada equipada
+    if (Input.GetMouseButtonDown(0) && isEquipped)
+    {
+        PlayFSound();
+    }
+}
+
+        private void PlayDrawSound()
+        {
+            // Intentar obtener o crear AudioSource
+            if (audioSource == null)
+            {
+                audioSource = GetComponent<AudioSource>();
+                if (audioSource == null)
+                {
+                    audioSource = gameObject.AddComponent<AudioSource>();
+                    Debug.Log("[DRAW SOUND] AudioSource creado en tiempo de ejecución");
+                }
+            }
+
+            if (audioSource != null)
+            {
+                if (DrawSound != null)
+                {
+                    audioSource.PlayOneShot(DrawSound, Mathf.Clamp01(DrawSoundVolume));
+                    Debug.Log($"[DRAW SOUND] ✓ Reproduciendo Draw Sound con volumen {DrawSoundVolume}");
+                }
+                else if (DrawSwordSound != null)
+                {
+                    audioSource.PlayOneShot(DrawSwordSound, DrawSwordVolume);
+                    Debug.Log($"[DRAW SOUND] ✓ Reproduciendo DrawSwordSound (fallback) con volumen {DrawSwordVolume}");
+                }
+                else
+                {
+                    Debug.LogWarning("[DRAW SOUND] ❌ No hay sonido asignado para Draw");
+                }
+            }
+            else
+            {
+                Debug.LogError("[DRAW SOUND] ❌ No se pudo crear AudioSource");
+            }
+        }
+
+        private void PlaySheathSound()
+        {
+            // Intentar obtener o crear AudioSource
+            if (audioSource == null)
+            {
+                audioSource = GetComponent<AudioSource>();
+                if (audioSource == null)
+                {
+                    audioSource = gameObject.AddComponent<AudioSource>();
+                    Debug.Log("[SHEATH SOUND] AudioSource creado en tiempo de ejecución");
+                }
+            }
+
+            if (audioSource != null)
+            {
+                if (SheathSound != null)
+                {
+                    audioSource.PlayOneShot(SheathSound, Mathf.Clamp01(SheathSoundVolume));
+                    Debug.Log($"[SHEATH SOUND] ✓ Reproduciendo Sheath Sound con volumen {SheathSoundVolume}");
+                }
+                else if (DrawSwordSound != null)
+                {
+                    audioSource.PlayOneShot(DrawSwordSound, DrawSwordVolume);
+                    Debug.Log($"[SHEATH SOUND] ✓ Reproduciendo DrawSwordSound (fallback) con volumen {DrawSwordVolume}");
+                }
+                else
+                {
+                    Debug.LogWarning("[SHEATH SOUND] ❌ No hay sonido asignado para Sheath");
+                }
+            }
+            else
+            {
+                Debug.LogError("[SHEATH SOUND] ❌ No se pudo crear AudioSource");
+            }
+        }
+
+        private void PlayFSound()
+{
+    // Intentar obtener o crear AudioSource
+    if (audioSource == null)
+    {
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+            Debug.Log("[F SOUND] AudioSource creado en tiempo de ejecución");
+        }
+    }
+
+    // Verificar que hay sonidos en el array
+    if (FSoundClips == null || FSoundClips.Length == 0)
+    {
+        Debug.LogWarning("[F SOUND] ❌ No hay sonidos asignados en el array");
+        return;
+    }
+
+    // Seleccionar el índice según el modo
+    int selectedIndex = SelectSoundIndex();
+
+    // Verificar que el clip no es nulo
+    if (FSoundClips[selectedIndex] != null)
+    {
+        audioSource.PlayOneShot(FSoundClips[selectedIndex], Mathf.Clamp01(FSoundVolume));
+        Debug.Log($"[F SOUND] ✓ Reproduciendo sonido {selectedIndex + 1}/{FSoundClips.Length} - Modo: {soundPlayMode}");
+    }
+    else
+    {
+        Debug.LogWarning($"[F SOUND] ❌ El clip en índice {selectedIndex} es nulo");
+    }
+}
+
+private int SelectSoundIndex()
+{
+    switch (soundPlayMode)
+    {
+        case 0: // Random
+            return Random.Range(0, FSoundClips.Length);
+
+        case 1: // Sequential
+            int seqIndex = currentSoundIndex;
+            currentSoundIndex = (currentSoundIndex + 1) % FSoundClips.Length;
+            return seqIndex;
+
+        case 2: // RandomNoRepeat
+            if (FSoundClips.Length == 1)
+                return 0;
+            
+            int randomIndex;
+            do
+            {
+                randomIndex = Random.Range(0, FSoundClips.Length);
+            }
+            while (randomIndex == lastPlayedSoundIndex);
+            
+            lastPlayedSoundIndex = randomIndex;
+            return randomIndex;
+
+        default:
+            return 0;
+    }
+}
+
+        private void StartAmbientSound()
+        {
+            if (ambientAudioSource == null)
+            {
+                ambientAudioSource = gameObject.AddComponent<AudioSource>();
+                ambientAudioSource.loop = true;
+                ambientAudioSource.spatialBlend = 0f;
+                Debug.Log("[AMBIENT] AudioSource para sonido ambiental creado");
+            }
+
+            if (ambientAudioSource != null && AmbientSound != null)
+            {
+                ambientAudioSource.clip = AmbientSound;
+                ambientAudioSource.volume = Mathf.Clamp01(AmbientSoundVolume);
+                ambientAudioSource.Play();
+                Debug.Log($"[AMBIENT] ✓ Sonido ambiental iniciado con volumen {AmbientSoundVolume}");
+            }
+            else if (AmbientSound == null)
+            {
+                Debug.LogWarning("[AMBIENT] ⚠️ No hay sonido ambiental asignado. Asigna un clip en el Inspector.");
+            }
+            else
+            {
+                Debug.LogError("[AMBIENT] ❌ No se pudo crear AudioSource para sonido ambiental");
+            }
+        }
+
+        public void StopAmbientSound()
+        {
+            if (ambientAudioSource != null && ambientAudioSource.isPlaying)
+            {
+                ambientAudioSource.Stop();
+                Debug.Log("[AMBIENT] Sonido ambiental detenido");
+            }
+        }
+
+        public void PauseAmbientSound()
+        {
+            if (ambientAudioSource != null && ambientAudioSource.isPlaying)
+            {
+                ambientAudioSource.Pause();
+                Debug.Log("[AMBIENT] Sonido ambiental pausado");
+            }
+        }
+
+        public void ResumeAmbientSound()
+        {
+            if (ambientAudioSource != null && !ambientAudioSource.isPlaying)
+            {
+                ambientAudioSource.Play();
+                Debug.Log("[AMBIENT] Sonido ambiental reanudado");
             }
         }
 
         private void Attack()
-        {
-            _animator.SetBool(_animIDAttacking, inAttackAnimation);
+{
+    _animator.SetBool(_animIDAttacking, inAttackAnimation);
 
-            if (Grounded)
+    if (Grounded)
+    {
+        // NO permite atacar si stamina es 0 o no hay suficiente o está siendo golpeado
+        if (_input.attack && isEquipped && !isAttacking && !inHitAnimation)
+        {
+            // update animator if using character
+            if (_hasAnimator)
             {
-                // Attack
-                if (_input.attack && isEquipped && !isAttacking && !inHitAnimation)
+                // Intentar consumir stamina para atacar (si existe FaseColorController)
+                bool canAttack = true;
+                if (faseColorController != null)
                 {
-                    // update animator if using character
-                    if (_hasAnimator)
-                    {
-                        _animator.SetTrigger(_animIDAttack);
-                        _animator.SetFloat(_animIDSpeed, 0);
-                        _input.attack = false;
-                    }
+                    canAttack = faseColorController.TryConsumeStaminaForAttack();
+                }
+                
+                if (canAttack)
+                {
+                    _animator.SetTrigger(_animIDAttack);
+                    _animator.SetFloat(_animIDSpeed, 0);
+                    _input.attack = false;
+                    
+                    // ✅ REPRODUCIR SONIDO AL ATACAR
+                    PlayFSound();
+                }
+                else
+                {
+                    // No hay stamina suficiente - cancelar ataque
+                    _input.attack = false;
                 }
             }
         }
+    }
+}
 
         private void HandleBlock()
         {
-            if (Grounded && !isAttacking && !isEquipping && _animationBlend <= 0.01f && staminaPercent > 10)
+            // NOTA: Temporalmente removido el check de staminaPercent hasta que se agregue la variable
+            if (Grounded && !isAttacking && !isEquipping && _animationBlend <= 0.01f) // && staminaPercent > 10
             {
                 if (_input.block && !isBlocking)
                 {
