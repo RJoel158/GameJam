@@ -66,6 +66,11 @@ public class BossSpawner : MonoBehaviour
     // Referencia a la UI del boss
     private BossHealthBarUI bossUI;
 
+    // Estados guardados del jugador antes de la cinemática
+    private bool playerWasEquipped = false;
+    private bool playerWasBlocking = false;
+    private PlayerController savedPlayerController = null;
+
     private void Awake()
     {
         audioSource = GetComponent<AudioSource>();
@@ -488,16 +493,50 @@ public class BossSpawner : MonoBehaviour
         var playerCtrl = FindAnyObjectByType<PlayerController>();
         if (playerCtrl != null)
         {
+            // GUARDAR el estado del equipamiento del PlayerController
+            savedPlayerController = playerCtrl;
+            playerWasEquipped = playerCtrl.isEquipped;
+            playerWasBlocking = playerCtrl.isBlocking;
+
+            Debug.Log($"<color=cyan>[BossSpawner] Saved PlayerController state: isEquipped={playerWasEquipped}, isBlocking={playerWasBlocking}</color>");
+
             playerCtrl.enabled = false;
             Debug.Log("<color=yellow>[BossSpawner] PlayerController disabled</color>");
         }
 
-        // Deshabilitar el Animator del jugador para detener animaciones de ataque
+        // MEJORADO: Guardar estado del jugador ANTES de resetear, luego resetear parámetros
         var playerAnimator = FindAnyObjectByType<ThirdPersonController>()?.GetComponent<Animator>();
         if (playerAnimator != null)
         {
-            playerAnimator.enabled = false;
-            Debug.Log("<color=yellow>[BossSpawner] Player Animator disabled</color>");
+            // GUARDAR estado actual del equipamiento y bloqueo desde el Animator
+            // (ya guardamos desde PlayerController arriba, esto es redundancia por seguridad)
+            if (savedPlayerController == null)
+            {
+                playerWasEquipped = playerAnimator.GetBool("Equipped");
+                playerWasBlocking = playerAnimator.GetBool("Block");
+            }
+
+            Debug.Log($"<color=cyan>[BossSpawner] Saved animator state: Equipped={playerWasEquipped}, Blocking={playerWasBlocking}</color>");
+
+            // Resetear TODOS los triggers
+            playerAnimator.ResetTrigger("Attack");
+            playerAnimator.ResetTrigger("Damage");
+            playerAnimator.ResetTrigger("Death");
+            playerAnimator.ResetTrigger("DrawSword");
+
+            // Resetear TODOS los bools a estado idle
+            playerAnimator.SetBool("Block", false);
+            playerAnimator.SetBool("Equipped", false);
+            playerAnimator.SetBool("Grounded", true);
+
+            // Resetear floats a 0 (sin movimiento)
+            playerAnimator.SetFloat("Speed", 0f);
+            playerAnimator.SetFloat("MotionSpeed", 0f);
+
+            // Forzar estado Idle/Locomotion
+            playerAnimator.Play("Idle", 0, 0f);
+
+            Debug.Log("<color=yellow>[BossSpawner] Player Animator reset to idle state</color>");
         }
 
         // IMPORTANTE: Desactivar TODOS los enemigos durante la cinemática
@@ -575,6 +614,16 @@ public class BossSpawner : MonoBehaviour
         if (playerController != null)
         {
             playerController.enabled = true;
+
+            // NUEVO: Resetear velocidades y estados físicos
+            var characterController = playerController.GetComponent<CharacterController>();
+            if (characterController != null)
+            {
+                // Reset velocity (no podemos acceder directamente, pero moverlo 0 ayuda)
+                characterController.Move(Vector3.zero);
+            }
+
+            Debug.Log("<color=cyan>[BossSpawner] Player controller enabled and physics reset</color>");
         }
 
         // Re-enable player input
@@ -582,6 +631,20 @@ public class BossSpawner : MonoBehaviour
         if (playerInput != null)
         {
             playerInput.ActivateInput();
+        }
+
+        // NUEVO: Resetear el StarterAssetsInputs para limpiar estados de input
+        var starterInput = FindAnyObjectByType<StarterAssets.StarterAssetsInputs>();
+        if (starterInput != null)
+        {
+            // Resetear todos los inputs a false/zero
+            starterInput.move = Vector2.zero;
+            starterInput.look = Vector2.zero;
+            starterInput.jump = false;
+            starterInput.sprint = false;
+            starterInput.attack = false;
+
+            Debug.Log("<color=cyan>[BossSpawner] StarterAssetsInputs reset</color>");
         }
 
         // Reactivar el sistema de combate del jugador
@@ -596,27 +659,60 @@ public class BossSpawner : MonoBehaviour
         var playerCtrl = FindAnyObjectByType<PlayerController>();
         if (playerCtrl != null)
         {
+            // RESTAURAR el estado del equipamiento
+            playerCtrl.isEquipped = playerWasEquipped;
+            playerCtrl.isBlocking = playerWasBlocking;
+            playerCtrl.isEquipping = false; // Asegurar que no está en medio de equipar
+
+            Debug.Log($"<color=green>[BossSpawner] Restored PlayerController state: isEquipped={playerWasEquipped}</color>");
+
             playerCtrl.enabled = true;
             Debug.Log("<color=cyan>[BossSpawner] PlayerController enabled</color>");
         }
 
-        // Reactivar el Animator del jugador
+        // MEJORADO: Reactivar el Animator y RESTAURAR el estado guardado
         var playerAnimator = FindAnyObjectByType<ThirdPersonController>()?.GetComponent<Animator>();
         if (playerAnimator != null)
         {
-            playerAnimator.enabled = true;
+            // El Animator ya está activo, solo necesitamos resetear parámetros
 
-            // Resetear triggers que puedan estar activos
+            // Resetear TODOS los triggers para evitar animaciones atascadas
             playerAnimator.ResetTrigger("Attack");
             playerAnimator.ResetTrigger("Damage");
             playerAnimator.ResetTrigger("Death");
             playerAnimator.ResetTrigger("DrawSword");
+            playerAnimator.ResetTrigger("Jump");
+            playerAnimator.ResetTrigger("FreeFall");
 
-            // Asegurar que está en estado base
-            playerAnimator.SetBool("Block", false);
-            playerAnimator.SetBool("Equipped", false);
+            // RESTAURAR el estado guardado de equipamiento y bloqueo
+            playerAnimator.SetBool("Block", playerWasBlocking);
+            playerAnimator.SetBool("Equipped", playerWasEquipped);
+            playerAnimator.SetBool("Grounded", true);
 
-            Debug.Log("<color=cyan>[BossSpawner] Player Animator enabled and reset</color>");
+            Debug.Log($"<color=green>[BossSpawner] Restored player state: Equipped={playerWasEquipped}, Blocking={playerWasBlocking}</color>");
+
+            // Resetear floats
+            playerAnimator.SetFloat("Speed", 0f);
+            playerAnimator.SetFloat("MotionSpeed", 0f);
+
+            // Forzar transición al estado correcto (Idle o IdleEquipped)
+            if (playerWasEquipped)
+            {
+                // Si tenía la espada, volver a IdleEquipped
+                playerAnimator.Play("IdleEquipped", 0, 0f);
+                Debug.Log("<color=green>[BossSpawner] Player restored to IdleEquipped state</color>");
+            }
+            else
+            {
+                // Si no tenía la espada, volver a Idle normal
+                playerAnimator.Play("Idle", 0, 0f);
+                Debug.Log("<color=green>[BossSpawner] Player restored to Idle state</color>");
+            }
+
+            // También actualizar el animator para forzar la transición inmediata
+            playerAnimator.Update(0f);
+
+            Debug.Log("<color=cyan>[BossSpawner] Player Animator parameters reset to clean state</color>");
         }
 
         // Reactivar TODOS los enemigos después de la cinemática
