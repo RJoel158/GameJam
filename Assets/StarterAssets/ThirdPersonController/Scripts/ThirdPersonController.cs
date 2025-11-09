@@ -82,8 +82,8 @@ namespace StarterAssets
         [Space(10)]
         [Range(0f, 100f)]
         public float staminaPercent = 100f;
-        public int stamina = 200;
-        public int maxStamina = 200;
+        public int stamina = 2000;
+        public int maxStamina = 2000;
 
         [Space(10)]
         [Range(0f, 100f)]
@@ -208,6 +208,14 @@ namespace StarterAssets
         {
             playerController = GetComponent<PlayerController>();
             faseColorController = FindFirstObjectByType<FaseColorController>();
+            
+            // Sincronizar stamina con FaseColorController si existe
+            if (faseColorController != null)
+            {
+                maxStamina = faseColorController.maxStamina;
+                stamina = faseColorController.GetCurrentStamina();
+                staminaPercent = (stamina * 100) / maxStamina;
+            }
 
             // get a reference to our main camera
             if (_mainCamera == null)
@@ -504,32 +512,12 @@ namespace StarterAssets
             _animator.SetInteger(_animIDForce, (int)forcePercent);
 
             healthPercent = (health * 100) / maxHealth;
-            staminaPercent = (stamina * 100) / maxStamina;
             forcePercent = (force * 100) / maxForce;
 
             if (hardModeEnabled)
             {
                 stamina = maxStamina;
                 health = maxHealth;
-            }
-
-            // Si la estamina no esta completa, esta en animacion de bloqueo o ataque, no esta corriendo y no esta en el aire no incrementa
-            if (staminaPercent != 100 && !isBlocking && !inAttackAnimation && Grounded && _animationBlend <= MoveSpeed && canBlock)
-            {
-                // Incrementar la estamina durante el tiempo
-                stamina += 1;
-            }
-            else if (isBlocking && stamina > 0)
-            {
-                stamina -= 1;
-
-                if (stamina <= 0)
-                {
-                    stamina = 0;
-                    _animator.SetBool(_animIDBlock, false);
-                    isBlocking = false;
-                    canBlock = false;
-                }
             }
         }
 
@@ -543,19 +531,11 @@ namespace StarterAssets
             }
             else if (!dead && !death && isBlocking)
             {
-                if (stamina > 0)
+                // Consumir estamina al bloquear/recibir daño
+                if (faseColorController != null)
                 {
-                    stamina -= maxHealth / 2;
-
-                    if (stamina <= 0)
-                    {
-                        stamina = 0;
-                        _animator.SetBool(_animIDBlock, false);
-                        isBlocking = false;
-                        canBlock = false;
-                    }
+                    faseColorController.ConsumeStaminaForDamage();
                 }
-
                 _animator.SetTrigger(_animIDBlocked);
             }
 
@@ -851,21 +831,35 @@ namespace StarterAssets
 
         private void HandleBlock()
         {
-            if (Grounded && !isAttacking && !isEquipping && _animationBlend <= 0.01f && staminaPercent > 10)
+            // Verificar si puede bloquear según estamina y condiciones
+            bool canBlockByStamina = (faseColorController != null) ? faseColorController.CanBlock() : true;
+            
+            if (Grounded && !isAttacking && !isEquipping && _animationBlend <= 0.01f && canBlockByStamina)
             {
                 if (_input.block && !isBlocking)
                 {
                     if (_hasAnimator)
                     {
                         _animator.SetBool(_animIDBlock, true);
+                        isBlocking = true;
+                        // Consumir estamina al iniciar el bloqueo
+                        if (faseColorController != null)
+                        {
+                            faseColorController.ConsumeStaminaForBlock();
+                        }
                     }
                 }
                 else if (!_input.block && isBlocking)
                 {
-                    // IMPLEMENTAR ESTO PARA CUANDO SE ACABE LA ESTAMINA
                     _animator.SetBool(_animIDBlock, false);
                     isBlocking = false;
                 }
+            }
+            else if (isBlocking && !canBlockByStamina)
+            {
+                // Detener bloqueo si se agota la estamina
+                _animator.SetBool(_animIDBlock, false);
+                isBlocking = false;
             }
         }
 
@@ -1056,6 +1050,13 @@ namespace StarterAssets
             {
                 AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(_controller.center), FootstepAudioVolume);
             }
+        }
+
+        // Método público para que FaseColorController actualice la estamina
+        public void UpdateStaminaFromUI(int newStamina, float newStaminaPercent)
+        {
+            stamina = newStamina;
+            staminaPercent = newStaminaPercent;
         }
     }
 }

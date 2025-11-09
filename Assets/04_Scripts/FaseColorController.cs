@@ -34,6 +34,9 @@ public class FaseColorController : MonoBehaviour
     public float attackStaminaCost = 500f; // Stamina consumed per attack (1.25x más que correr)
     public int staminaDecrementStep = 200; // Stamina baja en incrementos de este valor
     public float staminaRegenRate = 200f; // Stamina regeneration per second (sprintStaminaCost * 0.5f)
+    public float blockStaminaCostPercent = 15f; // Porcentaje de estamina que cuesta bloquear
+    public float damageStaminaCostPercent = 30f; // Porcentaje de estamina que cuesta al recibir daño
+    public float staminaRegenDelayTime = 0.5f; // Delay antes de regenerar estamina
     
     private float currentStamina; // Usar float interno para precisión
     private float staminaTickTimer = 0f; // Timer para controlar cuándo bajar stamina
@@ -117,6 +120,14 @@ public class FaseColorController : MonoBehaviour
         // Inicializar mana correctamente
         mana = 0;
         currentMana = 0f;
+        
+        // Sincronizar con ThirdPersonController si existe
+        if (thirdPersonController != null)
+        {
+            thirdPersonController.stamina = stamina;
+            thirdPersonController.maxStamina = maxStamina;
+            thirdPersonController.staminaPercent = 100f;
+        }
     }
 
     private void Update()
@@ -127,6 +138,9 @@ public class FaseColorController : MonoBehaviour
             HandleManaRegeneration();
             UpdateHealthUI();
             UpdateUI();
+            
+            // SINCRONIZAR la estamina con ThirdPersonController
+            thirdPersonController.UpdateStaminaFromUI(stamina, staminaPercent);
         }
     }
 
@@ -141,9 +155,13 @@ public class FaseColorController : MonoBehaviour
             return;
         }
         
-        // DESPUÉS DE QUE TERMINA EL PODER-UP, CONSUMIR NORMALMENTE
-        // Consume stamina when sprinting de forma fluida
-        if (thirdPersonController._input.sprint && thirdPersonController._input.move != Vector2.zero && currentStamina > 0)
+        // Variables para determinar el estado actual
+        bool isSprinting = thirdPersonController._input.sprint && thirdPersonController._input.move != Vector2.zero && currentStamina > 0;
+        bool isAttacking = thirdPersonController._input.attack;
+        bool isBlockingNow = thirdPersonController.isBlocking;
+        
+        // 1. SPRINT - Consume stamina mientras corre
+        if (isSprinting)
         {
             // Velocidad de consumo: 400 stamina por segundo (fluido y continuo)
             currentStamina -= sprintStaminaCost * Time.deltaTime;
@@ -152,16 +170,34 @@ public class FaseColorController : MonoBehaviour
                 currentStamina = 0;
             }
         }
-        // Regenerate stamina cuando no está presionando Shift ni atacando
-        else if (!thirdPersonController._input.sprint && !thirdPersonController._input.attack)
+        // 2. ATTACK - Si está atacando, no regenerar
+        else if (isAttacking)
         {
-            // Regenerate stamina cuando no está presionando Shift ni atacando
+            // No hacer nada, solo detener regeneración
+        }
+        // 3. BLOCK - Si está bloqueando, no regenerar
+        else if (isBlockingNow)
+        {
+            // No hacer nada, solo detener regeneración
+        }
+        // 4. IDLE - No está haciendo nada: regenerar inmediatamente
+        else
+        {
+            // Regenerar stamina continuamente cuando está en reposo
             currentStamina += staminaRegenRate * Time.deltaTime;
             
             if (currentStamina > maxStamina) 
             {
                 currentStamina = maxStamina;
             }
+        }
+
+        // Detener bloqueo si no hay estamina
+        if (currentStamina <= 0 && thirdPersonController.isBlocking)
+        {
+            thirdPersonController._animator.SetBool(Animator.StringToHash("Block"), false);
+            thirdPersonController.isBlocking = false;
+            thirdPersonController.canBlock = false;
         }
 
         // Convertir float a int para el stamina público
@@ -264,5 +300,27 @@ public class FaseColorController : MonoBehaviour
     public bool CanSprint()
     {
         return unlimitedStaminaActive || currentStamina > 0;
+    }
+
+    // Método para consumir estamina al bloquear (porcentaje del máximo)
+    public void ConsumeStaminaForBlock()
+    {
+        float staminaCost = maxStamina * (blockStaminaCostPercent / 100f);
+        currentStamina -= staminaCost;
+        if (currentStamina < 0) currentStamina = 0;
+    }
+
+    // Método para consumir estamina al recibir daño del enemigo (porcentaje del máximo)
+    public void ConsumeStaminaForDamage()
+    {
+        float staminaCost = maxStamina * (damageStaminaCostPercent / 100f);
+        currentStamina -= staminaCost;
+        if (currentStamina < 0) currentStamina = 0;
+    }
+
+    // Método para verificar si puede bloquear
+    public bool CanBlock()
+    {
+        return currentStamina > 0;
     }
 }
