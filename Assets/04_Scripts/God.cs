@@ -19,12 +19,28 @@ public class God : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-
+        // Auto-find player if not assigned
+        if (player == null)
+        {
+            player = GameObject.FindGameObjectWithTag("Player");
+            if (player == null)
+            {
+                Debug.LogWarning("<color=orange>[God] No player found! Looking for any ThirdPersonController...</color>");
+                var controller = FindAnyObjectByType<StarterAssets.ThirdPersonController>();
+                if (controller != null)
+                {
+                    player = controller.gameObject;
+                }
+            }
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
+        // Safety check
+        if (player == null) return;
+
         CheckIfCanShoot();
 
         Vector3 direction = player.transform.position - transform.position;
