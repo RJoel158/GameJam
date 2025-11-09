@@ -896,7 +896,7 @@ namespace StarterAssets
                     {
                         _animator.SetTrigger(_animIDHardMode);
                         hardModeEnabled = true;
-                        
+
                         // Activar el cambio de material inmediatamente
                         ActiveHardMode();
                     }
@@ -1025,7 +1025,7 @@ namespace StarterAssets
         {
             if (playerTextureObject != null && originalMaterial != null)
             {
-                var renderer = playerTextureObject.GetComponent<SkinnedMeshRenderer>();
+                var renderer = playerTextureObject.GetComponent<Renderer>();
                 if (renderer != null)
                 {
                     renderer.material = originalMaterial;
