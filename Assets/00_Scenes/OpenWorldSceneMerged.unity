@@ -2966,6 +2966,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1677202623}
   m_CullTransparentMesh: 1
+--- !u!1 &1695184368 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5282408608672437559, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
+  m_PrefabInstance: {fileID: 4668801097672879667}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1706279881
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3709,6 +3714,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1327167747}
     - target: {fileID: 1792395015654831956, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
+      propertyPath: force
+      value: 2000
+      objectReference: {fileID: 0}
+    - target: {fileID: 1792395015654831956, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
       propertyPath: DrawSound
       value: 
       objectReference: {fileID: 8300000, guid: 02dc6bda1b604544fba8809332627caf, type: 3}
@@ -3724,6 +3733,18 @@ PrefabInstance:
       propertyPath: AmbientSound
       value: 
       objectReference: {fileID: 8300000, guid: 195eb9ffd14e37742aa545f3ae0bc27a, type: 3}
+    - target: {fileID: 1792395015654831956, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
+      propertyPath: hardModeMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 9be07870f3a489742938edf514ab1eea, type: 2}
+    - target: {fileID: 1792395015654831956, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
+      propertyPath: originalMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: fd08d6257488e864d8a70422c82f2121, type: 2}
+    - target: {fileID: 1792395015654831956, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
+      propertyPath: playerTextureObject
+      value: 
+      objectReference: {fileID: 1695184368}
     - target: {fileID: 1792395015654831956, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
       propertyPath: FSoundClips.Array.size
       value: 3
