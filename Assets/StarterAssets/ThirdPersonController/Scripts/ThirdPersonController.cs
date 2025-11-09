@@ -81,6 +81,12 @@ private int lastPlayedSoundIndex = -1;
 
         [Space(10)]
         [Range(0f, 100f)]
+        public float staminaPercent = 100f;
+        public int stamina = 200;
+        public int maxStamina = 200;
+
+        [Space(10)]
+        [Range(0f, 100f)]
         public float forcePercent = 100f;
         public int force = 200;
         public int maxForce = 2000;
@@ -494,22 +500,20 @@ private int lastPlayedSoundIndex = -1;
         // Actualizar animator con estados de muerte y golpe
         _animator.SetBool(_animIDDeath, dead || death);
         _animator.SetBool(_animIDHitting, inHitAnimation);
-        // _animator.SetInteger(_animIDStamina, (int)staminaPercent);  // Comentado hasta que se agregue stamina
+        _animator.SetInteger(_animIDStamina, (int)staminaPercent);
         _animator.SetInteger(_animIDForce, (int)forcePercent);
 
         healthPercent = (health * 100) / maxHealth;
-
+        staminaPercent = (stamina * 100) / maxStamina;
         forcePercent = (force * 100) / maxForce;
 
         if (hardModeEnabled)
         {
-            // stamina = maxStamina;  // Comentado hasta que se agregue stamina
+            stamina = maxStamina;
             health = maxHealth;
         }
 
         // Si la estamina no esta completa, esta en animacion de bloqueo o ataque, no esta corriendo y no esta en el aire no incrementa
-        // NOTA: Código de stamina comentado hasta que se agreguen las variables necesarias
-        /*
         if (staminaPercent != 100 && !isBlocking && !inAttackAnimation && Grounded && _animationBlend <= MoveSpeed && canBlock)
         {
             // Incrementar la estamina durante el tiempo
@@ -527,7 +531,6 @@ private int lastPlayedSoundIndex = -1;
                 canBlock = false;
             }
         }
-        */
     }
 
     public void TakeDamage(int damageAmount)
@@ -540,8 +543,6 @@ private int lastPlayedSoundIndex = -1;
         }
         else if (!dead && !death && isBlocking)
         {
-            // NOTA: Código de stamina comentado hasta que se agreguen las variables necesarias
-            /*
             if (stamina > 0)
             {
                 stamina -= maxHealth / 2;
@@ -554,7 +555,6 @@ private int lastPlayedSoundIndex = -1;
                     canBlock = false;
                 }
             }
-            */
 
             _animator.SetTrigger(_animIDBlocked);
         }
@@ -851,8 +851,7 @@ private int SelectSoundIndex()
 
         private void HandleBlock()
         {
-            // NOTA: Temporalmente removido el check de staminaPercent hasta que se agregue la variable
-            if (Grounded && !isAttacking && !isEquipping && _animationBlend <= 0.01f) // && staminaPercent > 10
+            if (Grounded && !isAttacking && !isEquipping && _animationBlend <= 0.01f && staminaPercent > 10)
             {
                 if (_input.block && !isBlocking)
                 {
