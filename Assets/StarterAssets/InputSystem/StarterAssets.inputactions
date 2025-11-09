@@ -256,7 +256,7 @@
                 },
                 {
                     "name": "",
-                    "id": "fe8b6cb0-d7bb-435d-894e-a4ad222133ce",
+                    "id": "36006b67-81e2-458c-acd3-d29b4db187b7",
                     "path": "<Keyboard>/f",
                     "interactions": "",
                     "processors": "",
@@ -306,17 +306,6 @@
                     "processors": "",
                     "groups": ";KeyboardMouse",
                     "action": "Block",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "be6097c7-3256-4e5e-acf9-a2839d49f2fa",
-                    "path": "",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "HardMode",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

@@ -28,28 +28,28 @@ namespace StarterAssets
 #if ENABLE_INPUT_SYSTEM
 		private InputAction blockAction;
 
-        private void Awake()
-        {
-            var playerInput = GetComponent<PlayerInput>();
-            if (playerInput != null && playerInput.actions != null)
-            {
-                blockAction = playerInput.actions["Block"];
-                if (blockAction != null)
-                {
-                    blockAction.started += OnBlockStarted;
-                    blockAction.canceled += OnBlockCanceled;
-                }
-            }
-        }
+		private void Awake()
+		{
+			var playerInput = GetComponent<PlayerInput>();
+			if (playerInput != null && playerInput.actions != null)
+			{
+				blockAction = playerInput.actions["Block"];
+				if (blockAction != null)
+				{
+					blockAction.started += OnBlockStarted;
+					blockAction.canceled += OnBlockCanceled;
+				}
+			}
+		}
 
-        private void OnDestroy()
-        {
-            if (blockAction != null)
-            {
-                blockAction.started -= OnBlockStarted;
-                blockAction.canceled -= OnBlockCanceled;
-            }
-        }
+		private void OnDestroy()
+		{
+			if (blockAction != null)
+			{
+				blockAction.started -= OnBlockStarted;
+				blockAction.canceled -= OnBlockCanceled;
+			}
+		}
 
 		public void OnMove(InputValue value)
 		{
@@ -58,7 +58,7 @@ namespace StarterAssets
 
 		public void OnLook(InputValue value)
 		{
-			if(cursorInputForLook)
+			if (cursorInputForLook)
 			{
 				LookInput(value.Get<Vector2>());
 			}
@@ -97,20 +97,20 @@ namespace StarterAssets
 		}
 
 #if ENABLE_INPUT_SYSTEM
-	public void OnDraw(InputValue value)
-	{
-		DrawInput(value.isPressed);
-	}
+		public void OnDraw(InputValue value)
+		{
+			DrawInput(value.isPressed);
+		}
 
-	public void OnAttack(InputValue value)
-	{
-		AttackInput(value.isPressed);
-	}
+		public void OnAttack(InputValue value)
+		{
+			AttackInput(value.isPressed);
+		}
 
-	public void OnInteractF(InputValue value)
-	{
-		InteractFInput(value.isPressed);
-	}
+		public void OnInteractF(InputValue value)
+		{
+			InteractFInput(value.isPressed);
+		}
 #endif
 
 		public void DrawInput(bool newDrawState)
@@ -123,45 +123,46 @@ namespace StarterAssets
 			attack = newDrawState;
 		}
 
-	public void InteractFInput(bool newInteractFState)
-	{
-		interactF = newInteractFState;
-	}
+		public void InteractFInput(bool newInteractFState)
+		{
+			interactF = newInteractFState;
+		}
 
-    private void OnBlockStarted(InputAction.CallbackContext context)
-    {
-        BlockInput(true);
-    }
+		private void OnBlockStarted(InputAction.CallbackContext context)
+		{
+			BlockInput(true);
+		}
 
-    private void OnBlockCanceled(InputAction.CallbackContext context)
-    {
-        BlockInput(false);
-    }
+		private void OnBlockCanceled(InputAction.CallbackContext context)
+		{
+			BlockInput(false);
+		}
 
-    public void OnBlock(InputValue value)
-    {
-        BlockInput(value.isPressed);
-	}
+		public void OnBlock(InputValue value)
+		{
+			BlockInput(value.isPressed);
+		}
 
-	public void BlockInput(bool newBlockState)
-	{
-		block = newBlockState;
-	}
+		public void BlockInput(bool newBlockState)
+		{
+			block = newBlockState;
+		}
 
-    public void OnHardMode(InputValue value)
-    {
-        HardModeInput(value.isPressed);
-    }
+		public void OnHardMode(InputValue value)
+		{
+			HardModeInput(value.isPressed);
+		}
 
-    public void HardModeInput(bool newDrawState)
-    {
-        hardMode = newDrawState;
-    }
+		public void HardModeInput(bool newDrawState)
+		{
+			hardMode = newDrawState;
+		}
 
-	private void OnApplicationFocus(bool hasFocus)
-	{
-		SetCursorState(cursorLocked);
-	}		private void SetCursorState(bool newState)
+		private void OnApplicationFocus(bool hasFocus)
+		{
+			SetCursorState(cursorLocked);
+		}
+		private void SetCursorState(bool newState)
 		{
 			Cursor.lockState = newState ? CursorLockMode.Locked : CursorLockMode.None;
 		}
