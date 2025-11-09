@@ -50,19 +50,43 @@ public class FaseColorController : MonoBehaviour
     public int mana = 0;
     public int maxMana = 100;
     
+    public float hardModeManaCostPercent = 5f; // Porcentaje de mana que cuesta activar Hard Mode
+    public float hardModeManaCostDrainPercent = 3f; // Porcentaje de mana que se drena por segundo durante Hard Mode
+    
     private float currentMana = 0f; // Mana actual (float para precisión)
     private float manaTickTimer = 0f; // Timer para controlar cuándo subir mana
     private int manaIncrementStep = 25; // Mana sube en incrementos de 25
 
-    private void Start()
+    private void Awake()
     {
-        // Buscar el ThirdPersonController
+        // Buscar el ThirdPersonController ANTES de Start
         thirdPersonController = FindFirstObjectByType<ThirdPersonController>();
         if (thirdPersonController == null)
         {
             Debug.LogError("ThirdPersonController no encontrado en la escena");
         }
+        
+        // Inicializar stamina correctamente LO ANTES POSIBLE
+        stamina = maxStamina;
+        currentStamina = maxStamina;
+        staminaPercent = 100f;
 
+        // Inicializar mana correctamente
+        mana = 0;
+        currentMana = 0f;
+        manaPercent = 0f;
+        
+        // Sincronizar INMEDIATAMENTE con ThirdPersonController
+        if (thirdPersonController != null)
+        {
+            thirdPersonController.stamina = stamina;
+            thirdPersonController.maxStamina = maxStamina;
+            thirdPersonController.staminaPercent = 100f;
+        }
+    }
+
+    private void Start()
+    {
         // Buscar las imágenes automáticamente si no están asignadas
         if (faseImage == null)
         {
@@ -112,21 +136,11 @@ public class FaseColorController : MonoBehaviour
         {
             manaImage.fillAmount = 0f;
         }
-
-        // Inicializar stamina correctamente
-        stamina = maxStamina;
-        currentStamina = maxStamina;
-
-        // Inicializar mana correctamente
-        mana = 0;
-        currentMana = 0f;
         
-        // Sincronizar con ThirdPersonController si existe
-        if (thirdPersonController != null)
+        // Inicializar stamina UI
+        if (staminaImage != null)
         {
-            thirdPersonController.stamina = stamina;
-            thirdPersonController.maxStamina = maxStamina;
-            thirdPersonController.staminaPercent = 100f;
+            staminaImage.fillAmount = 1f;
         }
     }
 
@@ -207,14 +221,25 @@ public class FaseColorController : MonoBehaviour
 
     private void HandleManaRegeneration()
     {
-        // Mana sube de forma fluida y continua
-        if (currentMana < maxMana)
+        // Si Hard Mode está activo, drenar mana continuamente (3% por segundo)
+        if (thirdPersonController != null && thirdPersonController.hardModeEnabled)
         {
-            // Velocidad de regeneración: 15 mana por segundo (suave y fluido)
-            float manaRegenRate = 15f;
-            currentMana += manaRegenRate * Time.deltaTime;
+            float manaDrainRate = maxMana * (hardModeManaCostDrainPercent / 100f); // 3% de 100 = 3 mana por segundo
+            currentMana -= manaDrainRate * Time.deltaTime;
             
-            if (currentMana > maxMana) currentMana = maxMana;
+            if (currentMana < 0) currentMana = 0;
+        }
+        else
+        {
+            // Mana sube de forma fluida y continua cuando no estamos en Hard Mode
+            if (currentMana < maxMana)
+            {
+                // Velocidad de regeneración: 15 mana por segundo (suave y fluido)
+                float manaRegenRate = 15f;
+                currentMana += manaRegenRate * Time.deltaTime;
+                
+                if (currentMana > maxMana) currentMana = maxMana;
+            }
         }
 
         // Convertir float a int para el mana público
@@ -322,5 +347,13 @@ public class FaseColorController : MonoBehaviour
     public bool CanBlock()
     {
         return currentStamina > 0;
+    }
+
+    // Método para consumir mana al activar Hard Mode (porcentaje del máximo)
+    public void ConsumeManForHardMode()
+    {
+        float manaCost = maxMana * (hardModeManaCostPercent / 100f);
+        currentMana -= manaCost;
+        if (currentMana < 0) currentMana = 0;
     }
 }

@@ -899,7 +899,12 @@ namespace StarterAssets
 
             if (hardModeEnabled)
             {
-                if (forcePercent >= 0)
+                // Verificar si el mana se agotó - si es así, desactivar Hard Mode
+                if (faseColorController != null && faseColorController.mana <= 0)
+                {
+                    DeactivateHardMode();
+                }
+                else if (forcePercent >= 0)
                 {
                     force -= 1;
                 }
@@ -980,6 +985,12 @@ namespace StarterAssets
         {
             Debug.Log("Hard Mode Active - Changing Material");
             _input.hardMode = false;
+
+            // Consumir mana al activar Hard Mode
+            if (faseColorController != null)
+            {
+                faseColorController.ConsumeManForHardMode();
+            }
 
             // Guardar el material original la primera vez
             if (originalMaterial == null && playerTextureObject != null)
