@@ -164,21 +164,9 @@ public class Enemy : MonoBehaviour
         }
     }
 
-
-
     public void TakeDamage(int damageAmount)
     {
         health -= damageAmount;
-
-        //if (health <= 0)
-        //{
-        //    Die();
-        //}
-        //else
-        //{
-        //    animator.SetTrigger("Damage");
-        //    //CameraShake.Instance.ShakeCamera(2f, 0.2f);
-        //}
 
         if (!dead)
         {
@@ -241,22 +229,6 @@ public class Enemy : MonoBehaviour
     {
         isAttacking = false;
     }
-
-
-    //public void StartDealDamage()
-    //{
-    //    GetComponentInChildren<EnemyDamageDealer>().StartDealDamage();
-    //}
-    //public void EndDealDamage()
-    //{
-    //    GetComponentInChildren<EnemyDamageDealer>().EndDealDamage();
-    //}
-
-    //public void HitVFX(Vector3 hitPosition)
-    //{
-    //    GameObject hit = Instantiate(hitVFX, hitPosition, Quaternion.identity);
-    //    Destroy(hit, 3f);
-    //}
 
     private void OnDrawGizmos()
     {
