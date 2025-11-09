@@ -27,7 +27,6 @@ public class Enemy : MonoBehaviour
 
     public int health = 100;
     //[SerializeField] GameObject hitVFX;
-    //[SerializeField] GameObject ragdoll;
 
     [Header("Combat")]
     [SerializeField] float attackCD = 3f;
@@ -46,7 +45,7 @@ public class Enemy : MonoBehaviour
         //animator = GetComponent<Animator>();
         //CapsuleEnemyCollider = GetComponent<CapsuleCollider>();
         player = GameObject.FindGameObjectWithTag("Player");
-        //playerThirdPersonController = player.GetComponent<ThirdPersonController>();
+        playerThirdPersonController = player.GetComponent<ThirdPersonController>();
 
         // Asegurar que EnemyPowerUpDropper existe
         var dropperType = System.Type.GetType("EnemyPowerUpDropper");
@@ -92,6 +91,11 @@ public class Enemy : MonoBehaviour
             dead = true;
         }
 
+        if (dead)
+        {
+            return;
+        }
+
         if (timePassed >= attackCD)
         {
             attackPlayer = Vector3.Distance(player.transform.position, transform.position) <= attackRange;
@@ -106,13 +110,12 @@ public class Enemy : MonoBehaviour
 
         playerDetected = newDestinationCD <= 0 && Vector3.Distance(player.transform.position, transform.position) <= aggroRange;
 
-        if (playerDetected && !isAttacking && !inAttackAnimation && !dead)
+        if (playerDetected && !isAttacking && !inAttackAnimation && !dead && !attackPlayer)
         {
             //newDestinationCD = 0.5f;
             agent.SetDestination(player.transform.position);
         }
         newDestinationCD -= Time.deltaTime;
-        //transform.LookAt(player.transform);
 
         if (!dead && playerDetected)
         {
@@ -161,21 +164,9 @@ public class Enemy : MonoBehaviour
         }
     }
 
-
-
     public void TakeDamage(int damageAmount)
     {
         health -= damageAmount;
-
-        //if (health <= 0)
-        //{
-        //    Die();
-        //}
-        //else
-        //{
-        //    animator.SetTrigger("Damage");
-        //    //CameraShake.Instance.ShakeCamera(2f, 0.2f);
-        //}
 
         if (!dead)
         {
@@ -238,22 +229,6 @@ public class Enemy : MonoBehaviour
     {
         isAttacking = false;
     }
-
-
-    //public void StartDealDamage()
-    //{
-    //    GetComponentInChildren<EnemyDamageDealer>().StartDealDamage();
-    //}
-    //public void EndDealDamage()
-    //{
-    //    GetComponentInChildren<EnemyDamageDealer>().EndDealDamage();
-    //}
-
-    //public void HitVFX(Vector3 hitPosition)
-    //{
-    //    GameObject hit = Instantiate(hitVFX, hitPosition, Quaternion.identity);
-    //    Destroy(hit, 3f);
-    //}
 
     private void OnDrawGizmos()
     {

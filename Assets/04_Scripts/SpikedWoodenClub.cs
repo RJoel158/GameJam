@@ -32,8 +32,15 @@ public class SpikedWoodenClub : MonoBehaviour
     {
         if (other.CompareTag("Player") && canHit && enemyScript.isAttacking)
         {
-            ThirdPersonController player = other.GetComponent<ThirdPersonController>();
-            player.TakeDamage(damage);
+            ThirdPersonController playerController = other.GetComponent<ThirdPersonController>();
+            if (playerController == null)
+            {
+                playerController = other.GetComponentInChildren<ThirdPersonController>();
+            }
+            if (playerController != null)
+            {
+                playerController.TakeDamage(damage);
+            }
             canHit = false;
         }
     }

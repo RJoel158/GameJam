@@ -27,6 +27,17 @@ public class AttackSystem : MonoBehaviour
     public void EnterAttack()
     {
         thirdPersonController.isAttacking = true;
+
+        if (thirdPersonController.stamina > 0)
+        {
+            thirdPersonController.stamina -= thirdPersonController.maxHealth / 2;
+
+            if (thirdPersonController.stamina <= 0)
+            {
+                thirdPersonController.stamina = 0;
+            }
+        }
+        
         //thirdPersonController._animator.applyRootMotion = true;
         //timePassed = 0;
     }

@@ -61,9 +61,27 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "Block",
+                    "type": "Button",
+                    "id": "87556f8d-4f03-4978-89a9-b0192c51732d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "Hold",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "HardMode",
+                    "type": "Button",
+                    "id": "e9e9fd51-d948-44c9-b442-028e7ad3eb5e",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "InteractF",
                     "type": "Button",
-                    "id": "a1b2c3d4-e5f6-4789-b1c2-d3e4f5a6b7c8",
+                    "id": "a1b2c3d4-e5f6-4789-a1b2-c3d4e5f6a7b8",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -238,7 +256,7 @@
                 },
                 {
                     "name": "",
-                    "id": "fe8b6cb0-d7bb-435d-894e-a4ad222133ce",
+                    "id": "36006b67-81e2-458c-acd3-d29b4db187b7",
                     "path": "<Keyboard>/f",
                     "interactions": "",
                     "processors": "",
@@ -249,7 +267,7 @@
                 },
                 {
                     "name": "",
-                    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                    "id": "fe8b6cb0-d7bb-435d-894e-a4ad222133ce",
                     "path": "<Mouse>/leftButton",
                     "interactions": "",
                     "processors": "",
@@ -277,6 +295,28 @@
                     "processors": "",
                     "groups": "Gamepad",
                     "action": "Sprint",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9c4a23cf-b916-41fd-be30-5d7d068cb11d",
+                    "path": "<Keyboard>/g",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";KeyboardMouse",
+                    "action": "Block",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a64e12d7-9a57-4fde-84d8-3e5743ea42e5",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";KeyboardMouse",
+                    "action": "HardMode",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
