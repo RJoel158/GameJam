@@ -106,7 +106,7 @@ Editor Wizard para crear la UI automáticamente.
 4. Click en **"Create Boss UI"**
 
 #### Lo que Crea:
-
+asdasd
 ```
 BossUI_Canvas (si no existe)
 └── BossUI_Container
