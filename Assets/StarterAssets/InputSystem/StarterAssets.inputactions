@@ -77,15 +77,6 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
-                },
-                {
-                    "name": "InteractF",
-                    "type": "Button",
-                    "id": "a1b2c3d4-e5f6-4789-a1b2-c3d4e5f6a7b8",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -256,22 +247,11 @@
                 },
                 {
                     "name": "",
-                    "id": "36006b67-81e2-458c-acd3-d29b4db187b7",
+                    "id": "fe8b6cb0-d7bb-435d-894e-a4ad222133ce",
                     "path": "<Keyboard>/f",
                     "interactions": "",
                     "processors": "",
-                    "groups": "KeyboardMouse",
-                    "action": "InteractF",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "fe8b6cb0-d7bb-435d-894e-a4ad222133ce",
-                    "path": "<Mouse>/leftButton",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "KeyboardMouse",
+                    "groups": "",
                     "action": "Attack",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -301,11 +281,22 @@
                 {
                     "name": "",
                     "id": "9c4a23cf-b916-41fd-be30-5d7d068cb11d",
-                    "path": "<Mouse>/rightButton",
+                    "path": "<Keyboard>/g",
                     "interactions": "",
                     "processors": "",
                     "groups": ";KeyboardMouse",
                     "action": "Block",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "be6097c7-3256-4e5e-acf9-a2839d49f2fa",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "HardMode",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

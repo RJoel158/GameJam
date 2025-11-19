@@ -1794,7 +1794,7 @@ MonoBehaviour:
   bossPrefab: {fileID: 6198634483299440555, guid: 2ca82aa360ea6c246aa29f22c204aa25, type: 3}
   spawnPoint: {fileID: 1815726740}
   instantiateBoss: 1
-  cinematicTimeline: {fileID: 913009794}
+  cinematicTimeline: {fileID: 0}
   playCinematicBeforeSpawn: 1
   spawnDelay: 1
   missionCompleteDelay: 3
@@ -1974,8 +1974,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 849622128}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.09268533, y: -0.65290487, z: 0.13111508, w: 0.7402253}
-  m_LocalPosition: {x: -66069.164, y: -160415.53, z: 18059.709}
+  m_LocalRotation: {x: -0.29723105, y: -0.89936066, z: -0.00045144747, w: -0.32063058}
+  m_LocalPosition: {x: -93164.06, y: -343456.2, z: 3780.3552}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2200,222 +2200,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   powerUpPrefab: {fileID: 3966392473492572528, guid: 28f813b6862045f408c463f53e2bd035, type: 3}
   dropHeight: 1
---- !u!1 &913009792
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 913009795}
-  - component: {fileID: 913009794}
-  - component: {fileID: 913009793}
-  - component: {fileID: 913009796}
-  - component: {fileID: 913009797}
-  - component: {fileID: 913009798}
-  - component: {fileID: 913009799}
-  - component: {fileID: 913009800}
-  - component: {fileID: 913009802}
-  - component: {fileID: 913009801}
-  m_Layer: 0
-  m_Name: BossCinematicTimeline
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &913009793
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 913009792}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 13801f342bb2cf8489873cc30693a1d0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  bossSpawner: {fileID: 737097873}
-  boss: {fileID: 0}
-  enableCameraShake: 1
-  shakeIntensity: 0.5
-  shakeDuration: 0.3
-  bossAppearEffect: {fileID: 0}
-  groundImpactEffect: {fileID: 0}
-  bossRoarSound: {fileID: 8300000, guid: 342289d6684d9684a9540eda305d4f40, type: 3}
-  groundImpactSound: {fileID: 8300000, guid: 3b77f39418210e34099f47d79084dc44, type: 3}
-  dramaticMusic: {fileID: 8300000, guid: 7b54a08ee7a4d7e488783af6279662a7, type: 3}
---- !u!320 &913009794
-PlayableDirector:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 913009792}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_PlayableAsset: {fileID: 11400000, guid: 48b8179548981764aa63968252dd3866, type: 2}
-  m_InitialState: 0
-  m_WrapMode: 2
-  m_DirectorUpdateMode: 1
-  m_InitialTime: 0
-  m_SceneBindings:
-  - key: {fileID: 8734705997586957024, guid: 48b8179548981764aa63968252dd3866, type: 2}
-    value: {fileID: 0}
-  - key: {fileID: 8339952100975169096, guid: 48b8179548981764aa63968252dd3866, type: 2}
-    value: {fileID: 913009792}
-  m_ExposedReferences:
-    m_References:
-    - bdca5f0bc47ed5a41990d2aa1747a88d: {fileID: 317748088}
-    - f22cbf6553b434e48a67e60f724124f0: {fileID: 873834750}
-    - 36838e9a26aeffc4ca59d3a7f9b97418: {fileID: 317748088}
-    - 252eaad1f35361146a43ea1c8654d253: {fileID: 873834750}
-    - 584ada38e529a4240ad2838c1b4c5a28: {fileID: 1865500103}
-    - 8b685a5b04f022c4bbc105c1d28e8613: {fileID: 873834750}
-    - f76772d6cdcd76a4c85d9cc81ebf5cba: {fileID: 1827819509}
-    - 0740e8f2516276d44bc9b9634ec7763d: {fileID: 1827819509}
-    - e1b4a4582723d93469585cfa919cea1e: {fileID: 1827819509}
-    - 155709c8db95f874fac562d307aa7f83: {fileID: 317748088}
-    - bc471d1980b3e6e448095a540cc289df: {fileID: 317748088}
-    - 076ba50f172ab3a4bb41acf3fae2973f: {fileID: 1827819509}
-    - cf7fc7ec30789794dbf98547ca84b4c0: {fileID: 873834750}
-    - c0eb64fd416e75b4b8a115e396e174b9: {fileID: 1827819509}
-    - ffca6bc7361cdf643bbd775818354ee4: {fileID: 1865500103}
-    - 8869e4f8869c20746bc7d77016e2de74: {fileID: 1865500103}
-    - 0cca0d465ddfdce4b8a5ebb613de5e8c: {fileID: 873834750}
-    - 51f76ad8b3121cc489ef081af92ad604: {fileID: 317748088}
-    - b7b41002e881d87448c348526366bfa9: {fileID: 1865500103}
-    - 0ff086aefb6534f48ad780d61f9b7042: {fileID: 1865500103}
---- !u!4 &913009795
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 913009792}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &913009796
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 913009792}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ce31e8114a6f04d4fbe1888f44fec073, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  director: {fileID: 913009794}
-  runDiagnosticsOnStart: 1
-  continuousDiagnostics: 0
---- !u!114 &913009797
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 913009792}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 15f3b777972b38b4d873005db3488f0c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  director: {fileID: 913009794}
-  clipDuration: 3
-  executeSetup: 0
-  cameraNames:
-  - CM_BossIntro_Wide
-  - CM_BossIntro_CloseUp
-  - CM_BossIntro_Dramatic
-  - CM_BossIntro_PlayerReaction
---- !u!114 &913009798
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 913009792}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6eb358f7922368048939fbc62106f0c1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  director: {fileID: 913009794}
-  mainCameraObject: {fileID: 0}
---- !u!114 &913009799
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 913009792}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eae3ee0afcba5e44995f74400d749a79, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  bossSpawnPoint: {fileID: 1815726740}
-  playerTransform: {fileID: 0}
-  autoFind: 1
---- !u!114 &913009800
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 913009792}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 11a5d31552035964f9ff504a95ba10dd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  bossSpawnPoint: {fileID: 1815726740}
-  playerTransform: {fileID: 804905188}
-  cameraDistance: 10
-  cameraHeight: 2
-  autoFind: 1
---- !u!114 &913009801
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 913009792}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e52de21a22b6dd44c9cc19f810c65059, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Events:
-    m_Signals: []
-    m_Events: []
---- !u!114 &913009802
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 913009792}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2de9a1ee037754844ac2d0a283626183, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  director: {fileID: 913009794}
-  cinematicEvents: {fileID: 913009793}
-  spawnBossTime: 6
-  bossRoarTime: 7
-  groundImpactTime: 6.5
 --- !u!1 &944989576
 GameObject:
   m_ObjectHideFlags: 0
@@ -5271,35 +5055,35 @@ PrefabInstance:
       objectReference: {fileID: 8300000, guid: f322b18338aa75446ba948e686f94440, type: 3}
     - target: {fileID: 3190219576147118976, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -66021.664
+      value: -93116.56
       objectReference: {fileID: 0}
     - target: {fileID: 3190219576147118976, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -160327.73
+      value: -343368.38
       objectReference: {fileID: 0}
     - target: {fileID: 3190219576147118976, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 17676.209
+      value: 3396.8552
       objectReference: {fileID: 0}
     - target: {fileID: 3190219576147118976, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.7402253
+      value: -0.32063058
       objectReference: {fileID: 0}
     - target: {fileID: 3190219576147118976, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0.09268533
+      value: -0.29723105
       objectReference: {fileID: 0}
     - target: {fileID: 3190219576147118976, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.65290487
+      value: -0.89936066
       objectReference: {fileID: 0}
     - target: {fileID: 3190219576147118976, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0.13111508
+      value: -0.00045144747
       objectReference: {fileID: 0}
     - target: {fileID: 3190219576147118983, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
       propertyPath: field of view
-      value: 50
+      value: 60
       objectReference: {fileID: 0}
     - target: {fileID: 3190219576147118983, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
       propertyPath: far clip plane
@@ -5940,7 +5724,6 @@ SceneRoots:
   - {fileID: 1266870304}
   - {fileID: 737097874}
   - {fileID: 849622129}
-  - {fileID: 913009795}
   - {fileID: 1852357917}
   - {fileID: 2105114007}
   - {fileID: 1751425734}

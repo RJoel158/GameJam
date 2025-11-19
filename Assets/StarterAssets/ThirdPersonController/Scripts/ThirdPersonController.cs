@@ -1,5 +1,4 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
+﻿ using UnityEngine;
 #if ENABLE_INPUT_SYSTEM 
 using UnityEngine.InputSystem;
 #endif
@@ -10,9 +9,9 @@ using UnityEngine.InputSystem;
 namespace StarterAssets
 {
     [RequireComponent(typeof(CharacterController))]
-#if ENABLE_INPUT_SYSTEM
+
     [RequireComponent(typeof(PlayerInput))]
-#endif
+
     public class ThirdPersonController : MonoBehaviour
     {
         [Header("Player")]
@@ -25,36 +24,6 @@ namespace StarterAssets
         public AudioClip LandingAudioClip;
         public AudioClip[] FootstepAudioClips;
         [Range(0, 1)] public float FootstepAudioVolume = 0.5f;
-
-        [Space(10)]
-        public AudioClip DrawSwordSound;
-        public float DrawSwordVolume = 1f;
-
-        [Header("Draw & Sheath Sounds")]
-        public AudioClip DrawSound;
-        [Range(0f, 1f)]
-        public float DrawSoundVolume = 1f;
-        public AudioClip SheathSound;
-        [Range(0f, 1f)]
-        public float SheathSoundVolume = 1f;
-
-        [Header("Ambient Sound")]
-        public AudioClip AmbientSound;
-        [Range(0f, 1f)]
-        public float AmbientSoundVolume = 0.3f;
-        private AudioSource ambientAudioSource;
-
-        [Header("F Key Sound")]
-        [Tooltip("Array de clips de audio para reproducir")]
-        public AudioClip[] FSoundClips;
-        [Range(0f, 1f)]
-        public float FSoundVolume = 1f;
-
-        [Tooltip("Modo de selección: 0=Random, 1=Sequential, 2=RandomNoRepeat")]
-        public int soundPlayMode = 0; // 0: Random, 1: Sequential, 2: RandomNoRepeat
-
-        private int currentSoundIndex = 0;
-        private int lastPlayedSoundIndex = -1;
 
         [Space(10)]
         public float JumpHeight = 1.2f;
@@ -82,8 +51,8 @@ namespace StarterAssets
         [Space(10)]
         [Range(0f, 100f)]
         public float staminaPercent = 100f;
-        public int stamina = 200;
-        public int maxStamina = 200;
+        public int stamina = 100;
+        public int maxStamina = 2000;
 
         [Space(10)]
         [Range(0f, 100f)]
@@ -100,15 +69,11 @@ namespace StarterAssets
         [Header("Equipment")]
         public bool isEquipping;
         public bool isEquipped;
-        private bool drawSoundPlayed = false;  // Prevenir múltiples sonidos de Draw
-        private bool sheathSoundPlayed = false;  // Prevenir múltiples sonidos de Sheath
-        private float drawSoundCooldown = 0f;  // Cooldown para Draw
-        private float sheathSoundCooldown = 0f;  // Cooldown para Sheath
-        private const float SOUND_COOLDOWN_DURATION = 5f;  // 1 segundo de cooldown
 
         [Header("Attack")]
         public bool isAttacking;
         public bool inAttackAnimation = false;
+        public bool canAttack = true;
 
         [Header("Block")]
         public bool isBlocking;
@@ -174,15 +139,12 @@ namespace StarterAssets
         private int _animIDHardMode;
         private int _animIDForce;
 
-#if ENABLE_INPUT_SYSTEM
         private PlayerInput _playerInput;
-#endif
 
         public Animator _animator;
         private CharacterController _controller;
         public StarterAssetsInputs _input;
         private GameObject _mainCamera;
-        private AudioSource audioSource;
 
         private const float _threshold = 0.01f;
 
@@ -192,23 +154,17 @@ namespace StarterAssets
         {
             get
             {
-#if ENABLE_INPUT_SYSTEM
                 return _playerInput.currentControlScheme == "KeyboardMouse";
-#else
-                return true;
-#endif
             }
         }
 
         // PlayerControllerParameters
         private PlayerController playerController;
-        private FaseColorController faseColorController;
 
         private void Awake()
         {
             playerController = GetComponent<PlayerController>();
-            faseColorController = FindFirstObjectByType<FaseColorController>();
-
+            
             // get a reference to our main camera
             if (_mainCamera == null)
             {
@@ -219,30 +175,11 @@ namespace StarterAssets
         private void Start()
         {
             _cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
-
+            
             _hasAnimator = TryGetComponent(out _animator);
             _controller = GetComponent<CharacterController>();
             _input = GetComponent<StarterAssetsInputs>();
-            audioSource = GetComponent<AudioSource>();
-
-            // Si no hay AudioSource, crear uno automáticamente
-            if (audioSource == null)
-            {
-                audioSource = gameObject.AddComponent<AudioSource>();
-                Debug.Log("[AUDIO] AudioSource creado automáticamente en el jugador");
-            }
-
-            // Crear un segundo AudioSource para el sonido ambiental
-            ambientAudioSource = gameObject.AddComponent<AudioSource>();
-            ambientAudioSource.loop = true; // Loop infinito
-            ambientAudioSource.spatialBlend = 0f; // 2D, no 3D
-
-            // Iniciar el sonido ambiental
-            StartAmbientSound();
-
-#if ENABLE_INPUT_SYSTEM
             _playerInput = GetComponent<PlayerInput>();
-#endif
 
             AssignAnimationIDs();
 
@@ -254,12 +191,6 @@ namespace StarterAssets
         private void Update()
         {
             _hasAnimator = TryGetComponent(out _animator);
-
-            // Actualizar cooldowns de sonido
-            if (drawSoundCooldown > 0f)
-                drawSoundCooldown -= Time.deltaTime;
-            if (sheathSoundCooldown > 0f)
-                sheathSoundCooldown -= Time.deltaTime;
 
             Attack();
             DrawSheathSword();
@@ -338,27 +269,19 @@ namespace StarterAssets
 
         private void Move()
         {
-            // Prevenir movimiento si está muerto, bloqueando o en animación de hard mode
-            if (dead || death || isBlocking || inHardModeAnimation)
+            if (dead || isBlocking || inHardModeAnimation)
             {
                 return;
-            }            // ELIMINAR, RESTRINGE EL MOVIMIENTO EN LA EQUIPACION Y BLOQUEO
+            }
+
+            // ELIMINAR, RESTRINGE EL MOVIMIENTO EN LA EQUIPACION Y BLOQUEO
             //if (playerController.isEquipping || playerController.isBlocking)
             //{
             //    return;
             //}
-
+            
             // set target speed based on move speed, sprint speed and if sprint is pressed
-            // NO permite correr si el stamina está en 0
-            bool canSprint = (faseColorController != null) ? faseColorController.CanSprint() : true;
-
-            // Si stamina llegó a 0, fuerza cancelar sprint
-            if (!canSprint)
-            {
-                _input.sprint = false;
-            }
-
-            float targetSpeed = (_input.sprint && canSprint) ? SprintSpeed : MoveSpeed;
+            float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
 
             // a simplistic acceleration and deceleration designed to be easy to remove, replace, or iterate upon
 
@@ -497,14 +420,15 @@ namespace StarterAssets
 
         private void HandleStadistics()
         {
-            // Actualizar animator con estados de muerte y golpe
-            _animator.SetBool(_animIDDeath, dead || death);
+            _animator.SetBool(_animIDDeath, dead);
             _animator.SetBool(_animIDHitting, inHitAnimation);
             _animator.SetInteger(_animIDStamina, (int)staminaPercent);
             _animator.SetInteger(_animIDForce, (int)forcePercent);
 
             healthPercent = (health * 100) / maxHealth;
+
             staminaPercent = (stamina * 100) / maxStamina;
+
             forcePercent = (force * 100) / maxForce;
 
             if (hardModeEnabled)
@@ -535,13 +459,17 @@ namespace StarterAssets
 
         public void TakeDamage(int damageAmount)
         {
-            if (!dead && !death && !isBlocking)
+            if (!dead && !isBlocking)
             {
                 health -= damageAmount;
                 _animator.SetTrigger(_animIDDamage);
                 //CameraShake.Instance.ShakeCamera(2f, 0.2f);
+                
+                // Reproducir sonido de quejido al recibir daño
+                if (PlayerAudioManager.Instance != null)
+                    PlayerAudioManager.Instance.PlayHurtSound();
             }
-            else if (!dead && !death && isBlocking)
+            else if (!dead && isBlocking)
             {
                 if (stamina > 0)
                 {
@@ -557,17 +485,16 @@ namespace StarterAssets
                 }
 
                 _animator.SetTrigger(_animIDBlocked);
+                
+                // Reproducir sonido de bloqueo
+                if (PlayerAudioManager.Instance != null)
+                    PlayerAudioManager.Instance.PlayBlockSound();
             }
 
             if (health <= 0)
             {
-                // ARREGLO: Solo morir una vez
-                if (!dead && !death)
-                {
-                    death = true;
-                    dead = true;
-                    Die();
-                }
+                dead = true;
+                Die();
             }
         }
 
@@ -576,16 +503,14 @@ namespace StarterAssets
             //Instantiate(ragdoll, transform.position, transform.rotation);
             _animator.SetTrigger("Death");
             //Destroy(this.gameObject);
-
-            Debug.Log("<color=red>[Player] Player has died!</color>");
         }
 
         private void DrawSheathSword()
         {
             if (Grounded)
             {
-                // Draw (Tecla 1 - Sacar espada)
-                if (_input.draw && !isEquipped && drawSoundCooldown <= 0f)
+                // Draw
+                if (_input.draw && !isEquipped)
                 {
                     // update animator if using character
                     if (_hasAnimator)
@@ -593,13 +518,13 @@ namespace StarterAssets
                         _animator.SetTrigger(_animIDDrawSword);
                         _animator.SetBool(_animIDEquipped, true);
                         _input.draw = false;
-
-                        // Reproducir sonido personalizado de Draw (tecla 1)
-                        PlayDrawSound();
-                        drawSoundCooldown = SOUND_COOLDOWN_DURATION;  // Iniciar cooldown
+                        
+                        // Reproducir sonido de sacar espada
+                        if (PlayerAudioManager.Instance != null)
+                            PlayerAudioManager.Instance.PlayDrawSword();
                     }
                 }
-                else if (_input.draw && isEquipped && sheathSoundCooldown <= 0f)
+                else if (_input.draw && isEquipped)
                 {
                     // update animator if using character
                     if (_hasAnimator)
@@ -607,213 +532,12 @@ namespace StarterAssets
                         _animator.SetTrigger(_animIDSheathSword);
                         _animator.SetBool(_animIDEquipped, false);
                         _input.draw = false;
-
-                        // Reproducir sonido personalizado de Sheath (guardar)
-                        PlaySheathSound();
-                        sheathSoundCooldown = SOUND_COOLDOWN_DURATION;  // Iniciar cooldown
+                        
+                        // Reproducir sonido de guardar espada
+                        if (PlayerAudioManager.Instance != null)
+                            PlayerAudioManager.Instance.PlaySheathSword();
                     }
                 }
-            }
-        }
-
-        private void HandleFKeySound()
-        {
-            // Click izquierdo del mouse solo si tiene la espada equipada
-            if (Input.GetMouseButtonDown(0) && isEquipped)
-            {
-                PlayFSound();
-            }
-        }
-
-        private void PlayDrawSound()
-        {
-            // Intentar obtener o crear AudioSource
-            if (audioSource == null)
-            {
-                audioSource = GetComponent<AudioSource>();
-                if (audioSource == null)
-                {
-                    audioSource = gameObject.AddComponent<AudioSource>();
-                    Debug.Log("[DRAW SOUND] AudioSource creado en tiempo de ejecución");
-                }
-            }
-
-            if (audioSource != null)
-            {
-                if (DrawSound != null)
-                {
-                    audioSource.PlayOneShot(DrawSound, Mathf.Clamp01(DrawSoundVolume));
-                    Debug.Log($"[DRAW SOUND] ✓ Reproduciendo Draw Sound con volumen {DrawSoundVolume}");
-                }
-                else if (DrawSwordSound != null)
-                {
-                    audioSource.PlayOneShot(DrawSwordSound, DrawSwordVolume);
-                    Debug.Log($"[DRAW SOUND] ✓ Reproduciendo DrawSwordSound (fallback) con volumen {DrawSwordVolume}");
-                }
-                else
-                {
-                    Debug.LogWarning("[DRAW SOUND] ❌ No hay sonido asignado para Draw");
-                }
-            }
-            else
-            {
-                Debug.LogError("[DRAW SOUND] ❌ No se pudo crear AudioSource");
-            }
-        }
-
-        private void PlaySheathSound()
-        {
-            // Intentar obtener o crear AudioSource
-            if (audioSource == null)
-            {
-                audioSource = GetComponent<AudioSource>();
-                if (audioSource == null)
-                {
-                    audioSource = gameObject.AddComponent<AudioSource>();
-                    Debug.Log("[SHEATH SOUND] AudioSource creado en tiempo de ejecución");
-                }
-            }
-
-            if (audioSource != null)
-            {
-                if (SheathSound != null)
-                {
-                    audioSource.PlayOneShot(SheathSound, Mathf.Clamp01(SheathSoundVolume));
-                    Debug.Log($"[SHEATH SOUND] ✓ Reproduciendo Sheath Sound con volumen {SheathSoundVolume}");
-                }
-                else if (DrawSwordSound != null)
-                {
-                    audioSource.PlayOneShot(DrawSwordSound, DrawSwordVolume);
-                    Debug.Log($"[SHEATH SOUND] ✓ Reproduciendo DrawSwordSound (fallback) con volumen {DrawSwordVolume}");
-                }
-                else
-                {
-                    Debug.LogWarning("[SHEATH SOUND] ❌ No hay sonido asignado para Sheath");
-                }
-            }
-            else
-            {
-                Debug.LogError("[SHEATH SOUND] ❌ No se pudo crear AudioSource");
-            }
-        }
-
-        private void PlayFSound()
-        {
-            // Intentar obtener o crear AudioSource
-            if (audioSource == null)
-            {
-                audioSource = GetComponent<AudioSource>();
-                if (audioSource == null)
-                {
-                    audioSource = gameObject.AddComponent<AudioSource>();
-                    Debug.Log("[F SOUND] AudioSource creado en tiempo de ejecución");
-                }
-            }
-
-            // Verificar que hay sonidos en el array
-            if (FSoundClips == null || FSoundClips.Length == 0)
-            {
-                Debug.LogWarning("[F SOUND] ❌ No hay sonidos asignados en el array");
-                return;
-            }
-
-            // Seleccionar el índice según el modo
-            int selectedIndex = SelectSoundIndex();
-
-            // Verificar que el clip no es nulo
-            if (FSoundClips[selectedIndex] != null)
-            {
-                audioSource.PlayOneShot(FSoundClips[selectedIndex], Mathf.Clamp01(FSoundVolume));
-                Debug.Log($"[F SOUND] ✓ Reproduciendo sonido {selectedIndex + 1}/{FSoundClips.Length} - Modo: {soundPlayMode}");
-            }
-            else
-            {
-                Debug.LogWarning($"[F SOUND] ❌ El clip en índice {selectedIndex} es nulo");
-            }
-        }
-
-        private int SelectSoundIndex()
-        {
-            switch (soundPlayMode)
-            {
-                case 0: // Random
-                    return Random.Range(0, FSoundClips.Length);
-
-                case 1: // Sequential
-                    int seqIndex = currentSoundIndex;
-                    currentSoundIndex = (currentSoundIndex + 1) % FSoundClips.Length;
-                    return seqIndex;
-
-                case 2: // RandomNoRepeat
-                    if (FSoundClips.Length == 1)
-                        return 0;
-
-                    int randomIndex;
-                    do
-                    {
-                        randomIndex = Random.Range(0, FSoundClips.Length);
-                    }
-                    while (randomIndex == lastPlayedSoundIndex);
-
-                    lastPlayedSoundIndex = randomIndex;
-                    return randomIndex;
-
-                default:
-                    return 0;
-            }
-        }
-
-        private void StartAmbientSound()
-        {
-            if (ambientAudioSource == null)
-            {
-                ambientAudioSource = gameObject.AddComponent<AudioSource>();
-                ambientAudioSource.loop = true;
-                ambientAudioSource.spatialBlend = 0f;
-                Debug.Log("[AMBIENT] AudioSource para sonido ambiental creado");
-            }
-
-            if (ambientAudioSource != null && AmbientSound != null)
-            {
-                ambientAudioSource.clip = AmbientSound;
-                ambientAudioSource.volume = Mathf.Clamp01(AmbientSoundVolume);
-                ambientAudioSource.Play();
-                Debug.Log($"[AMBIENT] ✓ Sonido ambiental iniciado con volumen {AmbientSoundVolume}");
-            }
-            else if (AmbientSound == null)
-            {
-                Debug.LogWarning("[AMBIENT] ⚠️ No hay sonido ambiental asignado. Asigna un clip en el Inspector.");
-            }
-            else
-            {
-                Debug.LogError("[AMBIENT] ❌ No se pudo crear AudioSource para sonido ambiental");
-            }
-        }
-
-        public void StopAmbientSound()
-        {
-            if (ambientAudioSource != null && ambientAudioSource.isPlaying)
-            {
-                ambientAudioSource.Stop();
-                Debug.Log("[AMBIENT] Sonido ambiental detenido");
-            }
-        }
-
-        public void PauseAmbientSound()
-        {
-            if (ambientAudioSource != null && ambientAudioSource.isPlaying)
-            {
-                ambientAudioSource.Pause();
-                Debug.Log("[AMBIENT] Sonido ambiental pausado");
-            }
-        }
-
-        public void ResumeAmbientSound()
-        {
-            if (ambientAudioSource != null && !ambientAudioSource.isPlaying)
-            {
-                ambientAudioSource.Play();
-                Debug.Log("[AMBIENT] Sonido ambiental reanudado");
             }
         }
 
@@ -823,33 +547,19 @@ namespace StarterAssets
 
             if (Grounded)
             {
-                // NO permite atacar si stamina es 0 o no hay suficiente o está siendo golpeado
+                // Attack
                 if (_input.attack && isEquipped && !isAttacking && !inHitAnimation)
                 {
                     // update animator if using character
-                    if (_hasAnimator)
+                    if (canAttack)
                     {
-                        // Intentar consumir stamina para atacar (si existe FaseColorController)
-                        bool canAttack = true;
-                        if (faseColorController != null)
-                        {
-                            canAttack = faseColorController.TryConsumeStaminaForAttack();
-                        }
-
-                        if (canAttack)
-                        {
-                            _animator.SetTrigger(_animIDAttack);
-                            _animator.SetFloat(_animIDSpeed, 0);
-                            _input.attack = false;
-
-                            // ✅ REPRODUCIR SONIDO AL ATACAR
-                            PlayFSound();
-                        }
-                        else
-                        {
-                            // No hay stamina suficiente - cancelar ataque
-                            _input.attack = false;
-                        }
+                        _animator.SetTrigger(_animIDAttack);
+                        _animator.SetFloat(_animIDSpeed, 0);
+                        _input.attack = false;
+                        
+                        // Reproducir sonido de ataque
+                        if (PlayerAudioManager.Instance != null)
+                            PlayerAudioManager.Instance.PlayAttackSound();
                     }
                 }
             }
@@ -902,9 +612,6 @@ namespace StarterAssets
                     {
                         _animator.SetTrigger(_animIDHardMode);
                         hardModeEnabled = true;
-
-                        // Activar el cambio de material inmediatamente
-                        ActiveHardMode();
                     }
                 }
             }
@@ -985,45 +692,28 @@ namespace StarterAssets
 
         public void EndHardMode()
         {
-            inHardModeAnimation = false;
+            inHardModeAnimation= false;
         }
 
         public void ActiveHardMode()
         {
-            Debug.Log("Hard Mode Active - Changing Material");
+            Debug.Log("Hard Mode Active");
             _input.hardMode = false;
 
             // Guardar el material original la primera vez
             if (originalMaterial == null && playerTextureObject != null)
             {
-                var renderer = playerTextureObject.GetComponent<SkinnedMeshRenderer>();
+                var renderer = playerTextureObject.GetComponent<Renderer>();
                 if (renderer != null)
-                {
                     originalMaterial = renderer.material;
-                    Debug.Log($"Original material saved: {originalMaterial.name}");
-                }
-                else
-                {
-                    Debug.LogWarning("SkinnedMeshRenderer not found on playerTextureObject");
-                }
             }
 
             // Cambiar al material de modo difícil
             if (playerTextureObject != null && hardModeMaterial != null)
             {
-                var renderer = playerTextureObject.GetComponent<SkinnedMeshRenderer>();
+                var renderer = playerTextureObject.GetComponent<Renderer>();
                 if (renderer != null)
-                {
                     renderer.material = hardModeMaterial;
-                    Debug.Log($"Changed to hard mode material: {hardModeMaterial.name}");
-                }
-            }
-            else
-            {
-                if (playerTextureObject == null)
-                    Debug.LogError("playerTextureObject is null! Assign it in the Inspector.");
-                if (hardModeMaterial == null)
-                    Debug.LogError("hardModeMaterial is null! Assign it in the Inspector.");
             }
         }
 
@@ -1033,14 +723,10 @@ namespace StarterAssets
             {
                 var renderer = playerTextureObject.GetComponent<Renderer>();
                 if (renderer != null)
-                {
                     renderer.material = originalMaterial;
-                    Debug.Log($"Restored original material: {originalMaterial.name}");
-                }
             }
 
             hardModeEnabled = false;
-            hardModeTimer = 0f;
             Debug.Log("Hard Mode Deactivated");
         }
 
@@ -1048,7 +734,13 @@ namespace StarterAssets
         {
             if (animationEvent.animatorClipInfo.weight > 0.5f)
             {
-                if (FootstepAudioClips.Length > 0)
+                // Usar PlayerAudioManager si está disponible
+                if (PlayerAudioManager.Instance != null)
+                {
+                    PlayerAudioManager.Instance.PlayFootstepSound(transform.TransformPoint(_controller.center));
+                }
+                // Fallback al sistema antiguo
+                else if (FootstepAudioClips.Length > 0)
                 {
                     var index = Random.Range(0, FootstepAudioClips.Length);
                     AudioSource.PlayClipAtPoint(FootstepAudioClips[index], transform.TransformPoint(_controller.center), FootstepAudioVolume);
@@ -1060,7 +752,16 @@ namespace StarterAssets
         {
             if (animationEvent.animatorClipInfo.weight > 0.5f)
             {
-                AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(_controller.center), FootstepAudioVolume);
+                // Usar PlayerAudioManager si está disponible
+                if (PlayerAudioManager.Instance != null)
+                {
+                    PlayerAudioManager.Instance.PlayLandingSound(transform.TransformPoint(_controller.center));
+                }
+                // Fallback al sistema antiguo
+                else if (LandingAudioClip != null)
+                {
+                    AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(_controller.center), FootstepAudioVolume);
+                }
             }
         }
     }
