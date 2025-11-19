@@ -1,4 +1,4 @@
-﻿ using UnityEngine;
+﻿using UnityEngine;
 #if ENABLE_INPUT_SYSTEM 
 using UnityEngine.InputSystem;
 #endif
@@ -164,7 +164,7 @@ namespace StarterAssets
         private void Awake()
         {
             playerController = GetComponent<PlayerController>();
-            
+
             // get a reference to our main camera
             if (_mainCamera == null)
             {
@@ -175,7 +175,7 @@ namespace StarterAssets
         private void Start()
         {
             _cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
-            
+
             _hasAnimator = TryGetComponent(out _animator);
             _controller = GetComponent<CharacterController>();
             _input = GetComponent<StarterAssetsInputs>();
@@ -279,7 +279,7 @@ namespace StarterAssets
             //{
             //    return;
             //}
-            
+
             // set target speed based on move speed, sprint speed and if sprint is pressed
             float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
 
@@ -464,7 +464,7 @@ namespace StarterAssets
                 health -= damageAmount;
                 _animator.SetTrigger(_animIDDamage);
                 //CameraShake.Instance.ShakeCamera(2f, 0.2f);
-                
+
                 // Reproducir sonido de quejido al recibir daño
                 if (PlayerAudioManager.Instance != null)
                     PlayerAudioManager.Instance.PlayHurtSound();
@@ -485,7 +485,7 @@ namespace StarterAssets
                 }
 
                 _animator.SetTrigger(_animIDBlocked);
-                
+
                 // Reproducir sonido de bloqueo
                 if (PlayerAudioManager.Instance != null)
                     PlayerAudioManager.Instance.PlayBlockSound();
@@ -518,7 +518,7 @@ namespace StarterAssets
                         _animator.SetTrigger(_animIDDrawSword);
                         _animator.SetBool(_animIDEquipped, true);
                         _input.draw = false;
-                        
+
                         // Reproducir sonido de sacar espada
                         if (PlayerAudioManager.Instance != null)
                             PlayerAudioManager.Instance.PlayDrawSword();
@@ -532,7 +532,7 @@ namespace StarterAssets
                         _animator.SetTrigger(_animIDSheathSword);
                         _animator.SetBool(_animIDEquipped, false);
                         _input.draw = false;
-                        
+
                         // Reproducir sonido de guardar espada
                         if (PlayerAudioManager.Instance != null)
                             PlayerAudioManager.Instance.PlaySheathSword();
@@ -556,7 +556,7 @@ namespace StarterAssets
                         _animator.SetTrigger(_animIDAttack);
                         _animator.SetFloat(_animIDSpeed, 0);
                         _input.attack = false;
-                        
+
                         // Reproducir sonido de ataque
                         if (PlayerAudioManager.Instance != null)
                             PlayerAudioManager.Instance.PlayAttackSound();
@@ -692,7 +692,7 @@ namespace StarterAssets
 
         public void EndHardMode()
         {
-            inHardModeAnimation= false;
+            inHardModeAnimation = false;
         }
 
         public void ActiveHardMode()

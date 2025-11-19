@@ -19,7 +19,7 @@ namespace StarterAssets
         {
             // Verificar si ya existe un PlayerAudioManager en la escena
             PlayerAudioManager existingManager = Object.FindObjectOfType<PlayerAudioManager>();
-            
+
             if (existingManager == null)
             {
                 // Preguntar al usuario si desea crear uno
@@ -42,18 +42,18 @@ namespace StarterAssets
         {
             // Crear el GameObject
             GameObject audioManagerObject = new GameObject("PlayerAudioManager");
-            
+
             // Agregar el componente
             PlayerAudioManager manager = audioManagerObject.AddComponent<PlayerAudioManager>();
-            
+
             // Seleccionar el objeto para que el usuario lo vea en el Inspector
             Selection.activeGameObject = audioManagerObject;
-            
+
             // Marcar la escena como modificada
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
-            
+
             Debug.Log("✓ PlayerAudioManager creado correctamente. Ahora configura los AudioClips en el Inspector.");
-            
+
             // Mostrar mensaje de ayuda
             EditorUtility.DisplayDialog(
                 "PlayerAudioManager Creado",

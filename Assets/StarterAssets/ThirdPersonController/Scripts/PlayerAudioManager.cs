@@ -55,7 +55,7 @@ namespace StarterAssets
         // AudioSources privados
         private AudioSource effectsSource;
         private AudioSource ambientSource;
-        
+
         // Control de reproducción
         private int lastAttackIndex = -1;
         private int currentAttackIndex = 0;
@@ -138,7 +138,7 @@ namespace StarterAssets
             }
 
             int index = GetAttackSoundIndex();
-            
+
             if (attackSounds[index] != null && effectsSource != null)
             {
                 effectsSource.PlayOneShot(attackSounds[index], attackVolume);
@@ -158,7 +158,7 @@ namespace StarterAssets
             }
 
             int randomIndex = Random.Range(0, hurtSounds.Length);
-            
+
             if (hurtSounds[randomIndex] != null && effectsSource != null)
             {
                 effectsSource.PlayOneShot(hurtSounds[randomIndex], hurtVolume);
@@ -175,7 +175,7 @@ namespace StarterAssets
                 return;
 
             int randomIndex = Random.Range(0, footstepSounds.Length);
-            
+
             if (footstepSounds[randomIndex] != null)
             {
                 AudioSource.PlayClipAtPoint(footstepSounds[randomIndex], position, footstepVolume);
@@ -320,7 +320,7 @@ namespace StarterAssets
                 {
                     if (clip == null) nullCount++;
                 }
-                
+
                 if (nullCount > 0)
                 {
                     Debug.LogWarning($"[PlayerAudioManager] {nullCount} sonidos de ataque están vacíos");
