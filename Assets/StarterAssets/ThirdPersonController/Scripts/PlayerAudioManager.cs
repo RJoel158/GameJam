@@ -90,6 +90,7 @@ namespace StarterAssets
                 effectsSource = gameObject.AddComponent<AudioSource>();
             }
             effectsSource.playOnAwake = false;
+            effectsSource.spatialBlend = 0f; // efectos por defecto en 2D (no posicional)
 
             // AudioSource separado para música ambiental
             ambientSource = gameObject.AddComponent<AudioSource>();
@@ -107,11 +108,8 @@ namespace StarterAssets
         /// </summary>
         public void PlayDrawSword()
         {
-            if (drawSwordSound != null && effectsSource != null)
-            {
-                effectsSource.PlayOneShot(drawSwordSound, equipmentVolume);
-                Debug.Log("[Audio] 🗡️ Draw Sword");
-            }
+            PlayEffectClip(drawSwordSound, equipmentVolume, interrupt: true, allowOverlap: false);
+            Debug.Log("[Audio] 🗡️ Draw Sword");
         }
 
         /// <summary>
@@ -119,11 +117,8 @@ namespace StarterAssets
         /// </summary>
         public void PlaySheathSword()
         {
-            if (sheathSwordSound != null && effectsSource != null)
-            {
-                effectsSource.PlayOneShot(sheathSwordSound, equipmentVolume);
-                Debug.Log("[Audio] 📦 Sheath Sword");
-            }
+            PlayEffectClip(sheathSwordSound, equipmentVolume, interrupt: true, allowOverlap: false);
+            Debug.Log("[Audio] 📦 Sheath Sword");
         }
 
         /// <summary>
@@ -136,14 +131,10 @@ namespace StarterAssets
                 Debug.LogWarning("[Audio] ⚠️ No hay sonidos de ataque configurados");
                 return;
             }
-
             int index = GetAttackSoundIndex();
-
-            if (attackSounds[index] != null && effectsSource != null)
-            {
-                effectsSource.PlayOneShot(attackSounds[index], attackVolume);
-                Debug.Log($"[Audio] ⚔️ Attack Sound {index + 1}/{attackSounds.Length}");
-            }
+            // Interrumpe y reproduce la versión más reciente (más responsivo para combos rápidos)
+            PlayEffectClip(attackSounds[index], attackVolume, interrupt: true, allowOverlap: false);
+            Debug.Log($"[Audio] ⚔️ Attack Sound {index + 1}/{attackSounds.Length}");
         }
 
         /// <summary>
@@ -158,12 +149,9 @@ namespace StarterAssets
             }
 
             int randomIndex = Random.Range(0, hurtSounds.Length);
-
-            if (hurtSounds[randomIndex] != null && effectsSource != null)
-            {
-                effectsSource.PlayOneShot(hurtSounds[randomIndex], hurtVolume);
-                Debug.Log($"[Audio] 😖 Hurt Sound {randomIndex + 1}/{hurtSounds.Length}");
-            }
+            // Para que el feedback de recibir daño sea inmediato, interrumpimos cualquier efecto actual
+            PlayEffectClip(hurtSounds[randomIndex], hurtVolume, interrupt: true, allowOverlap: false);
+            Debug.Log($"[Audio] 😖 Hurt Sound {randomIndex + 1}/{hurtSounds.Length}");
         }
 
         /// <summary>
@@ -199,10 +187,41 @@ namespace StarterAssets
         /// </summary>
         public void PlayBlockSound()
         {
-            if (blockSound != null && effectsSource != null)
+            PlayEffectClip(blockSound, blockVolume, interrupt: true, allowOverlap: false);
+            Debug.Log("[Audio] 🛡️ Block");
+        }
+
+        /// <summary>
+        /// Reproduce un clip de efecto con reglas de prioridad.
+        /// - allowOverlap = true -> usa PlayOneShot (permitir solapamiento)
+        /// - interrupt = true -> detiene el clip actual y reproduce el nuevo
+        /// - interrupt = false && !allowOverlap -> solo reproduce si no hay nada sonando
+        /// </summary>
+        private void PlayEffectClip(AudioClip clip, float volume, bool interrupt = true, bool allowOverlap = false)
+        {
+            if (clip == null || effectsSource == null) return;
+
+            if (allowOverlap)
             {
-                effectsSource.PlayOneShot(blockSound, blockVolume);
-                Debug.Log("[Audio] 🛡️ Block");
+                effectsSource.PlayOneShot(clip, volume);
+                return;
+            }
+
+            if (interrupt)
+            {
+                effectsSource.Stop();
+                effectsSource.clip = clip;
+                effectsSource.volume = volume;
+                effectsSource.Play();
+                return;
+            }
+
+            // No interrumpir: solo reproducir si no está sonando nada
+            if (!effectsSource.isPlaying)
+            {
+                effectsSource.clip = clip;
+                effectsSource.volume = volume;
+                effectsSource.Play();
             }
         }
 

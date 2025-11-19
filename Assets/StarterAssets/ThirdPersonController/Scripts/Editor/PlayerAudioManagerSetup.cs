@@ -12,6 +12,16 @@ namespace StarterAssets
     {
         static PlayerAudioManagerSetup()
         {
+            // Forzar refresco de assets para asegurar que Unity compile los scripts nuevos
+            try
+            {
+                UnityEditor.AssetDatabase.Refresh();
+            }
+            catch
+            {
+                // Ignorar si no estamos en un contexto donde AssetDatabase está disponible
+            }
+
             EditorSceneManager.sceneOpened += OnSceneOpened;
         }
 

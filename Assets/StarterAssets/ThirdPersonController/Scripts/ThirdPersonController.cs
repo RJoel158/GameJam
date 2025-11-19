@@ -8,6 +8,8 @@ using UnityEngine.InputSystem;
 
 namespace StarterAssets
 {
+
+
     [RequireComponent(typeof(CharacterController))]
 
     [RequireComponent(typeof(PlayerInput))]
@@ -69,11 +71,19 @@ namespace StarterAssets
         [Header("Equipment")]
         public bool isEquipping;
         public bool isEquipped;
+        [Space(4)]
+        [Tooltip("Tiempo mínimo entre acciones de sacar/guardar espada (segundos)")]
+        public float drawCooldown = 0.35f;
+        private float _drawTimer = 0f;
+        private bool _canDraw = true;
 
         [Header("Attack")]
         public bool isAttacking;
         public bool inAttackAnimation = false;
         public bool canAttack = true;
+        [Tooltip("Cooldown entre ataques para evitar spam (segundos)")]
+        public float attackCooldown = 0.25f;
+        private float _attackTimer = 0f;
 
         [Header("Block")]
         public bool isBlocking;
@@ -176,12 +186,24 @@ namespace StarterAssets
         {
             _cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
 
-            _hasAnimator = TryGetComponent(out _animator);
+            // Initialize required components early to avoid NullReferenceExceptions
             _controller = GetComponent<CharacterController>();
             _input = GetComponent<StarterAssetsInputs>();
             _playerInput = GetComponent<PlayerInput>();
 
+            // Assign animator reference and hashes before any animator calls
+            _hasAnimator = TryGetComponent(out _animator);
             AssignAnimationIDs();
+
+            // Ensure cooldown timers are initialized
+            _attackTimer = 0f;
+            canAttack = true;
+            _drawTimer = 0f;
+            _canDraw = true;
+
+            // Call initial handlers after initialization
+            Attack();
+            DrawSheathSword();
 
             // reset our timeouts on start
             _jumpTimeoutDelta = JumpTimeout;
@@ -190,8 +212,7 @@ namespace StarterAssets
 
         private void Update()
         {
-            _hasAnimator = TryGetComponent(out _animator);
-
+            // avoid TryGetComponent each frame - components are cached in Start()
             Attack();
             DrawSheathSword();
             JumpAndGravity();

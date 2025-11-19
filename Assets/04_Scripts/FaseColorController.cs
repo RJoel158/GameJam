@@ -6,19 +6,19 @@ public class FaseColorController : MonoBehaviour
 {
     [SerializeField]
     private Image faseImage;
-    
+
     [SerializeField]
     private Image manaImage;
-    
+
     [SerializeField]
     private Image staminaImage;
-    
+
     [SerializeField]
     private Image healthImage;
-    
+
     [SerializeField]
     private Color startColor = new Color(1f, 0f, 0f, 1f); // Rojo (FF0000)
-    
+
     [SerializeField]
     private Color endColor = new Color(1f, 1f, 1f, 1f); // Blanco (FFFFFF)
 
@@ -29,12 +29,12 @@ public class FaseColorController : MonoBehaviour
     public float staminaPercent = 100f;
     public int stamina = 2000;
     public int maxStamina = 2000;
-    
+
     public float sprintStaminaCost = 400f; // Stamina consumed per second while sprinting
     public float attackStaminaCost = 500f; // Stamina consumed per attack (1.25x más que correr)
     public int staminaDecrementStep = 200; // Stamina baja en incrementos de este valor
     public float staminaRegenRate = 200f; // Stamina regeneration per second (sprintStaminaCost * 0.5f)
-    
+
     private float currentStamina; // Usar float interno para precisión
     private float staminaTickTimer = 0f; // Timer para controlar cuándo bajar stamina
     private bool lastAttackInputState = false; // Guardar el estado anterior del input de ataque
@@ -46,7 +46,7 @@ public class FaseColorController : MonoBehaviour
     public float manaPercent = 0f;
     public int mana = 0;
     public int maxMana = 100;
-    
+
     private float currentMana = 0f; // Mana actual (float para precisión)
     private float manaTickTimer = 0f; // Timer para controlar cuándo subir mana
     private int manaIncrementStep = 25; // Mana sube en incrementos de 25
@@ -65,7 +65,7 @@ public class FaseColorController : MonoBehaviour
         {
             faseImage = GameObject.Find("fase")?.GetComponent<Image>();
         }
-        
+
         if (manaImage == null)
         {
             manaImage = GameObject.Find("mana")?.GetComponent<Image>();
@@ -103,7 +103,7 @@ public class FaseColorController : MonoBehaviour
         {
             faseImage.color = startColor;
         }
-        
+
         // Inicializar mana en 0
         if (manaImage != null)
         {
@@ -140,25 +140,41 @@ public class FaseColorController : MonoBehaviour
             staminaPercent = 100f;
             return;
         }
-        
         // DESPUÉS DE QUE TERMINA EL PODER-UP, CONSUMIR NORMALMENTE
+        // Proteger contra referencias nulas en _input: intentar obtener el componente si no está presente
+        var input = thirdPersonController._input;
+        if (input == null)
+        {
+            input = thirdPersonController.GetComponent<StarterAssets.StarterAssetsInputs>();
+            if (input != null)
+            {
+                // opcionalmente sincronizar con el tercer person controller
+                thirdPersonController._input = input;
+            }
+            else
+            {
+                // No podemos procesar el consumo de stamina sin input
+                return;
+            }
+        }
+
         // Consume stamina when sprinting de forma fluida
-        if (thirdPersonController._input.sprint && thirdPersonController._input.move != Vector2.zero && currentStamina > 0)
+        if (input.sprint && input.move != Vector2.zero && currentStamina > 0)
         {
             // Velocidad de consumo: 400 stamina por segundo (fluido y continuo)
             currentStamina -= sprintStaminaCost * Time.deltaTime;
-            if (currentStamina < 0) 
+            if (currentStamina < 0)
             {
                 currentStamina = 0;
             }
         }
         // Regenerate stamina cuando no está presionando Shift ni atacando
-        else if (!thirdPersonController._input.sprint && !thirdPersonController._input.attack)
+        else if (!input.sprint && !input.attack)
         {
             // Regenerate stamina cuando no está presionando Shift ni atacando
             currentStamina += staminaRegenRate * Time.deltaTime;
-            
-            if (currentStamina > maxStamina) 
+
+            if (currentStamina > maxStamina)
             {
                 currentStamina = maxStamina;
             }
@@ -177,7 +193,7 @@ public class FaseColorController : MonoBehaviour
             // Velocidad de regeneración: 15 mana por segundo (suave y fluido)
             float manaRegenRate = 15f;
             currentMana += manaRegenRate * Time.deltaTime;
-            
+
             if (currentMana > maxMana) currentMana = maxMana;
         }
 
@@ -192,7 +208,7 @@ public class FaseColorController : MonoBehaviour
         {
             float fillAmount = manaPercent / 100f;
             manaImage.fillAmount = fillAmount;
-            
+
             // Interpolar color basado en el fillAmount
             Color newColor = Color.Lerp(startColor, endColor, fillAmount);
             faseImage.color = newColor;
@@ -220,7 +236,7 @@ public class FaseColorController : MonoBehaviour
             float healthPercent = (thirdPersonController.health * 100f) / thirdPersonController.maxHealth;
             float fillAmount = Mathf.Clamp01(healthPercent / 100f);
             healthImage.fillAmount = fillAmount;
-            
+
             // Verificar si el jugador está muerto
             if (thirdPersonController.health <= 0)
             {
