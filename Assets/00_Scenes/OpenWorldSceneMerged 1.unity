@@ -1074,6 +1074,79 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 568148726}
   m_CullTransparentMesh: 1
+--- !u!1 &588395271
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 588395273}
+  - component: {fileID: 588395272}
+  m_Layer: 0
+  m_Name: AudioManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &588395272
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 588395271}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b74088d2283fb541832f18d2887d63e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  drawSwordSound: {fileID: 8300000, guid: 02dc6bda1b604544fba8809332627caf, type: 3}
+  sheathSwordSound: {fileID: 8300000, guid: 02dc6bda1b604544fba8809332627caf, type: 3}
+  equipmentVolume: 0.329
+  attackSounds:
+  - {fileID: 8300000, guid: bc3a2cc1f8197e14d832a7bfc83ec148, type: 3}
+  - {fileID: 8300000, guid: b341cd93b546d2d4898777ecd3cb0253, type: 3}
+  - {fileID: 8300000, guid: f322b18338aa75446ba948e686f94440, type: 3}
+  attackVolume: 0.518
+  attackSoundMode: 2
+  hurtSounds:
+  - {fileID: 8300000, guid: 316418a54960fee41932ae78063da140, type: 3}
+  hurtVolume: 0.9
+  footstepSounds:
+  - {fileID: 8300000, guid: 72f526a6a9890f643a88e85a61c86c8a, type: 3}
+  - {fileID: 8300000, guid: 85016e0f2b01da248b9663dd49a161b0, type: 3}
+  - {fileID: 8300000, guid: 186de84b3207156479abe98f4958fed0, type: 3}
+  - {fileID: 8300000, guid: 1a91fcd19acf1e54bba0945d9f390849, type: 3}
+  - {fileID: 8300000, guid: 14e8a8d2158bec840b56c54f5266e692, type: 3}
+  - {fileID: 8300000, guid: 29841e7d5bbfb5b419c9ad16ca8bc4c1, type: 3}
+  - {fileID: 8300000, guid: dd1af302b8902684d9381de1f2d3a5af, type: 3}
+  - {fileID: 8300000, guid: 67c8b33e424ccdc4486edf538ab91c5a, type: 3}
+  - {fileID: 8300000, guid: 274649b0e221539409070ebf6c18918b, type: 3}
+  - {fileID: 8300000, guid: a3194b8bbc96ef84fab1f98f4b7dae3e, type: 3}
+  landingSound: {fileID: 8300000, guid: ff697d3070687ce4583faa0561a145a2, type: 3}
+  footstepVolume: 0.276
+  ambientSound: {fileID: 8300000, guid: 195eb9ffd14e37742aa545f3ae0bc27a, type: 3}
+  ambientVolume: 0.791
+  blockSound: {fileID: 0}
+  blockVolume: 0.8
+--- !u!4 &588395273
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 588395271}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &625540147 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3799545845586785563, guid: 93071e979dd127d40badf3ff7a485b76, type: 3}
