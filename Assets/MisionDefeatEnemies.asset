@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9bb96a9236a66b546aeb66e56c43755c, type: 3}
   m_Name: MisionDefeatEnemies
   m_EditorClassIdentifier: 
-  missionName: Derrota enemigos
-  description: Derrota 1 enemigo
-  enemiesRequired: 1
-  enemiesDefeated: 1
-  isActive: 0
-  isCompleted: 1
-  defeatPositions:
-  - {x: 58.97943, y: -90.03935, z: 428.17328}
+  missionName: Limpia los campamentos de los caidos
+  description: Acaba con todos los caidos
+  enemiesRequired: 3
+  countCampClearsInsteadOfEnemies: 1
+  enemiesDefeated: 0
+  isActive: 1
+  isCompleted: 0
+  defeatPositions: []

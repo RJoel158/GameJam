@@ -7,6 +7,8 @@ public class Enemy : MonoBehaviour
 {
     // Event for mission system - fires when enemy is defeated with position
     public static event System.Action<Vector3> OnEnemyDefeated;
+    // Instance event for camp tracking
+    public event System.Action OnDied;
 
     // Public method for testing - simulates enemy defeat
     public static void TEST_TriggerEnemyDefeated(Vector3 position)
@@ -41,7 +43,20 @@ public class Enemy : MonoBehaviour
 
     void Start()
     {
-        //agent = GetComponent<NavMeshAgent>();
+        // Ensure NavMeshAgent reference is assigned
+        if (agent == null)
+        {
+            agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
+            if (agent != null)
+            {
+                agent.updateRotation = false; // we rotate manually on Y axis
+                agent.updateUpAxis = true;
+            }
+            else
+            {
+                Debug.LogWarning($"[Enemy] NavMeshAgent not found on {gameObject.name}. Enemigo no podrá navegar por NavMesh.");
+            }
+        }
         //animator = GetComponent<Animator>();
         //CapsuleEnemyCollider = GetComponent<CapsuleCollider>();
         player = GameObject.FindGameObjectWithTag("Player");
@@ -93,6 +108,8 @@ public class Enemy : MonoBehaviour
 
         if (dead)
         {
+            // Stop agent if dead
+            if (agent != null && agent.enabled) agent.isStopped = true;
             return;
         }
 
@@ -113,7 +130,17 @@ public class Enemy : MonoBehaviour
         if (playerDetected && !isAttacking && !inAttackAnimation && !dead && !attackPlayer)
         {
             //newDestinationCD = 0.5f;
-            agent.SetDestination(player.transform.position);
+            if (agent != null && agent.isOnNavMesh)
+            {
+                agent.SetDestination(player.transform.position);
+            }
+            else
+            {
+                // Fallback simple movement towards player for cases where navmesh isn't available
+                Vector3 dir = (player.transform.position - transform.position);
+                dir.y = 0f;
+                transform.position += dir.normalized * 1.5f * Time.deltaTime;
+            }
         }
         newDestinationCD -= Time.deltaTime;
 
@@ -190,6 +217,16 @@ public class Enemy : MonoBehaviour
         // Fire mission event with enemy position
         Debug.Log($"<color=red>[Enemy] Firing OnEnemyDefeated event at position: {transform.position}</color>");
         Debug.Log($"<color=red>[Enemy] Event has {(OnEnemyDefeated != null ? OnEnemyDefeated.GetInvocationList().Length : 0)} subscribers</color>");
+        // Invoke instance event first so local owners (camps) get notified
+        try
+        {
+            OnDied?.Invoke();
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[Enemy] Error invoking OnDied: {ex}");
+        }
+
         OnEnemyDefeated?.Invoke(transform.position);
 
         // Soltar poder-up al morir usando reflection para evitar dependencias

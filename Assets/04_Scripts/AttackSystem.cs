@@ -4,7 +4,7 @@ using UnityEngine;
 public class AttackSystem : MonoBehaviour
 {
     [HideInInspector] public bool exitComboTriggered = false;
-    
+
     [SerializeField] float timePassed = 0f;
     [SerializeField] float clipLength = 0f;
     [SerializeField] float clipSpeed = 0f;
@@ -37,7 +37,7 @@ public class AttackSystem : MonoBehaviour
                 thirdPersonController.stamina = 0;
             }
         }
-        
+
         //thirdPersonController._animator.applyRootMotion = true;
         //timePassed = 0;
     }
@@ -51,10 +51,10 @@ public class AttackSystem : MonoBehaviour
 
     void Start()
     {
-        
+
     }
 
-    
+
     void Update()
     {
         timePassed += Time.deltaTime;
@@ -64,7 +64,7 @@ public class AttackSystem : MonoBehaviour
             // ERRROR DE DESBORDAMIENTO EN EL ARRAY
             clipLength = thirdPersonController._animator.GetCurrentAnimatorClipInfo(1)[0].clip.length;
             clipSpeed = thirdPersonController._animator.GetCurrentAnimatorStateInfo(1).speed;
-            
+
             //Debug.Log($"Attack Clip Length: {clipLength} / Speed: {clipSpeed}");
             //Debug.Log($"Time: {clipLength / clipSpeed}");
 
