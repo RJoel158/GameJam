@@ -22,9 +22,19 @@ public class GodProyectile : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player") && !playerBullet)
         {
-            Debug.Log("PlayerDetected");
             ThirdPersonController player = collision.gameObject.GetComponent<ThirdPersonController>();
-            player.TakeDamage(damage);
+
+            // ARREGLO: Solo hacer daño si el jugador NO está muerto
+            if (player != null && !player.dead && !player.death)
+            {
+                Debug.Log("PlayerDetected - Taking Damage");
+                player.TakeDamage(damage);
+            }
+            else
+            {
+                Debug.Log("PlayerDetected - But player is already dead");
+            }
+
             Destroy(gameObject);
         }
     }

@@ -16,15 +16,37 @@ public class God : MonoBehaviour
     [SerializeField] float timer = 0;
     public float timeBtwShoot = 1f;
 
+    // Referencia al BossController
+    private BossController bossController;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        // Auto-find player if not assigned
+        if (player == null)
+        {
+            player = GameObject.FindGameObjectWithTag("Player");
+            if (player == null)
+            {
+                Debug.LogWarning("<color=orange>[God] No player found! Looking for any ThirdPersonController...</color>");
+                var controller = FindAnyObjectByType<StarterAssets.ThirdPersonController>();
+                if (controller != null)
+                {
+                    player = controller.gameObject;
+                }
+            }
+        }
 
+        // Obtener referencia al BossController
+        bossController = GetComponent<BossController>();
     }
 
     // Update is called once per frame
     void Update()
     {
+        // Safety check
+        if (player == null) return;
+
         CheckIfCanShoot();
 
         Vector3 direction = player.transform.position - transform.position;
@@ -61,8 +83,20 @@ public class God : MonoBehaviour
         else
         {
             timer = 0;
-            //AudioManager.instance.PlayRandomPitchSFX(shootSFX);
-            Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+
+            // NUEVO: Verificar si el boss tiene energía suficiente
+            bool canShoot = true;
+            if (bossController != null)
+            {
+                canShoot = bossController.TryUseEnergy();
+            }
+
+            // Solo disparar si tiene energía (o si no tiene BossController)
+            if (canShoot)
+            {
+                //AudioManager.instance.PlayRandomPitchSFX(shootSFX);
+                Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+            }
         }
     }
 
