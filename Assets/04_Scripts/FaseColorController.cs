@@ -34,6 +34,8 @@ public class FaseColorController : MonoBehaviour
     public float attackStaminaCost = 500f; // Stamina consumed per attack (1.25x más que correr)
     public int staminaDecrementStep = 200; // Stamina baja en incrementos de este valor
     public float staminaRegenRate = 200f; // Stamina regeneration per second (sprintStaminaCost * 0.5f)
+    public float blockStaminaCostPercent = 15f; // Porcentaje de estamina que cuesta bloquear
+    public float damageStaminaCostPercent = 30f; // Porcentaje de estamina que cuesta al recibir daño
 
     private float currentStamina; // Usar float interno para precisión
     private float staminaTickTimer = 0f; // Timer para controlar cuándo bajar stamina
@@ -46,10 +48,15 @@ public class FaseColorController : MonoBehaviour
     public float manaPercent = 0f;
     public int mana = 0;
     public int maxMana = 100;
+    public float hardModeManaCostPercent = 15f; // Porcentaje de mana que cuesta activar Hard Mode (15%)
+    public float hardModeManaCostDrainPercent = 5f; // Porcentaje de mana que se drena por segundo durante Hard Mode (5%)
 
     private float currentMana = 0f; // Mana actual (float para precisión)
     private float manaTickTimer = 0f; // Timer para controlar cuándo subir mana
     private int manaIncrementStep = 25; // Mana sube en incrementos de 25
+    
+    private bool isInitializingMana = true; // Flag para saber si estamos en la carga inicial de mana
+    private float manaInitializationSpeed = 15f; // Velocidad de carga inicial del mana (15 puntos por segundo)
 
     private void Awake()
     {
@@ -65,10 +72,11 @@ public class FaseColorController : MonoBehaviour
         currentStamina = maxStamina;
         staminaPercent = 100f;
 
-        // Inicializar mana correctamente
+        // Inicializar mana en 0 - comenzará a cargarse fluidamente
         mana = 0;
         currentMana = 0f;
         manaPercent = 0f;
+        isInitializingMana = true; // Activar la carga inicial
         
         // Sincronizar INMEDIATAMENTE con ThirdPersonController
         if (thirdPersonController != null)
@@ -142,8 +150,8 @@ public class FaseColorController : MonoBehaviour
     {
         if (thirdPersonController != null)
         {
-            HandleStaminaConsumption();
             HandleManaRegeneration();
+            HandleStaminaConsumption();
             UpdateHealthUI();
             UpdateUI();
             
@@ -162,62 +170,55 @@ public class FaseColorController : MonoBehaviour
             staminaPercent = 100f;
             return;
         }
-        // DESPUÉS DE QUE TERMINA EL PODER-UP, CONSUMIR NORMALMENTE
-        // Proteger contra referencias nulas en _input: intentar obtener el componente si no está presente
+
+        // Proteger contra referencias nulas en _input
         var input = thirdPersonController._input;
         if (input == null)
         {
             input = thirdPersonController.GetComponent<StarterAssets.StarterAssetsInputs>();
             if (input != null)
             {
-                // opcionalmente sincronizar con el tercer person controller
                 thirdPersonController._input = input;
             }
             else
             {
-                // No podemos procesar el consumo de stamina sin input
                 return;
             }
         }
 
-        // Consume stamina when sprinting de forma fluida
-        if (input.sprint && input.move != Vector2.zero && currentStamina > 0)
+        bool isSprinting = input.sprint && input.move != Vector2.zero && currentStamina > 0;
+        bool isAttacking = input.attack && thirdPersonController.isAttacking;
+        bool isBlocking = thirdPersonController.isBlocking;
+
+        // 1. SPRINT - Consume 400 stamina por segundo (pero solo si hay estamina > 0)
+        if (isSprinting && currentStamina > 0)
         {
-            // Velocidad de consumo: 400 stamina por segundo (fluido y continuo)
             currentStamina -= sprintStaminaCost * Time.deltaTime;
-            if (currentStamina < 0)
+            if (currentStamina < 0) currentStamina = 0;
+        }
+        // 2. ATTACK - Consumir 20% de estamina por golpe (una sola vez)
+        else if (isAttacking)
+        {
+            // Se consume en el método TryConsumeStaminaForAttack() que se llama desde ThirdPersonController
+        }
+        // 3. BLOCK - Consumir 15% de estamina continuo mientras se mantiene presionado
+        else if (blockingActive)
+        {
+            float blockStaminaCost = maxStamina * (blockStaminaCostPercent / 100f);
+            currentStamina -= blockStaminaCost * Time.deltaTime;
+            
+            if (currentStamina <= 0)
             {
                 currentStamina = 0;
+                blockingActive = false; // Detener bloqueo automáticamente
+                Debug.Log("[FaseColorController] Bloqueo finalizado - Estamina agotada");
             }
         }
-        // Regenerate stamina cuando no está presionando Shift ni atacando
-        else if (!input.sprint && !input.attack)
-        {
-            // No hacer nada, solo detener regeneración
-        }
-        // 3. BLOCK - Si está bloqueando, no regenerar
-        else if (isBlockingNow)
-        {
-            // No hacer nada, solo detener regeneración
-        }
-        // 4. IDLE - No está haciendo nada: regenerar inmediatamente
+        // 4. IDLE - Regenerar estamina solo cuando NO está corriendo, atacando o bloqueando
         else
         {
-            // Regenerar stamina continuamente cuando está en reposo
             currentStamina += staminaRegenRate * Time.deltaTime;
-
-            if (currentStamina > maxStamina)
-            {
-                currentStamina = maxStamina;
-            }
-        }
-
-        // Detener bloqueo si no hay estamina
-        if (currentStamina <= 0 && thirdPersonController.isBlocking)
-        {
-            thirdPersonController._animator.SetBool(Animator.StringToHash("Block"), false);
-            thirdPersonController.isBlocking = false;
-            thirdPersonController.canBlock = false;
+            if (currentStamina > maxStamina) currentStamina = maxStamina;
         }
 
         // Convertir float a int para el stamina público
@@ -225,16 +226,68 @@ public class FaseColorController : MonoBehaviour
         staminaPercent = (stamina * 100) / maxStamina;
     }
 
+    private bool attackingActive = false; // Flag para rastrear si el ataque está activo
+    
+    // Método para intentar atacar - Consume 10% de estamina
+    public bool TryAttack()
+    {
+        float attackStaminaCost = maxStamina * (0.10f); // 10% de estamina
+        if (currentStamina >= attackStaminaCost)
+        {
+            currentStamina -= attackStaminaCost;
+            if (currentStamina < 0) currentStamina = 0;
+            stamina = (int)currentStamina;
+            staminaPercent = (stamina * 100) / maxStamina;
+            attackingActive = true;
+            Debug.Log($"[Estamina] Consumido 10% en ataque. Estamina actual: {stamina}/{maxStamina}");
+            return true;
+        }
+        else
+        {
+            Debug.Log("[Estamina] No hay suficiente estamina para atacar");
+            return false;
+        }
+    }
+    
+    // Método para registrar fin del ataque
+    public void EndAttack()
+    {
+        attackingActive = false;
+    }
+
     private void HandleManaRegeneration()
     {
-        // Si Hard Mode está activo, drenar mana continuamente (3% por segundo)
-        if (thirdPersonController != null && thirdPersonController.hardModeEnabled)
+        // Si estamos inicializando mana, cargar fluidamente desde 0 hasta maxMana
+        if (isInitializingMana)
         {
-            // Velocidad de regeneración: 15 mana por segundo (suave y fluido)
-            float manaRegenRate = 15f;
-            currentMana += manaRegenRate * Time.deltaTime;
-
-            if (currentMana > maxMana) currentMana = maxMana;
+            currentMana += manaInitializationSpeed * Time.deltaTime;
+            
+            if (currentMana >= maxMana)
+            {
+                currentMana = maxMana;
+                isInitializingMana = false; // Terminar la carga inicial
+                Debug.Log("[FaseColorController] Carga inicial de mana completada");
+            }
+        }
+        // Si Hard Mode está activo, drenar mana continuamente (3% por segundo)
+        else if (thirdPersonController != null && thirdPersonController.hardModeEnabled)
+        {
+            float manaDrainRate = maxMana * (hardModeManaCostDrainPercent / 100f); // 3% de 100 = 3 mana por segundo
+            currentMana -= manaDrainRate * Time.deltaTime;
+            
+            if (currentMana < 0) currentMana = 0;
+        }
+        else
+        {
+            // Mana sube de forma fluida y continua cuando no estamos en Hard Mode
+            if (currentMana < maxMana)
+            {
+                // Velocidad de regeneración: 15 mana por segundo (suave y fluido)
+                float manaRegenRate = 15f;
+                currentMana += manaRegenRate * Time.deltaTime;
+                
+                if (currentMana > maxMana) currentMana = maxMana;
+            }
         }
 
         // Convertir float a int para el mana público
@@ -291,19 +344,6 @@ public class FaseColorController : MonoBehaviour
         }
     }
 
-    // Método público para consumir stamina en ataques
-    public bool TryConsumeStaminaForAttack()
-    {
-        if (currentStamina >= attackStaminaCost && currentStamina > 0)
-        {
-            currentStamina -= attackStaminaCost;
-            if (currentStamina < 0) currentStamina = 0;
-            stamina = (int)currentStamina;
-            return true;
-        }
-        return false;
-    }
-
     // Propiedad pública para acceder al stamina actual
     public int GetCurrentStamina()
     {
@@ -338,6 +378,31 @@ public class FaseColorController : MonoBehaviour
         if (currentStamina < 0) currentStamina = 0;
     }
 
+    private bool blockingActive = false; // Rastrear si el bloqueo está activo internamente
+    
+    // Método para intentar iniciar bloqueo
+    public bool TryStartBlock()
+    {
+        if (currentStamina > 0)
+        {
+            blockingActive = true;
+            return true;
+        }
+        return false;
+    }
+    
+    // Método para detener el bloqueo
+    public void StopBlock()
+    {
+        blockingActive = false;
+    }
+    
+    // Método para verificar si el bloqueo está activo
+    public bool IsBlockingActive()
+    {
+        return blockingActive && currentStamina > 0;
+    }
+    
     // Método para verificar si puede bloquear
     public bool CanBlock()
     {

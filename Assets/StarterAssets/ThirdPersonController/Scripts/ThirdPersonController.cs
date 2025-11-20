@@ -96,6 +96,9 @@ namespace StarterAssets
         public Material originalMaterial;
         public GameObject playerTextureObject;
 
+        [Header("UI & Systems")]
+        private FaseColorController faseColorController;
+
         [Header("Cinemachine")]
         [Tooltip("The follow target set in the Cinemachine Virtual Camera that the camera will follow")]
         public GameObject CinemachineCameraTarget;
@@ -190,6 +193,7 @@ namespace StarterAssets
             _controller = GetComponent<CharacterController>();
             _input = GetComponent<StarterAssetsInputs>();
             _playerInput = GetComponent<PlayerInput>();
+            faseColorController = FindFirstObjectByType<FaseColorController>();
 
             // Assign animator reference and hashes before any animator calls
             _hasAnimator = TryGetComponent(out _animator);
@@ -301,8 +305,9 @@ namespace StarterAssets
             //    return;
             //}
 
-            // set target speed based on move speed, sprint speed and if sprint is pressed
-            float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
+            // Verificar si estamina llegó a 0 mientras estaba corriendo - forzar a caminar
+            bool canSprint = faseColorController != null ? faseColorController.CanSprint() : true;
+            float targetSpeed = (_input.sprint && canSprint) ? SprintSpeed : MoveSpeed;
 
             // a simplistic acceleration and deceleration designed to be easy to remove, replace, or iterate upon
 
@@ -333,7 +338,15 @@ namespace StarterAssets
                 _speed = targetSpeed;
             }
 
-            _animationBlend = Mathf.Lerp(_animationBlend, targetSpeed, Time.deltaTime * SpeedChangeRate);
+            // Si no puede correr más, forzar animación de walk inmediatamente
+            if (!canSprint && _input.sprint && _animationBlend > MoveSpeed)
+            {
+                _animationBlend = MoveSpeed;
+            }
+            else
+            {
+                _animationBlend = Mathf.Lerp(_animationBlend, targetSpeed, Time.deltaTime * SpeedChangeRate);
+            }
             if (_animationBlend < 0.01f) _animationBlend = 0f;
 
             // normalise input direction
@@ -468,8 +481,8 @@ namespace StarterAssets
                 //CameraShake.Instance.ShakeCamera(2f, 0.2f);
 
                 // Reproducir sonido de quejido al recibir daño
-                if (PlayerAudioManager.Instance != null)
-                    PlayerAudioManager.Instance.PlayHurtSound();
+                // if (PlayerAudioManager.Instance != null)
+                //     PlayerAudioManager.Instance.PlayHurtSound();
             }
             else if (!dead && isBlocking)
             {
@@ -481,8 +494,8 @@ namespace StarterAssets
                 _animator.SetTrigger(_animIDBlocked);
 
                 // Reproducir sonido de bloqueo
-                if (PlayerAudioManager.Instance != null)
-                    PlayerAudioManager.Instance.PlayBlockSound();
+                // if (PlayerAudioManager.Instance != null)
+                //     PlayerAudioManager.Instance.PlayBlockSound();
             }
 
             if (health <= 0)
@@ -514,8 +527,8 @@ namespace StarterAssets
                         _input.draw = false;
 
                         // Reproducir sonido de sacar espada
-                        if (PlayerAudioManager.Instance != null)
-                            PlayerAudioManager.Instance.PlayDrawSword();
+                        // if (PlayerAudioManager.Instance != null)
+                        //     PlayerAudioManager.Instance.PlayDrawSword();
                     }
                 }
                 else if (_input.draw && isEquipped)
@@ -528,8 +541,8 @@ namespace StarterAssets
                         _input.draw = false;
 
                         // Reproducir sonido de guardar espada
-                        if (PlayerAudioManager.Instance != null)
-                            PlayerAudioManager.Instance.PlaySheathSword();
+                        // if (PlayerAudioManager.Instance != null)
+                        //     PlayerAudioManager.Instance.PlaySheathSword();
                     }
                 }
             }
@@ -539,7 +552,7 @@ namespace StarterAssets
         {
             _animator.SetBool(_animIDAttacking, inAttackAnimation);
 
-            if (Grounded)
+            if (Grounded && faseColorController != null)
             {
                 // Attack
                 if (_input.attack && isEquipped && !isAttacking && !inHitAnimation)
@@ -547,13 +560,19 @@ namespace StarterAssets
                     // update animator if using character
                     if (canAttack)
                     {
-                        _animator.SetTrigger(_animIDAttack);
-                        _animator.SetFloat(_animIDSpeed, 0);
-                        _input.attack = false;
-
-                        // Reproducir sonido de ataque
-                        if (PlayerAudioManager.Instance != null)
-                            PlayerAudioManager.Instance.PlayAttackSound();
+                        // Intentar atacar - FaseColorController verifica estamina
+                        bool canPerformAttack = faseColorController.TryAttack();
+                        if (canPerformAttack)
+                        {
+                            _animator.SetTrigger(_animIDAttack);
+                            _animator.SetFloat(_animIDSpeed, 0);
+                            _input.attack = false;
+                        }
+                        else
+                        {
+                            Debug.Log("[Ataque] No hay suficiente estamina para atacar");
+                            _input.attack = false;
+                        }
                     }
                 }
             }
@@ -561,34 +580,39 @@ namespace StarterAssets
 
         private void HandleBlock()
         {
-            // Verificar si puede bloquear según estamina y condiciones
-            bool canBlockByStamina = (faseColorController != null) ? faseColorController.CanBlock() : true;
+            if (faseColorController == null) return;
             
-            if (Grounded && !isAttacking && !isEquipping && _animationBlend <= 0.01f && canBlockByStamina)
+            // Reportar estado de bloqueo a FaseColorController
+            if (_input.block && !isBlocking && Grounded && !isAttacking && !isEquipping && _animationBlend <= 0.01f)
             {
-                if (_input.block && !isBlocking)
+                // Intentar iniciar bloqueo
+                if (faseColorController.TryStartBlock())
                 {
                     if (_hasAnimator)
                     {
                         _animator.SetBool(_animIDBlock, true);
-                        isBlocking = true;
-                        // Consumir estamina al iniciar el bloqueo
-                        if (faseColorController != null)
-                        {
-                            faseColorController.ConsumeStaminaForBlock();
-                        }
                     }
-                }
-                else if (!_input.block && isBlocking)
-                {
-                    _animator.SetBool(_animIDBlock, false);
-                    isBlocking = false;
+                    isBlocking = true;
                 }
             }
-            else if (isBlocking && !canBlockByStamina)
+            else if (!_input.block && isBlocking)
             {
-                // Detener bloqueo si se agota la estamina
-                _animator.SetBool(_animIDBlock, false);
+                // Soltar bloqueo
+                faseColorController.StopBlock();
+                if (_hasAnimator)
+                {
+                    _animator.SetBool(_animIDBlock, false);
+                }
+                isBlocking = false;
+            }
+            
+            // Verificar si FaseColorController dice que debe detener el bloqueo (por falta de estamina)
+            if (isBlocking && !faseColorController.IsBlockingActive())
+            {
+                if (_hasAnimator)
+                {
+                    _animator.SetBool(_animIDBlock, false);
+                }
                 isBlocking = false;
             }
         }
@@ -620,6 +644,12 @@ namespace StarterAssets
                     {
                         _animator.SetTrigger(_animIDHardMode);
                         hardModeEnabled = true;
+                        
+                        // Consumir mana al activar Hard Mode desde FaseColorController
+                        if (faseColorController != null)
+                        {
+                            faseColorController.ConsumeManForHardMode();
+                        }
                     }
                 }
             }
@@ -713,12 +743,6 @@ namespace StarterAssets
             Debug.Log("Hard Mode Active");
             _input.hardMode = false;
 
-            // Consumir mana al activar Hard Mode
-            if (faseColorController != null)
-            {
-                faseColorController.ConsumeManForHardMode();
-            }
-
             // Guardar el material original la primera vez
             if (originalMaterial == null && playerTextureObject != null)
             {
@@ -754,12 +778,12 @@ namespace StarterAssets
             if (animationEvent.animatorClipInfo.weight > 0.5f)
             {
                 // Usar PlayerAudioManager si está disponible
-                if (PlayerAudioManager.Instance != null)
-                {
-                    PlayerAudioManager.Instance.PlayFootstepSound(transform.TransformPoint(_controller.center));
-                }
+                // if (PlayerAudioManager.Instance != null)
+                // {
+                //     PlayerAudioManager.Instance.PlayFootstepSound(transform.TransformPoint(_controller.center));
+                // }
                 // Fallback al sistema antiguo
-                else if (FootstepAudioClips.Length > 0)
+                if (FootstepAudioClips.Length > 0)
                 {
                     var index = Random.Range(0, FootstepAudioClips.Length);
                     AudioSource.PlayClipAtPoint(FootstepAudioClips[index], transform.TransformPoint(_controller.center), FootstepAudioVolume);
@@ -772,12 +796,12 @@ namespace StarterAssets
             if (animationEvent.animatorClipInfo.weight > 0.5f)
             {
                 // Usar PlayerAudioManager si está disponible
-                if (PlayerAudioManager.Instance != null)
-                {
-                    PlayerAudioManager.Instance.PlayLandingSound(transform.TransformPoint(_controller.center));
-                }
+                // if (PlayerAudioManager.Instance != null)
+                // {
+                //     PlayerAudioManager.Instance.PlayLandingSound(transform.TransformPoint(_controller.center));
+                // }
                 // Fallback al sistema antiguo
-                else if (LandingAudioClip != null)
+                if (LandingAudioClip != null)
                 {
                     AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(_controller.center), FootstepAudioVolume);
                 }
