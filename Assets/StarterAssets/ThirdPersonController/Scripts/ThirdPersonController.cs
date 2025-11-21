@@ -151,6 +151,7 @@ namespace StarterAssets
         private int _animIDStamina;
         private int _animIDHardMode;
         private int _animIDForce;
+        private int _animIDBlocking;
 
         private PlayerInput _playerInput;
 
@@ -254,6 +255,7 @@ namespace StarterAssets
             _animIDStamina = Animator.StringToHash("Stamina");
             _animIDHardMode = Animator.StringToHash("HardMode");
             _animIDForce = Animator.StringToHash("Force");
+            _animIDBlocking = Animator.StringToHash("Blocking");
         }
 
         private void GroundedCheck()
@@ -484,13 +486,14 @@ namespace StarterAssets
                 // if (PlayerAudioManager.Instance != null)
                 //     PlayerAudioManager.Instance.PlayHurtSound();
             }
-            else if (!dead && isBlocking)
+            else if (!dead && isBlocking && staminaPercent > 0)
             {
                 // Consumir estamina al bloquear/recibir daño
                 if (faseColorController != null)
                 {
                     faseColorController.ConsumeStaminaForDamage();
                 }
+
                 _animator.SetTrigger(_animIDBlocked);
 
                 // Reproducir sonido de bloqueo
@@ -580,6 +583,8 @@ namespace StarterAssets
 
         private void HandleBlock()
         {
+            _animator.SetBool(_animIDBlocking, isBlocking);
+
             if (faseColorController == null) return;
             
             // Reportar estado de bloqueo a FaseColorController

@@ -34,7 +34,7 @@ public class FaseColorController : MonoBehaviour
     public float attackStaminaCost = 500f; // Stamina consumed per attack (1.25x más que correr)
     public int staminaDecrementStep = 200; // Stamina baja en incrementos de este valor
     public float staminaRegenRate = 200f; // Stamina regeneration per second (sprintStaminaCost * 0.5f)
-    public float blockStaminaCostPercent = 15f; // Porcentaje de estamina que cuesta bloquear
+    public float blockStaminaCostPercent = 0f; // Porcentaje de estamina que cuesta bloquear
     public float damageStaminaCostPercent = 30f; // Porcentaje de estamina que cuesta al recibir daño
 
     private float currentStamina; // Usar float interno para precisión
@@ -400,7 +400,7 @@ public class FaseColorController : MonoBehaviour
     // Método para verificar si el bloqueo está activo
     public bool IsBlockingActive()
     {
-        return blockingActive && currentStamina > 0;
+        return blockingActive;
     }
     
     // Método para verificar si puede bloquear
