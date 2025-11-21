@@ -39,10 +39,10 @@ public class AudioManager : MonoBehaviour
     /// </summary>
     public static void PauseAmbient()
     {
-        if (instance != null && instance.playerController != null)
-        {
-            instance.playerController.PauseAmbientSound();
-        }
+        // if (instance != null && instance.playerController != null)
+        // {
+        //     instance.playerController.PauseAmbientSound();
+        // }
     }
 
     /// <summary>
@@ -50,10 +50,10 @@ public class AudioManager : MonoBehaviour
     /// </summary>
     public static void ResumeAmbient()
     {
-        if (instance != null && instance.playerController != null)
-        {
-            instance.playerController.ResumeAmbientSound();
-        }
+        // if (instance != null && instance.playerController != null)
+        // {
+        //     instance.playerController.ResumeAmbientSound();
+        // }
     }
 
     /// <summary>
@@ -61,10 +61,10 @@ public class AudioManager : MonoBehaviour
     /// </summary>
     public static void StopAmbient()
     {
-        if (instance != null && instance.playerController != null)
-        {
-            instance.playerController.StopAmbientSound();
-        }
+        // if (instance != null && instance.playerController != null)
+        // {
+        //     instance.playerController.StopAmbientSound();
+        // }
     }
 
     /// <summary>
@@ -73,10 +73,10 @@ public class AudioManager : MonoBehaviour
     /// <param name="volume">Volumen entre 0 y 1</param>
     public static void SetAmbientVolume(float volume)
     {
-        if (instance != null && instance.playerController != null)
-        {
-            instance.playerController.AmbientSoundVolume = Mathf.Clamp01(volume);
-            Debug.Log($"[AudioManager] Volumen ambiental cambiado a {volume}");
-        }
+        // if (instance != null && instance.playerController != null)
+        // {
+        //     instance.playerController.AmbientSoundVolume = Mathf.Clamp01(volume);
+        //     Debug.Log($"[AudioManager] Volumen ambiental cambiado a {volume}");
+        // }
     }
 }

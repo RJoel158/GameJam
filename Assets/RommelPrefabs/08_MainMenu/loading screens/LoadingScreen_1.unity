@@ -614,7 +614,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c175b5d9c0a82144dbe061cb6202ecd1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneToLoad: Game
+  sceneToLoad: OpenWorldSceneMerged1
   fadeImage: {fileID: 287561127}
   canvasGroup: {fileID: 733538907}
   fadeDuration: 1.5
