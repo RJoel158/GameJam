@@ -27,6 +27,11 @@ public class AttackSystem : MonoBehaviour
     public void EnterAttack()
     {
         thirdPersonController.isAttacking = true;
+        
+        if (PlayerAudioManager.Instance != null)
+        {
+            PlayerAudioManager.Instance.PlayAttackSwordSound();
+        }
 
         if (thirdPersonController.stamina > 0)
         {

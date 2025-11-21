@@ -26,6 +26,14 @@ namespace StarterAssets
         [Tooltip("0=Random, 1=Sequential, 2=Random sin repetir")]
         public int attackSoundMode = 2;
 
+        [Header("▼ COMBATE ESPADA - Ataques")]
+        [Tooltip("Sonidos de Espada")]
+        public AudioClip[] swordSounds;
+        [Range(0f, 1f)]
+        public float swordVolume = 0.7f;
+        [Tooltip("0=Random, 1=Sequential, 2=Random sin repetir")]
+        public int swordSoundMode = 2;
+
         [Header("▼ DAÑO - Recibir golpes")]
         [Tooltip("Sonidos de quejido al recibir daño")]
         public AudioClip[] hurtSounds;
@@ -137,10 +145,15 @@ namespace StarterAssets
             Debug.Log($"[Audio] ⚔️ Attack Sound {index + 1}/{attackSounds.Length}");
         }
 
+        public void PlayAttackSwordSound()
+        {
+            PlayEffectClip(swordSounds[0], swordVolume, interrupt: true, allowOverlap: false);
+        }
+
         /// <summary>
         /// Reproduce sonido de quejido al recibir daño
         /// </summary>
-        public void PlayHurtSound()
+        public void PlayEnemyHurtSound()
         {
             if (hurtSounds == null || hurtSounds.Length == 0)
             {
@@ -148,10 +161,10 @@ namespace StarterAssets
                 return;
             }
 
-            int randomIndex = Random.Range(0, hurtSounds.Length);
+            //int randomIndex = Random.Range(0, hurtSounds.Length);
             // Para que el feedback de recibir daño sea inmediato, interrumpimos cualquier efecto actual
-            PlayEffectClip(hurtSounds[randomIndex], hurtVolume, interrupt: true, allowOverlap: false);
-            Debug.Log($"[Audio] 😖 Hurt Sound {randomIndex + 1}/{hurtSounds.Length}");
+            PlayEffectClip(hurtSounds[0], hurtVolume, interrupt: true, allowOverlap: false);
+            Debug.Log($"[Audio] 😖 Hurt Sound {0 + 1}/{hurtSounds.Length}");
         }
 
         /// <summary>

@@ -936,7 +936,7 @@ MonoBehaviour:
   isAttacking: 0
   dead: 0
   health: 100
-  attackCD: 3
+  attackCD: 2
   attackRange: 1
   aggroRange: 10
   player: {fileID: 0}
@@ -1284,14 +1284,6 @@ MonoBehaviour:
   hitTimer: 0
   timeBwtHit: 1
   canHit: 1
-  originPoint: {fileID: 3848168630816228506}
-  castDirection: {x: 0, y: 0, z: -2.89}
-  castDistance: -0.23
-  layerMask:
-    serializedVersion: 2
-    m_Bits: 0
-  boxHalfExtents: {x: 0.5, y: 0.5, z: 0.5}
-  boxCastDistance: 0.1
 --- !u!1 &8561842331801038218
 GameObject:
   m_ObjectHideFlags: 0

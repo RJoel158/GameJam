@@ -90,6 +90,7 @@ namespace StarterAssets
         public float timeBtwResetBlock = 2f;
         public float resetBlockTimer = 0f;
         public bool canBlock = true;
+        public bool block = false;
 
         [Header("Materials")]
         public Material hardModeMaterial;
@@ -309,7 +310,7 @@ namespace StarterAssets
 
             // Verificar si estamina llegó a 0 mientras estaba corriendo - forzar a caminar
             bool canSprint = faseColorController != null ? faseColorController.CanSprint() : true;
-            float targetSpeed = (_input.sprint && canSprint) ? SprintSpeed : MoveSpeed;
+            float targetSpeed = (_input.sprint && canSprint && staminaPercent > 0) ? SprintSpeed : MoveSpeed;
 
             // a simplistic acceleration and deceleration designed to be easy to remove, replace, or iterate upon
 
@@ -561,7 +562,7 @@ namespace StarterAssets
                 if (_input.attack && isEquipped && !isAttacking && !inHitAnimation)
                 {
                     // update animator if using character
-                    if (canAttack)
+                    if (canAttack && staminaPercent > 0)
                     {
                         // Intentar atacar - FaseColorController verifica estamina
                         bool canPerformAttack = faseColorController.TryAttack();
@@ -570,6 +571,7 @@ namespace StarterAssets
                             _animator.SetTrigger(_animIDAttack);
                             _animator.SetFloat(_animIDSpeed, 0);
                             _input.attack = false;
+                            canAttack = false;
                         }
                         else
                         {
@@ -579,11 +581,25 @@ namespace StarterAssets
                     }
                 }
             }
+
+            if (!canAttack)
+            {
+                if (_attackTimer <= attackCooldown)
+                {
+                    _attackTimer += Time.deltaTime;
+                }
+                else
+                {
+                    canAttack = true;
+                    _attackTimer = 0;
+                }
+            }
         }
 
         private void HandleBlock()
-        {
+        {   
             _animator.SetBool(_animIDBlocking, isBlocking);
+            _animator.SetBool(_animIDBlock, block);
 
             if (faseColorController == null) return;
             
@@ -593,11 +609,11 @@ namespace StarterAssets
                 // Intentar iniciar bloqueo
                 if (faseColorController.TryStartBlock())
                 {
-                    if (_hasAnimator)
+                    if (_hasAnimator && staminaPercent > 0)
                     {
-                        _animator.SetBool(_animIDBlock, true);
+                        block = true;
                     }
-                    isBlocking = true;
+                    //isBlocking = true;
                 }
             }
             else if (!_input.block && isBlocking)
@@ -606,17 +622,18 @@ namespace StarterAssets
                 faseColorController.StopBlock();
                 if (_hasAnimator)
                 {
-                    _animator.SetBool(_animIDBlock, false);
+                    block = false;
                 }
                 isBlocking = false;
             }
             
             // Verificar si FaseColorController dice que debe detener el bloqueo (por falta de estamina)
-            if (isBlocking && !faseColorController.IsBlockingActive())
+            if (!faseColorController.IsBlockingActive())
             {
                 if (_hasAnimator)
                 {
-                    _animator.SetBool(_animIDBlock, false);
+                    block = false;
+                    faseColorController.StopBlock();
                 }
                 isBlocking = false;
             }
@@ -731,6 +748,14 @@ namespace StarterAssets
         public void StartBlocking()
         {
             isBlocking = true;
+        }
+
+        public void BlockSound()
+        {
+            if (PlayerAudioManager.Instance != null)
+            {
+                PlayerAudioManager.Instance.PlayBlockSound();
+            }
         }
 
         public void StartHardMode()

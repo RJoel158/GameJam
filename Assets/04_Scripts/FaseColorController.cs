@@ -37,7 +37,7 @@ public class FaseColorController : MonoBehaviour
     public float blockStaminaCostPercent = 0f; // Porcentaje de estamina que cuesta bloquear
     public float damageStaminaCostPercent = 30f; // Porcentaje de estamina que cuesta al recibir daño
 
-    private float currentStamina; // Usar float interno para precisión
+    public float currentStamina; // Usar float interno para precisión
     private float staminaTickTimer = 0f; // Timer para controlar cuándo bajar stamina
     private bool lastAttackInputState = false; // Guardar el estado anterior del input de ataque
     private float attackCooldownTimer = 0f; // Cooldown entre ataques
@@ -378,12 +378,12 @@ public class FaseColorController : MonoBehaviour
         if (currentStamina < 0) currentStamina = 0;
     }
 
-    private bool blockingActive = false; // Rastrear si el bloqueo está activo internamente
+    public bool blockingActive = false; // Rastrear si el bloqueo está activo internamente
     
     // Método para intentar iniciar bloqueo
     public bool TryStartBlock()
     {
-        if (currentStamina > 0)
+        if (staminaPercent > 10)
         {
             blockingActive = true;
             return true;
@@ -406,7 +406,7 @@ public class FaseColorController : MonoBehaviour
     // Método para verificar si puede bloquear
     public bool CanBlock()
     {
-        return currentStamina > 0;
+        return staminaPercent > 0;
     }
 
     // Método para consumir mana al activar Hard Mode (porcentaje del máximo)

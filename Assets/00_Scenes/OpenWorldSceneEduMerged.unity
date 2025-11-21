@@ -1297,8 +1297,12 @@ MonoBehaviour:
   - {fileID: 8300000, guid: f322b18338aa75446ba948e686f94440, type: 3}
   attackVolume: 0.518
   attackSoundMode: 2
+  swordSounds:
+  - {fileID: 8300000, guid: 246f021bcd5a5754d8bd24f0062350f5, type: 3}
+  swordVolume: 0.7
+  swordSoundMode: 2
   hurtSounds:
-  - {fileID: 8300000, guid: 316418a54960fee41932ae78063da140, type: 3}
+  - {fileID: 8300000, guid: 0e6919040bf7bd44fa64269a4e44f9da, type: 3}
   hurtVolume: 0.9
   footstepSounds:
   - {fileID: 8300000, guid: 72f526a6a9890f643a88e85a61c86c8a, type: 3}
@@ -1315,7 +1319,7 @@ MonoBehaviour:
   footstepVolume: 0.276
   ambientSound: {fileID: 8300000, guid: 195eb9ffd14e37742aa545f3ae0bc27a, type: 3}
   ambientVolume: 0.791
-  blockSound: {fileID: 0}
+  blockSound: {fileID: 8300000, guid: a0001051363898748906fd78b238010c, type: 3}
   blockVolume: 0.8
 --- !u!4 &588395273
 Transform:
@@ -4264,6 +4268,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 1671981475105218395, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
+      propertyPath: sprintStaminaCost
+      value: 200
+      objectReference: {fileID: 0}
+    - target: {fileID: 1671981475105218395, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
       propertyPath: blockStaminaCostPercent
       value: 0
       objectReference: {fileID: 0}
@@ -4287,6 +4295,10 @@ PrefabInstance:
       propertyPath: AmbientSound
       value: 
       objectReference: {fileID: 8300000, guid: 195eb9ffd14e37742aa545f3ae0bc27a, type: 3}
+    - target: {fileID: 1792395015654831956, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
+      propertyPath: attackCooldown
+      value: 0.25
+      objectReference: {fileID: 0}
     - target: {fileID: 1792395015654831956, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
       propertyPath: hardModeMaterial
       value: 
@@ -4374,6 +4386,10 @@ PrefabInstance:
     - target: {fileID: 3387321611310869008, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
       value: -60
+      objectReference: {fileID: 0}
+    - target: {fileID: 4316137489879231379, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
+      propertyPath: timeBwtHit
+      value: 0.25
       objectReference: {fileID: 0}
     - target: {fileID: 4393703759652859024, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
       propertyPath: m_LocalPosition.x

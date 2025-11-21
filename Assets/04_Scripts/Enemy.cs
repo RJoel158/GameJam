@@ -198,6 +198,11 @@ public class Enemy : MonoBehaviour
         if (!dead)
         {
             animator.SetTrigger("Damage");
+            
+            if (PlayerAudioManager.Instance != null)
+            {
+                PlayerAudioManager.Instance.PlayEnemyHurtSound();
+            }
             //CameraShake.Instance.ShakeCamera(2f, 0.2f);
         }
 
@@ -264,6 +269,12 @@ public class Enemy : MonoBehaviour
 
     public void ExitBasicEnemyAttack()
     {
+        isAttacking = false;
+    }
+
+    public void ImpactEnemy()
+    {
+        inAttackAnimation = false;
         isAttacking = false;
     }
 
