@@ -15,6 +15,8 @@ namespace StarterAssets
         public AudioClip drawSwordSound;
         [Tooltip("Sonido al guardar la espada")]
         public AudioClip sheathSwordSound;
+        [Tooltip("Sonido de Hard Mode")]
+        public AudioClip hardModeSound;
         [Range(0f, 1f)]
         public float equipmentVolume = 0.8f;
 
@@ -165,6 +167,41 @@ namespace StarterAssets
             // Para que el feedback de recibir daño sea inmediato, interrumpimos cualquier efecto actual
             PlayEffectClip(hurtSounds[0], hurtVolume, interrupt: true, allowOverlap: false);
             Debug.Log($"[Audio] 😖 Hurt Sound {0 + 1}/{hurtSounds.Length}");
+        }
+
+        public void PlayEnemyDieSound()
+        {
+            if (hurtSounds == null || hurtSounds.Length == 0)
+            {
+                Debug.LogWarning("[Audio] ⚠️ No hay sonidos de daño configurados");
+                return;
+            }
+
+            //int randomIndex = Random.Range(0, hurtSounds.Length);
+            // Para que el feedback de recibir daño sea inmediato, interrumpimos cualquier efecto actual
+            PlayEffectClip(hurtSounds[4], hurtVolume, interrupt: true, allowOverlap: false);
+            Debug.Log($"[Audio] 😖 Hurt Sound {4 + 1}/{hurtSounds.Length}");
+        }
+
+        public void PlayPlayerHurtSound()
+        {
+            if (hurtSounds == null || hurtSounds.Length == 0)
+            {
+                Debug.LogWarning("[Audio] ⚠️ No hay sonidos de daño configurados");
+                return;
+            }
+
+            //int randomIndex = Random.Range(0, hurtSounds.Length);
+            // Para que el feedback de recibir daño sea inmediato, interrumpimos cualquier efecto actual
+            PlayEffectClip(hurtSounds[1], hurtVolume, interrupt: true, allowOverlap: false);
+            Debug.Log($"[Audio] 😖 Hurt Sound {1 + 1}/{hurtSounds.Length}");
+        }
+
+        public void PlayHardModeSound()
+        {
+            // Para que el feedback de recibir daño sea inmediato, interrumpimos cualquier efecto actual
+            PlayEffectClip(hardModeSound, hurtVolume, interrupt: true, allowOverlap: false);
+            Debug.Log($"[Audio] 😖 HardMode Sound {2 + 1}/{hurtSounds.Length}");
         }
 
         /// <summary>

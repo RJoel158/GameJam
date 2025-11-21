@@ -218,6 +218,10 @@ public class Enemy : MonoBehaviour
     {
         //Instantiate(ragdoll, transform.position, transform.rotation);
         animator.SetTrigger("Death");
+        if (PlayerAudioManager.Instance != null)
+        {
+            PlayerAudioManager.Instance.PlayEnemyDieSound();
+        }
 
         // Fire mission event with enemy position
         Debug.Log($"<color=red>[Enemy] Firing OnEnemyDefeated event at position: {transform.position}</color>");

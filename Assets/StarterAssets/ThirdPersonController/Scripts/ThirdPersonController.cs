@@ -728,6 +728,10 @@ namespace StarterAssets
         public void StartPlayerDamage()
         {
             inHitAnimation = true;
+            if (PlayerAudioManager.Instance != null)
+            {
+                PlayerAudioManager.Instance.PlayPlayerHurtSound();
+            }
         }
 
         public void EndPlayerDamage()
@@ -761,6 +765,11 @@ namespace StarterAssets
         public void StartHardMode()
         {
             inHardModeAnimation = true;
+
+            if (PlayerAudioManager.Instance != null)
+            {
+                PlayerAudioManager.Instance.PlayHardModeSound();
+            }
         }
 
         public void EndHardMode()

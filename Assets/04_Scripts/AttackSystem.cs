@@ -14,6 +14,9 @@ public class AttackSystem : MonoBehaviour
     [SerializeField]
     StarterAssetsInputs starterAssetsInputs;
 
+    [Header("Sword Slashes")]
+    public GameObject swordSlah;
+
     public void StartAnimationAttack()
     {
         thirdPersonController.inAttackAnimation = true;
@@ -31,6 +34,7 @@ public class AttackSystem : MonoBehaviour
         if (PlayerAudioManager.Instance != null)
         {
             PlayerAudioManager.Instance.PlayAttackSwordSound();
+            swordSlah.SetActive(true);
         }
 
         if (thirdPersonController.stamina > 0)
@@ -50,6 +54,7 @@ public class AttackSystem : MonoBehaviour
     public void ExitAttack()
     {
         thirdPersonController.isAttacking = false;
+        swordSlah.SetActive(false);
         //thirdPersonController._animator.applyRootMotion = false;
         //timePassed = 0;
     }
