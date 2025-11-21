@@ -2156,7 +2156,7 @@ GameObject:
   - component: {fileID: 944989578}
   - component: {fileID: 944989577}
   m_Layer: 5
-  m_Name: Canvas
+  m_Name: Pause
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5046,6 +5046,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1601140802972503892, guid: e3b8128116a87cb4e90d22842ae0807b, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3502410453170122143, guid: e3b8128116a87cb4e90d22842ae0807b, type: 3}
       propertyPath: m_LocalPosition.x
       value: -183.60916

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9bb96a9236a66b546aeb66e56c43755c, type: 3}
   m_Name: MisionDefeatEnemies
   m_EditorClassIdentifier: 
-  missionName: Limpia Cmapamentos
+  missionName: Limpia 3 Campamentos
   description: Acaba con todos los caidos
   enemiesRequired: 3
   countCampClearsInsteadOfEnemies: 1
