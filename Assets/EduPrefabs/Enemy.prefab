@@ -1193,7 +1193,7 @@ MonoBehaviour:
   health: 100
   attackCD: 3
   attackRange: 1
-  aggroRange: 3
+  aggroRange: 10
   player: {fileID: 0}
   agent: {fileID: 4524847715481367773}
   animator: {fileID: 4121114977421348330}
