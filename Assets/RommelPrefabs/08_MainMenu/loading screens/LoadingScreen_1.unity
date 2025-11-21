@@ -351,7 +351,7 @@ RectTransform:
   m_GameObject: {fileID: 287561126}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.13, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 733538905}
@@ -960,12 +960,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tipText: {fileID: 13335072}
   tips:
-  - te aconsejamos siempre contraatacar ya que los enemigos son muy rapidos y no
-    podras atacarlos antes
-  - te aconsejamos siempre contraatacar ya que los enemigos son muy rapidos y no
-    podras atacarlos antes
-  - te aconsejamos siempre contraatacar ya que los enemigos son muy rapidos y no
-    podras atacarlos antes
+  - "Te aconsejamos siempre contraatacar: los enemigos son r\xE1pidos y no podr\xE1s
+    adelantarte a sus ataques si solo presionas atacar"
+  - "Controla tu estamina: si te quedas sin energ\xEDa quedar\xE1s vulnerable, sin
+    poder rodar, bloquear o atacar con fuerza."
+  - 'Usa el bloqueo en el momento justo: bloquear demasiado consume estamina y puede
+    romper tu guardia'
+  - "No te rindas: los jefes siempre parecen imposibles\u2026 hasta que encuentras
+    el momento exacto para golpear"
   tipChangeInterval: 6
   textFadeDuration: 0.6
 --- !u!1 &1514554438
