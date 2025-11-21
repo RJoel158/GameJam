@@ -11,6 +11,8 @@ public class DefeatEnemiesMission : ScriptableObject
 
     [Header("Mission Requirements")]
     public int enemiesRequired = 5;
+    [Tooltip("Si está activado, la misión contará campamentos limpiados en lugar de enemigos individuales.")]
+    public bool countCampClearsInsteadOfEnemies = false;
 
     [Header("Mission Progress (Runtime)")]
     public int enemiesDefeated = 0;
@@ -30,8 +32,18 @@ public class DefeatEnemiesMission : ScriptableObject
         enemiesDefeated = 0;
         defeatPositions.Clear();
 
-        // Subscribe to enemy defeated event
-        Enemy.OnEnemyDefeated += OnEnemyDefeated;
+        // Subscribe to the proper event depending on counting mode
+        if (countCampClearsInsteadOfEnemies)
+        {
+            EnemyCamp.OnCampCleared += OnCampCleared;
+            Debug.Log($"<color=yellow>[DefeatEnemiesMission] Subscribed to EnemyCamp.OnCampCleared event</color>");
+        }
+        else
+        {
+            // Subscribe to enemy defeated event
+            Enemy.OnEnemyDefeated += OnEnemyDefeated;
+            Debug.Log($"<color=yellow>[DefeatEnemiesMission] Subscribed to Enemy.OnEnemyDefeated event</color>");
+        }
 
         Debug.Log($"<color=yellow>[DefeatEnemiesMission] Mission Started: {missionName}</color>");
         Debug.Log($"<color=yellow>[DefeatEnemiesMission] Subscribed to Enemy.OnEnemyDefeated event</color>");
@@ -88,7 +100,14 @@ public class DefeatEnemiesMission : ScriptableObject
         isActive = false;
 
         // Unsubscribe from event
-        Enemy.OnEnemyDefeated -= OnEnemyDefeated;
+        if (countCampClearsInsteadOfEnemies)
+        {
+            EnemyCamp.OnCampCleared -= OnCampCleared;
+        }
+        else
+        {
+            Enemy.OnEnemyDefeated -= OnEnemyDefeated;
+        }
 
         Debug.Log($"<color=green>========================================</color>");
         Debug.Log($"<color=green>[DefeatEnemiesMission] MISSION COMPLETED: {missionName}</color>");
@@ -122,7 +141,14 @@ public class DefeatEnemiesMission : ScriptableObject
     {
         if (isActive)
         {
-            Enemy.OnEnemyDefeated -= OnEnemyDefeated;
+            if (countCampClearsInsteadOfEnemies)
+            {
+                EnemyCamp.OnCampCleared -= OnCampCleared;
+            }
+            else
+            {
+                Enemy.OnEnemyDefeated -= OnEnemyDefeated;
+            }
         }
 
         isActive = false;
@@ -137,6 +163,27 @@ public class DefeatEnemiesMission : ScriptableObject
     public float GetProgressPercentage()
     {
         return enemiesRequired > 0 ? (float)enemiesDefeated / enemiesRequired * 100f : 0f;
+    }
+
+    /// <summary>
+    /// Called when a camp is cleared. We treat it as one unit of mission progress.
+    /// </summary>
+    private void OnCampCleared(EnemyCamp camp)
+    {
+        if (!isActive || isCompleted) return;
+
+        enemiesDefeated++;
+        defeatPositions.Add(camp.GetCampPosition());
+
+        Debug.Log($"<color=cyan>[DefeatEnemiesMission] Camp cleared at {camp.GetCampPosition()}. Progress: {enemiesDefeated}/{enemiesRequired}</color>");
+
+        var manager = UnityEngine.Object.FindAnyObjectByType<MissionManager>();
+        if (manager != null)
+        {
+            manager.OnMissionProgressChanged?.Invoke(enemiesDefeated, enemiesRequired);
+        }
+
+        CheckProgress();
     }
 
     /// <summary>
