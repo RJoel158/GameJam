@@ -33,7 +33,7 @@ public static class OptimizePostProcessing
         Undo.RecordObject(QualitySettingsRenderHelper.Instance, "QualitySettings Change");
         QualitySettings.antiAliasing = 0; // disable MSAA in built-in QA
         QualitySettings.shadowDistance = Mathf.Min(QualitySettings.shadowDistance, 30f);
-        QualitySettings.masterTextureLimit = Mathf.Max(0, QualitySettings.masterTextureLimit); // keep but ensure it's valid
+        QualitySettings.globalTextureMipmapLimit = Mathf.Max(0, QualitySettings.globalTextureMipmapLimit); // keep but ensure it's valid
 
         // 3) Attempt to find and modify UniversalRenderPipelineAsset (URP)
         try

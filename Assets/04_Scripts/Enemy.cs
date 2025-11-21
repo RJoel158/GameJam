@@ -62,6 +62,10 @@ public class Enemy : MonoBehaviour
         player = GameObject.FindGameObjectWithTag("Player");
         playerThirdPersonController = player.GetComponent<ThirdPersonController>();
 
+        // NOTE: Dropping power-ups on death was causing unwanted objects in scene.
+        // The auto-add of EnemyPowerUpDropper has been disabled. If you need drops,
+        // re-enable by restoring the code below.
+        /*
         // Asegurar que EnemyPowerUpDropper existe
         var dropperType = System.Type.GetType("EnemyPowerUpDropper");
         if (dropperType != null && GetComponent(dropperType) == null)
@@ -69,6 +73,7 @@ public class Enemy : MonoBehaviour
             gameObject.AddComponent(dropperType);
             Debug.Log($"[ENEMY] EnemyPowerUpDropper agregado automáticamente a {gameObject.name}");
         }
+        */
 
         // Ensure a health bar is present at runtime (adds component if prefab wasn't edited)
         // Use reflection to avoid a hard compile-time dependency on the healthbar script symbol order
@@ -229,6 +234,9 @@ public class Enemy : MonoBehaviour
 
         OnEnemyDefeated?.Invoke(transform.position);
 
+        // Power-up drops on death have been disabled. To re-enable, restore the
+        // reflection code below that calls DropPowerUp on EnemyPowerUpDropper.
+        /*
         // Soltar poder-up al morir usando reflection para evitar dependencias
         var dropperType = System.Type.GetType("EnemyPowerUpDropper");
         if (dropperType != null)
@@ -243,6 +251,7 @@ public class Enemy : MonoBehaviour
                 }
             }
         }
+        */
         //Destroy(this.gameObject);
     }
 

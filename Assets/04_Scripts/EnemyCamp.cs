@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,6 +8,18 @@ using UnityEngine;
 /// </summary>
 public class EnemyCamp : MonoBehaviour
 {
+    [Header("Auto-sink (simple)")]
+    [Tooltip("Si true, cuando el campamento quede limpio se desactivarán colliders, se hundirá y se destruirá automáticamente.")]
+    public bool autoSinkOnClear = true;
+    [Tooltip("Distancia en unidades a hundir (hacia abajo) cuando se limpia el campamento")]
+    public float sinkDepth = 5f;
+    [Tooltip("Velocidad de hundimiento en unidades/segundo")]
+    public float sinkSpeed = 2f;
+    [Tooltip("Segundos que esperar después de hundirse antes de destruir")]
+    public float destroyDelayAfterSink = 5f;
+    [Tooltip("Si true, se desactivan los Colliders en los hijos antes de hundir")]
+    public bool disableCollidersWhenSinking = true;
+
     [Header("Camp Settings")]
     [Tooltip("Número de enemigos que deben morir para considerar el campamento limpio")]
     public int enemiesNeeded = 3;
@@ -85,8 +98,48 @@ public class EnemyCamp : MonoBehaviour
         {
             isCleared = true;
             Debug.Log($"<color=green>[EnemyCamp] Camp cleared: {name}</color>");
+            // Invoke event so other systems still react
             OnCampCleared?.Invoke(this);
+
+            // Simple built-in sink behavior: optionally disable colliders, translate down and destroy
+            if (autoSinkOnClear)
+            {
+                StartCoroutine(SimpleSinkAndDestroy());
+            }
         }
+    }
+
+    IEnumerator SimpleSinkAndDestroy()
+    {
+        // disable colliders if requested
+        Collider[] cols = null;
+        bool[] prev = null;
+        if (disableCollidersWhenSinking)
+        {
+            cols = GetComponentsInChildren<Collider>(true);
+            if (cols != null && cols.Length > 0)
+            {
+                prev = new bool[cols.Length];
+                for (int i = 0; i < cols.Length; i++)
+                {
+                    prev[i] = cols[i].enabled;
+                    cols[i].enabled = false;
+                }
+            }
+        }
+
+        float targetY = transform.position.y - sinkDepth;
+        while (transform.position.y > targetY)
+        {
+            float step = sinkSpeed * Time.deltaTime;
+            transform.position = Vector3.MoveTowards(transform.position, new Vector3(transform.position.x, targetY, transform.position.z), step);
+            yield return null;
+        }
+
+        // wait a bit then destroy
+        yield return new WaitForSeconds(destroyDelayAfterSink);
+
+        Destroy(gameObject);
     }
 
     [ContextMenu("Reset Camp")]
