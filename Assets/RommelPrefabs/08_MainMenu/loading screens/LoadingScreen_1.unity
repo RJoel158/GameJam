@@ -153,7 +153,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -147, y: -47}
+  m_AnchoredPosition: {x: -147, y: -34}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &13335072
@@ -618,7 +618,7 @@ MonoBehaviour:
   fadeImage: {fileID: 287561127}
   canvasGroup: {fileID: 733538907}
   fadeDuration: 1.5
-  minLoadingTime: 2.5
+  minLoadingTime: 10
 --- !u!1 &763573001
 GameObject:
   m_ObjectHideFlags: 0
@@ -867,10 +867,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 733538905}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 600, y: 300}
+  m_SizeDelta: {x: 70, y: 2}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &818657611
 MonoBehaviour:
@@ -892,7 +892,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 39bc2ebbae09de04e930848955628ebe, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 2547d052e3ba6cd46807e1d2944d884d, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -960,10 +960,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tipText: {fileID: 13335072}
   tips:
-  - "Te aconsejamos siempre contraatacar: los enemigos son r\xE1pidos y no podr\xE1s
-    adelantarte a sus ataques si solo presionas atacar"
+  - 'Te aconsejamos siempre contraatacar: los enemigos son rapidos y no podras adelantarte
+    a sus ataques si solo presionas atacar'
   - "Controla tu estamina: si te quedas sin energ\xEDa quedar\xE1s vulnerable, sin
-    poder rodar, bloquear o atacar con fuerza."
+    poder bloquear o atacar con fuerza."
   - 'Usa el bloqueo en el momento justo: bloquear demasiado consume estamina y puede
     romper tu guardia'
   - "No te rindas: los jefes siempre parecen imposibles\u2026 hasta que encuentras
