@@ -19,6 +19,13 @@ public class BossSpawner : MonoBehaviour
     [Tooltip("If true, uses the prefab. If false, just activates the boss GameObject")]
     public bool instantiateBoss = true;
 
+    [Header("Mission Trigger Settings")]
+    [Tooltip("The mission that must be completed before the boss spawns")]
+    public DefeatEnemiesMission requiredMission;
+
+    [Tooltip("If true, checks if the mission is completed. If false, spawns when any mission completes")]
+    public bool requireSpecificMission = true;
+
     [Header("Cinematic Settings")]
     [Tooltip("The Timeline Playable Director for the boss introduction")]
     public PlayableDirector cinematicTimeline;
@@ -140,7 +147,14 @@ public class BossSpawner : MonoBehaviour
             return;
         }
 
-        Debug.Log($"<color=green>[BossSpawner] Mission '{mission.missionName}' completed! Preparing boss spawn...</color>");
+        // Check if this is the required mission (if specific mission check is enabled)
+        if (requireSpecificMission && requiredMission != null && mission != requiredMission)
+        {
+            Debug.Log($"<color=yellow>[BossSpawner] Mission '{mission.missionName}' completed, but waiting for '{requiredMission.missionName}'</color>");
+            return;
+        }
+
+        Debug.Log($"<color=green>[BossSpawner] Required mission '{mission.missionName}' completed! Preparing boss spawn...</color>");
 
         // IMPORTANTE: Esperar un momento para que la UI de misión completada se muestre
         StartCoroutine(DelayedCinematicStart());
@@ -373,8 +387,33 @@ public class BossSpawner : MonoBehaviour
             return;
         }
 
-        Vector3 spawnPosition = spawnPoint != null ? spawnPoint.position : transform.position;
-        Quaternion spawnRotation = spawnPoint != null ? spawnPoint.rotation : transform.rotation;
+        Vector3 spawnPosition;
+        Quaternion spawnRotation;
+
+        // If spawn near player is enabled, calculate position near player
+        if (spawnPoint != null)
+        {
+            spawnPosition = spawnPoint.position;
+            spawnRotation = spawnPoint.rotation;
+        }
+        else
+        {
+            // Spawn near player if no spawn point is set
+            var player = FindAnyObjectByType<ThirdPersonController>();
+            if (player != null)
+            {
+                Vector3 playerPos = player.transform.position;
+                Vector3 direction = player.transform.forward;
+                spawnPosition = playerPos + direction * teleportDistance;
+                spawnPosition.y = playerPos.y + teleportHeightOffset;
+                spawnRotation = Quaternion.LookRotation(-direction);
+            }
+            else
+            {
+                spawnPosition = transform.position;
+                spawnRotation = transform.rotation;
+            }
+        }
 
         if (instantiateBoss)
         {

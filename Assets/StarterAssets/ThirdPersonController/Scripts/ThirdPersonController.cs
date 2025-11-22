@@ -531,7 +531,7 @@ namespace StarterAssets
                         _input.draw = false;
 
                         //Reproducir sonido de sacar espada
-                         if (PlayerAudioManager.Instance != null)
+                        if (PlayerAudioManager.Instance != null)
                             PlayerAudioManager.Instance.PlayDrawSword();
                     }
                 }
@@ -597,12 +597,12 @@ namespace StarterAssets
         }
 
         private void HandleBlock()
-        {   
+        {
             _animator.SetBool(_animIDBlocking, isBlocking);
             _animator.SetBool(_animIDBlock, block);
 
             if (faseColorController == null) return;
-            
+
             // Reportar estado de bloqueo a FaseColorController
             if (_input.block && !isBlocking && Grounded && !isAttacking && !isEquipping && _animationBlend <= 0.01f)
             {
@@ -626,7 +626,7 @@ namespace StarterAssets
                 }
                 isBlocking = false;
             }
-            
+
             // Verificar si FaseColorController dice que debe detener el bloqueo (por falta de estamina)
             if (!faseColorController.IsBlockingActive())
             {
@@ -666,11 +666,11 @@ namespace StarterAssets
                     {
                         _animator.SetTrigger(_animIDHardMode);
                         hardModeEnabled = true;
-                        
-                        // Consumir mana al activar Hard Mode desde FaseColorController
+
+                        // Consumir force al activar Hard Mode desde FaseColorController
                         if (faseColorController != null)
                         {
-                            faseColorController.ConsumeManForHardMode();
+                            faseColorController.ConsumeForceForHardMode();
                         }
                     }
                 }
@@ -678,8 +678,8 @@ namespace StarterAssets
 
             if (hardModeEnabled)
             {
-                // Verificar si el mana se agotó - si es así, desactivar Hard Mode
-                if (faseColorController != null && faseColorController.mana <= 0)
+                // Verificar si el force se agotó - si es así, desactivar Hard Mode
+                if (forcePercent <= 0)
                 {
                     DeactivateHardMode();
                 }

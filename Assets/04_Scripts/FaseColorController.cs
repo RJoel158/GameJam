@@ -43,20 +43,10 @@ public class FaseColorController : MonoBehaviour
     private float attackCooldownTimer = 0f; // Cooldown entre ataques
     public bool unlimitedStaminaActive = false; // Flag para poder-up de estamina infinita
 
-    [Header("Mana")]
-    [Range(0f, 100f)]
-    public float manaPercent = 0f;
-    public int mana = 0;
-    public int maxMana = 100;
-    public float hardModeManaCostPercent = 15f; // Porcentaje de mana que cuesta activar Hard Mode (15%)
-    public float hardModeManaCostDrainPercent = 5f; // Porcentaje de mana que se drena por segundo durante Hard Mode (5%)
-
-    private float currentMana = 0f; // Mana actual (float para precisión)
-    private float manaTickTimer = 0f; // Timer para controlar cuándo subir mana
-    private int manaIncrementStep = 25; // Mana sube en incrementos de 25
-    
-    private bool isInitializingMana = true; // Flag para saber si estamos en la carga inicial de mana
-    private float manaInitializationSpeed = 15f; // Velocidad de carga inicial del mana (15 puntos por segundo)
+    [Header("Force (antes Mana)")]
+    [Tooltip("Este sistema ahora usa el atributo 'force' del ThirdPersonController")]
+    public float hardModeManaCostPercent = 15f; // Porcentaje de force que cuesta activar Hard Mode (15%)
+    public float hardModeManaCostDrainPercent = 1f; // Porcentaje de force que se drena por segundo durante Hard Mode (1% - como en ThirdPersonController)
 
     private void Awake()
     {
@@ -66,18 +56,15 @@ public class FaseColorController : MonoBehaviour
         {
             Debug.LogError("ThirdPersonController no encontrado en la escena");
         }
-        
+
         // Inicializar stamina correctamente LO ANTES POSIBLE
         stamina = maxStamina;
         currentStamina = maxStamina;
         staminaPercent = 100f;
 
-        // Inicializar mana en 0 - comenzará a cargarse fluidamente
-        mana = 0;
-        currentMana = 0f;
-        manaPercent = 0f;
-        isInitializingMana = true; // Activar la carga inicial
-        
+        // Force se maneja completamente en ThirdPersonController
+        // No necesitamos inicializar nada aquí
+
         // Sincronizar INMEDIATAMENTE con ThirdPersonController
         if (thirdPersonController != null)
         {
@@ -133,12 +120,12 @@ public class FaseColorController : MonoBehaviour
             faseImage.color = startColor;
         }
 
-        // Inicializar mana en 0
+        // Force Image se actualiza desde ThirdPersonController
         if (manaImage != null)
         {
-            manaImage.fillAmount = 0f;
+            manaImage.fillAmount = 0f; // Comenzará en 0 y subirá automáticamente
         }
-        
+
         // Inicializar stamina UI
         if (staminaImage != null)
         {
@@ -150,11 +137,10 @@ public class FaseColorController : MonoBehaviour
     {
         if (thirdPersonController != null)
         {
-            HandleManaRegeneration();
             HandleStaminaConsumption();
             UpdateHealthUI();
             UpdateUI();
-            
+
             // SINCRONIZAR la estamina con ThirdPersonController
             thirdPersonController.UpdateStaminaFromUI(stamina, staminaPercent);
         }
@@ -215,7 +201,7 @@ public class FaseColorController : MonoBehaviour
         {
             float blockStaminaCost = maxStamina * (blockStaminaCostPercent / 100f);
             currentStamina -= blockStaminaCost * Time.deltaTime;
-            
+
             if (currentStamina <= 0)
             {
                 currentStamina = 0;
@@ -236,7 +222,7 @@ public class FaseColorController : MonoBehaviour
     }
 
     private bool attackingActive = false; // Flag para rastrear si el ataque está activo
-    
+
     // Método para intentar atacar - Consume 10% de estamina
     public bool TryAttack()
     {
@@ -257,58 +243,19 @@ public class FaseColorController : MonoBehaviour
             return false;
         }
     }
-    
+
     // Método para registrar fin del ataque
     public void EndAttack()
     {
         attackingActive = false;
     }
 
-    private void HandleManaRegeneration()
-    {
-        // Si estamos inicializando mana, cargar fluidamente desde 0 hasta maxMana
-        if (isInitializingMana)
-        {
-            currentMana += manaInitializationSpeed * Time.deltaTime;
-            
-            if (currentMana >= maxMana)
-            {
-                currentMana = maxMana;
-                isInitializingMana = false; // Terminar la carga inicial
-                Debug.Log("[FaseColorController] Carga inicial de mana completada");
-            }
-        }
-        // Si Hard Mode está activo, drenar mana continuamente (3% por segundo)
-        else if (thirdPersonController != null && thirdPersonController.hardModeEnabled)
-        {
-            float manaDrainRate = maxMana * (hardModeManaCostDrainPercent / 100f); // 3% de 100 = 3 mana por segundo
-            currentMana -= manaDrainRate * Time.deltaTime;
-            
-            if (currentMana < 0) currentMana = 0;
-        }
-        else
-        {
-            // Mana sube de forma fluida y continua cuando no estamos en Hard Mode
-            if (currentMana < maxMana)
-            {
-                // Velocidad de regeneración: 15 mana por segundo (suave y fluido)
-                float manaRegenRate = 15f;
-                currentMana += manaRegenRate * Time.deltaTime;
-                
-                if (currentMana > maxMana) currentMana = maxMana;
-            }
-        }
-
-        // Convertir float a int para el mana público
-        mana = (int)currentMana;
-        manaPercent = (mana * 100) / maxMana;
-    }
-
     private void UpdateUI()
     {
-        if (manaImage != null)
+        if (manaImage != null && thirdPersonController != null)
         {
-            float fillAmount = manaPercent / 100f;
+            // Usar forcePercent del ThirdPersonController
+            float fillAmount = thirdPersonController.forcePercent / 100f;
             manaImage.fillAmount = fillAmount;
 
             // Interpolar color basado en el fillAmount
@@ -388,7 +335,7 @@ public class FaseColorController : MonoBehaviour
     }
 
     public bool blockingActive = false; // Rastrear si el bloqueo está activo internamente
-    
+
     // Método para intentar iniciar bloqueo
     public bool TryStartBlock()
     {
@@ -399,30 +346,34 @@ public class FaseColorController : MonoBehaviour
         }
         return false;
     }
-    
+
     // Método para detener el bloqueo
     public void StopBlock()
     {
         blockingActive = false;
     }
-    
+
     // Método para verificar si el bloqueo está activo
     public bool IsBlockingActive()
     {
         return blockingActive;
     }
-    
+
     // Método para verificar si puede bloquear
     public bool CanBlock()
     {
         return staminaPercent > 0;
     }
 
-    // Método para consumir mana al activar Hard Mode (porcentaje del máximo)
-    public void ConsumeManForHardMode()
+    // Método para consumir force al activar Hard Mode (porcentaje del máximo)
+    public void ConsumeForceForHardMode()
     {
-        float manaCost = maxMana * (hardModeManaCostPercent / 100f);
-        currentMana -= manaCost;
-        if (currentMana < 0) currentMana = 0;
+        if (thirdPersonController != null)
+        {
+            float forceCost = thirdPersonController.maxForce * (hardModeManaCostPercent / 100f);
+            thirdPersonController.force -= (int)forceCost;
+            if (thirdPersonController.force < 0) thirdPersonController.force = 0;
+            Debug.Log($"[Force] Consumido {(int)forceCost} force al activar Hard Mode. Force actual: {thirdPersonController.force}/{thirdPersonController.maxForce}");
+        }
     }
 }

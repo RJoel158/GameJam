@@ -6,6 +6,9 @@ using Unity.VisualScripting;
 
 public class Boss : MonoBehaviour
 {
+    // Event for boss defeated (for mission system)
+    public static event System.Action<Vector3> OnBossDefeated;
+
     public enum BossPhase
     {
         Phase1,
@@ -203,7 +206,7 @@ public class Boss : MonoBehaviour
         switch (currentPhase)
         {
             case BossPhase.Phase1:
-                
+
                 if (!phase1Triggered)
                 {
                     phase1Triggered = true;
@@ -274,6 +277,10 @@ public class Boss : MonoBehaviour
     void Die()
     {
         animator.SetTrigger("Death");
+
+        // Emit boss defeated event at the boss's position
+        Debug.Log($"<color=red>[Boss] Boss defeated! Emitting OnBossDefeated event at {transform.position}</color>");
+        OnBossDefeated?.Invoke(transform.position);
     }
 
     private void HandleStadistics()

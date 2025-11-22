@@ -177,6 +177,37 @@ CapsuleCollider:
   m_Height: 0.01435028
   m_Direction: 1
   m_Center: {x: 0.000011750497, y: 0.00009535998, z: -0.000027094968}
+--- !u!1 &79277706
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 79277707}
+  m_Layer: 0
+  m_Name: BossSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &79277707
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 79277706}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 338.375, y: 179.12498, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &128807625
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -970,6 +1001,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   drawSwordSound: {fileID: 8300000, guid: 02dc6bda1b604544fba8809332627caf, type: 3}
   sheathSwordSound: {fileID: 8300000, guid: 02dc6bda1b604544fba8809332627caf, type: 3}
+  hardModeSound: {fileID: 0}
   equipmentVolume: 0.48
   attackSounds:
   - {fileID: 8300000, guid: bc3a2cc1f8197e14d832a7bfc83ec148, type: 3}
@@ -977,6 +1009,9 @@ MonoBehaviour:
   - {fileID: 8300000, guid: f322b18338aa75446ba948e686f94440, type: 3}
   attackVolume: 0.518
   attackSoundMode: 2
+  swordSounds: []
+  swordVolume: 0.7
+  swordSoundMode: 2
   hurtSounds:
   - {fileID: 8300000, guid: 316418a54960fee41932ae78063da140, type: 3}
   hurtVolume: 0.9
@@ -997,6 +1032,8 @@ MonoBehaviour:
   ambientVolume: 0.791
   blockSound: {fileID: 0}
   blockVolume: 0.8
+  spawnEnemies: {fileID: 0}
+  spawnEnemiesVolume: 0.8
 --- !u!4 &588395273
 Transform:
   m_ObjectHideFlags: 0
@@ -3402,6 +3439,14 @@ PrefabInstance:
       value: -0.92999995
       objectReference: {fileID: 0}
     - target: {fileID: 1671981475105218395, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
+      propertyPath: mana
+      value: 2000
+      objectReference: {fileID: 0}
+    - target: {fileID: 1671981475105218395, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
+      propertyPath: maxMana
+      value: 2000
+      objectReference: {fileID: 0}
+    - target: {fileID: 1671981475105218395, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
       propertyPath: faseImage
       value: 
       objectReference: {fileID: 0}
@@ -3412,6 +3457,22 @@ PrefabInstance:
     - target: {fileID: 1671981475105218395, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
       propertyPath: healthImage
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 1671981475105218395, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
+      propertyPath: manaPercent
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1671981475105218395, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
+      propertyPath: blockingActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1671981475105218395, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
+      propertyPath: hardModeManaCostPercent
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 1671981475105218395, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
+      propertyPath: hardModeManaCostDrainPercent
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1792395015654831956, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
       propertyPath: dead
@@ -4525,3 +4586,4 @@ SceneRoots:
   - {fileID: 588395273}
   - {fileID: 1645437041}
   - {fileID: 840730948}
+  - {fileID: 79277707}
