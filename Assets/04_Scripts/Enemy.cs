@@ -22,7 +22,7 @@ public class Enemy : MonoBehaviour
     /// </summary>
     public void AlignNow()
     {
-        bool ok = GroundUtils.AlignToGround_Average(transform, groundMask, radius:0.5f, samples:4, rayStartOffset:2f, maxDown:50f, smooth:0.25f, minAboveGround: minAboveGround);
+        bool ok = GroundUtils.AlignToGround_Average(transform, groundMask, radius: 0.5f, samples: 4, rayStartOffset: 2f, maxDown: 50f, smooth: 0.25f, minAboveGround: minAboveGround);
         if (!ok)
         {
             Debug.LogWarning($"[Enemy] AlignNow failed for '{gameObject.name}' at {transform.position}");
@@ -105,7 +105,7 @@ public class Enemy : MonoBehaviour
         if (alignToGroundOnStart)
         {
             // Use the averaged method for robustness
-                bool ok = GroundUtils.AlignToGround_Average(transform, groundMask, radius:0.5f, samples:4, rayStartOffset:2f, maxDown:50f, smooth:0.25f, minAboveGround: minAboveGround);
+            bool ok = GroundUtils.AlignToGround_Average(transform, groundMask, radius: 0.5f, samples: 4, rayStartOffset: 2f, maxDown: 50f, smooth: 0.25f, minAboveGround: minAboveGround);
             if (!ok)
             {
                 Debug.LogWarning($"[Enemy] Ground alignment failed for '{gameObject.name}' at {transform.position}");
