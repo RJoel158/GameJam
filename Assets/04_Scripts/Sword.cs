@@ -49,17 +49,25 @@ public class Sword : MonoBehaviour
         // Atacar al BOSS
         if (other.CompareTag("Boss"))
         {
-            // Usar SendMessage para llamar a TakeDamage en el Boss
-            other.SendMessage("TakeDamage", damage, SendMessageOptions.DontRequireReceiver);
-
-            // Intentar en el padre si no funcionó
-            if (other.transform.parent != null)
+            Boss boss = other.GetComponent<Boss>();
+            if (boss != null)
             {
-                other.transform.parent.SendMessage("TakeDamage", damage, SendMessageOptions.DontRequireReceiver);
+                boss.TakeDamage(damage);
+                canHit = false;
+                Debug.Log($"<color=yellow>[Sword] Golpeaste al jefe por {damage} de daño!</color>");
             }
 
-            canHit = false;
-            Debug.Log($"<color=red>[Sword] GOLPEASTE AL BOSS por {damage} de daño!</color>");
+            //// Usar SendMessage para llamar a TakeDamage en el Boss
+            //other.SendMessage("TakeDamage", damage, SendMessageOptions.DontRequireReceiver);
+
+            //// Intentar en el padre si no funcionó
+            //if (other.transform.parent != null)
+            //{
+            //    other.transform.parent.SendMessage("TakeDamage", damage, SendMessageOptions.DontRequireReceiver);
+            //}
+
+            //canHit = false;
+            //Debug.Log($"<color=red>[Sword] GOLPEASTE AL BOSS por {damage} de daño!</color>");
         }
     }
 }

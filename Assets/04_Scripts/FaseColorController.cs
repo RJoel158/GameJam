@@ -158,6 +158,15 @@ public class FaseColorController : MonoBehaviour
             // SINCRONIZAR la estamina con ThirdPersonController
             thirdPersonController.UpdateStaminaFromUI(stamina, staminaPercent);
         }
+
+        if (thirdPersonController.hardModeEnabled)
+        {
+            unlimitedStaminaActive = true;
+        }
+        else
+        {
+            unlimitedStaminaActive = false;
+        }
     }
 
     private void HandleStaminaConsumption()

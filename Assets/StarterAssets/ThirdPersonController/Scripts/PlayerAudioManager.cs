@@ -62,6 +62,12 @@ namespace StarterAssets
         [Range(0f, 1f)]
         public float blockVolume = 0.8f;
 
+        [Header("▼ BOSS")]
+        [Tooltip("Sonido del Jefe")]
+        public AudioClip spawnEnemies;
+        [Range(0f, 1f)]
+        public float spawnEnemiesVolume = 0.8f;
+
         // AudioSources privados
         private AudioSource effectsSource;
         private AudioSource ambientSource;
@@ -239,6 +245,12 @@ namespace StarterAssets
         {
             PlayEffectClip(blockSound, blockVolume, interrupt: true, allowOverlap: false);
             Debug.Log("[Audio] 🛡️ Block");
+        }
+
+        public void PlayBossSpawnEnemies()
+        {
+            PlayEffectClip(spawnEnemies, spawnEnemiesVolume, interrupt: true, allowOverlap: false);
+            Debug.Log("[Audio] Spawn Enemies");
         }
 
         /// <summary>
