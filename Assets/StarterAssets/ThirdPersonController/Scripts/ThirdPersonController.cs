@@ -530,9 +530,9 @@ namespace StarterAssets
                         _animator.SetBool(_animIDEquipped, true);
                         _input.draw = false;
 
-                        // Reproducir sonido de sacar espada
-                        // if (PlayerAudioManager.Instance != null)
-                        //     PlayerAudioManager.Instance.PlayDrawSword();
+                        //Reproducir sonido de sacar espada
+                         if (PlayerAudioManager.Instance != null)
+                            PlayerAudioManager.Instance.PlayDrawSword();
                     }
                 }
                 else if (_input.draw && isEquipped)
@@ -545,8 +545,8 @@ namespace StarterAssets
                         _input.draw = false;
 
                         // Reproducir sonido de guardar espada
-                        // if (PlayerAudioManager.Instance != null)
-                        //     PlayerAudioManager.Instance.PlaySheathSword();
+                        if (PlayerAudioManager.Instance != null)
+                            PlayerAudioManager.Instance.PlaySheathSword();
                     }
                 }
             }

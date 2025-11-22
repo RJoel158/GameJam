@@ -1,6 +1,8 @@
 ﻿using StarterAssets;
 using UnityEngine;
+using UnityEngine.AI;
 using System.Collections;
+using Unity.VisualScripting;
 
 public class Boss : MonoBehaviour
 {
@@ -20,15 +22,26 @@ public class Boss : MonoBehaviour
 
     public GameObject BasicEnemyPrefab;
     public GameObject SpawnParticle;
+    public GameObject ShieldParticle;
 
     public bool spawnEnemies = false;
     public Animator animator;
+    public SphereCollider sphereCollider;
 
     private bool phase1Triggered = false;
     private bool phase2Triggered = false;
     private bool phase3Triggered = false;
 
     private int enemiesAlive = 0;
+    public float SpeedChangeRate = 10.0f;
+
+    [Header("Combat")]
+    [SerializeField] float attackCD = 2f;
+    [SerializeField] float attackRange = 1f;
+    [SerializeField] float aggroRange = 10f;
+    public bool inAttackAnimation = false;
+    public bool isAttacking = false;
+    float timePassed;
 
     [Header("Stadistics")]
     [Range(0f, 100f)]
@@ -38,6 +51,18 @@ public class Boss : MonoBehaviour
     public bool death = false;
     public bool dead = false;
     public bool inHitAnimation = false;
+
+    // ===============================
+    // NAVMESH / MOVIMIENTO (solo fase 2)
+    // ===============================
+    [SerializeField] NavMeshAgent agent;
+    [SerializeField] Animator bossAnimator;
+    [SerializeField] GameObject player;
+    float _animationBlend;
+    bool playerDetected = false;
+    bool attackPlayer = false;
+    float newDestinationCD = 0f;
+    ThirdPersonController playerTPC;
 
     void OnEnable()
     {
@@ -52,6 +77,20 @@ public class Boss : MonoBehaviour
     void Start()
     {
         animator = GetComponent<Animator>();
+        sphereCollider = GetComponent<SphereCollider>();
+        bossAnimator = animator;
+
+        player = GameObject.FindGameObjectWithTag("Player");
+
+        if (player != null)
+            playerTPC = player.GetComponent<ThirdPersonController>();
+
+        agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
+        if (agent != null)
+        {
+            agent.updateRotation = false;
+            agent.updateUpAxis = true;
+        }
 
         health = maxHealth;
     }
@@ -60,12 +99,8 @@ public class Boss : MonoBehaviour
     {
         HandleStadistics();
 
-        if (dead)
-        {
-            return;
-        }
+        if (dead) return;
 
-        // 🔥 Tu lógica ORIGINAL no se toca.
         animator.SetBool("SpawnEnemies", spawnEnemies);
 
         if (spawnEnemies)
@@ -75,10 +110,71 @@ public class Boss : MonoBehaviour
         }
 
         HandlePhases();
+
+        // ===================================
+        // MOVIMIENTO CON NAVMESH SOLO FASE 2
+        // ===================================
+        if (currentPhase == BossPhase.Phase2 && !dead)
+        {
+            BossMovement();
+        }
     }
 
     // ============================================================
-    //           Se llama cada vez que muere un enemigo
+    // Lógica de movimiento adaptada de Enemy.cs
+    // ============================================================
+    void BossMovement()
+    {
+        if (player == null || playerTPC == null || playerTPC.dead) return;
+
+        playerDetected = Vector3.Distance(player.transform.position, transform.position) <= aggroRange;
+        attackPlayer = Vector3.Distance(player.transform.position, transform.position) <= attackRange;
+
+        newDestinationCD -= Time.deltaTime;
+
+        if (timePassed >= attackCD)
+        {
+            attackPlayer = Vector3.Distance(player.transform.position, transform.position) <= attackRange;
+
+            if (attackPlayer && !dead)
+            {
+                animator.SetTrigger("Attack");
+                timePassed = 0;
+            }
+        }
+        timePassed += Time.deltaTime;
+
+        if (playerDetected && !attackPlayer)
+        {
+            if (newDestinationCD <= 0)
+            {
+                if (agent != null && agent.isOnNavMesh)
+                    agent.SetDestination(player.transform.position);
+
+                newDestinationCD = 0.5f;
+            }
+        }
+
+        if (playerDetected)
+        {
+            Vector3 direction = player.transform.position - transform.position;
+            direction.y = 0;
+            if (direction.sqrMagnitude > 0.001f)
+            {
+                Quaternion targetRot = Quaternion.LookRotation(direction);
+                transform.rotation = Quaternion.Euler(0, targetRot.eulerAngles.y, 0);
+            }
+        }
+
+        float targetSpeed = 0;
+        if (playerDetected && !attackPlayer) targetSpeed = 2f;
+
+        _animationBlend = Mathf.Lerp(_animationBlend, targetSpeed, Time.deltaTime * SpeedChangeRate);
+        bossAnimator.SetFloat("Speed", _animationBlend);
+    }
+
+    // ============================================================
+    // Se llama cada vez que muere un enemigo
     // ============================================================
     void OnEnemyKilled(Vector3 pos)
     {
@@ -100,13 +196,14 @@ public class Boss : MonoBehaviour
     }
 
     // ============================================================
-    //                     CONTROL DE FASES
+    // CONTROL DE FASES
     // ============================================================
     void HandlePhases()
     {
         switch (currentPhase)
         {
             case BossPhase.Phase1:
+                
                 if (!phase1Triggered)
                 {
                     phase1Triggered = true;
@@ -115,6 +212,8 @@ public class Boss : MonoBehaviour
                 break;
 
             case BossPhase.Phase2:
+                sphereCollider.enabled = false;
+
                 if (!phase2Triggered)
                 {
                     phase2Triggered = true;
@@ -132,25 +231,18 @@ public class Boss : MonoBehaviour
         }
     }
 
-    // ============================================================
-    //    ESPERAR 3 SEGUNDOS → activar spawnEnemies = true
-    // ============================================================
     IEnumerator ExecuteSpawnWithDelay()
     {
         yield return new WaitForSeconds(3f);
-
-        // 🔥 NO · SE · TOCA · LA · LÓGICA
         spawnEnemies = true;
-
-        // 🔥 Como se van a spawnnear, contamos 4 enemigos vivos
         enemiesAlive = 4;
     }
 
-    // ============================================================
-    //     MÉTODO ORIGINAL SpawnEnemies — NO CAMBIADO
-    // ============================================================
     public void SpawnEnemies()
     {
+        Instantiate(ShieldParticle, transform.position, transform.rotation);
+        sphereCollider.enabled = true;
+
         Instantiate(BasicEnemyPrefab, BasicEnemySpawn.transform.position, BasicEnemySpawn.transform.rotation);
         Instantiate(SpawnParticle, BasicEnemySpawn.transform.position, BasicEnemySpawn.transform.rotation);
 
@@ -170,11 +262,6 @@ public class Boss : MonoBehaviour
         {
             health -= damageAmount;
             animator.SetTrigger("Damage");
-            //CameraShake.Instance.ShakeCamera(2f, 0.2f);
-
-            // Reproducir sonido de quejido al recibir daño
-            // if (PlayerAudioManager.Instance != null)
-            //     PlayerAudioManager.Instance.PlayHurtSound();
         }
 
         if (health <= 0)
@@ -186,16 +273,33 @@ public class Boss : MonoBehaviour
 
     void Die()
     {
-        //Instantiate(ragdoll, transform.position, transform.rotation);
         animator.SetTrigger("Death");
-        //Destroy(this.gameObject);
     }
 
     private void HandleStadistics()
     {
         animator.SetBool("Dead", dead);
-        //animator.SetBool(_animIDHitting, inHitAnimation);
-
         healthPercent = (health * 100) / maxHealth;
+    }
+
+    // Animation Events
+    public void StartBossAttack()
+    {
+        inAttackAnimation = true;
+    }
+
+    public void EndBossAttack()
+    {
+        inAttackAnimation = false;
+    }
+
+    public void EnterBossAttack()
+    {
+        isAttacking = true;
+    }
+
+    public void ExitBossAttack()
+    {
+        isAttacking = false;
     }
 }
