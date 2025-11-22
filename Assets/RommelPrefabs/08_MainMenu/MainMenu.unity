@@ -2400,7 +2400,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   runtimeProfile: {fileID: 11400000, guid: b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2, type: 2}
-  openWorldSceneName: OpenWorldSceneMerged1
+  openWorldSceneName: Game
   saveFileName: savegame.json
   loadOnNextOpenWorld: 0
 --- !u!4 &1631352152

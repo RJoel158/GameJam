@@ -1,5 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
+using System;
+using System.Reflection;
 using UnityEngine.SceneManagement;
 using Cinemachine;
 
@@ -25,6 +28,46 @@ public class PauseManager : MonoBehaviour
 
         if (optionsPanel != null)
             optionsPanel.SetActive(false);
+
+        // Asegurar que exista un EventSystem en la escena para que los botones funcionen
+        if (FindObjectOfType<EventSystem>() == null)
+        {
+            var esGO = new GameObject("EventSystem");
+            esGO.AddComponent<EventSystem>();
+
+            // Intentar usar Input System UI module si está disponible (soporte para hover/point con PlayerInput)
+            Type uiModuleType = null;
+            try
+            {
+                foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+                {
+                    try
+                    {
+                        var t = asm.GetType("UnityEngine.InputSystem.UI.InputSystemUIInputModule");
+                        if (t != null)
+                        {
+                            uiModuleType = t;
+                            break;
+                        }
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+
+            if (uiModuleType != null && typeof(Component).IsAssignableFrom(uiModuleType))
+            {
+                esGO.AddComponent(uiModuleType);
+                Debug.Log("[PauseManager] EventSystem creado con InputSystemUIInputModule.");
+            }
+            else
+            {
+                esGO.AddComponent<StandaloneInputModule>();
+                Debug.Log("[PauseManager] EventSystem creado con StandaloneInputModule.");
+            }
+
+            DontDestroyOnLoad(esGO);
+        }
     }
 
     void Update()
@@ -54,6 +97,9 @@ public class PauseManager : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
+        // Asegurar que el panel de pausa pueda recibir clicks y esté al frente
+        EnsureInteractableCanvas(pausePanel);
+
         isPaused = true;
     }
 
@@ -73,6 +119,9 @@ public class PauseManager : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
+        // Restaurar bloqueo de raycasts si fue modificado
+        DisablePanelRaycasts(pausePanel);
+
         isPaused = false;
     }
 
@@ -87,10 +136,62 @@ public class PauseManager : MonoBehaviour
         }
     }
 
+    // Asegura que un panel de UI tenga Canvas con overrideSorting, GraphicRaycaster y CanvasGroup
+    void EnsureInteractableCanvas(GameObject panel)
+    {
+        if (panel == null) return;
+
+        // Si no existe Canvas en los padres, crear uno (caso excepcional)
+        var parentCanvas = panel.GetComponentInParent<Canvas>();
+        if (parentCanvas == null)
+        {
+            parentCanvas = panel.AddComponent<Canvas>();
+            parentCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            parentCanvas.overrideSorting = true;
+            parentCanvas.sortingOrder = 1000;
+        }
+
+        // Asegurar que el panel tenga su propio Canvas y priorizarlo
+        var ownCanvas = panel.GetComponent<Canvas>();
+        if (ownCanvas == null)
+        {
+            ownCanvas = panel.AddComponent<Canvas>();
+        }
+        ownCanvas.overrideSorting = true;
+        ownCanvas.sortingOrder = 10001; // por encima del fade (9999)
+
+        // Asegurar GraphicRaycaster en el panel directamente
+        var gr = panel.GetComponent<UnityEngine.UI.GraphicRaycaster>();
+        if (gr == null)
+        {
+            panel.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+        }
+
+        // Asegurar CanvasGroup y que permita raycasts
+        var cg = panel.GetComponent<CanvasGroup>();
+        if (cg == null)
+        {
+            cg = panel.AddComponent<CanvasGroup>();
+        }
+        cg.interactable = true;
+        cg.blocksRaycasts = true;
+
+        // Traer al frente en la jerarquía
+        try { panel.transform.SetAsLastSibling(); } catch { }
+    }
+
+    void DisablePanelRaycasts(GameObject panel)
+    {
+        if (panel == null) return;
+        var cg = panel.GetComponent<CanvasGroup>();
+        if (cg != null)
+        {
+            cg.blocksRaycasts = false;
+        }
+    }
+
     public void OnContinueButton() => ResumeGame();
     public void OnOptionsButton() => optionsPanel?.SetActive(true);
-    
-    // 🔹 Método actualizado para guardar el estado completo
     public void OnSaveButton() => SaveGame();
 
     public void OnQuitButton()
