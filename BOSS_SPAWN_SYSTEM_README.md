@@ -9,9 +9,11 @@ Este sistema permite que el boss aparezca automáticamente cerca del jugador cua
 ## 📁 Archivos Creados/Modificados
 
 ### Nuevos Archivos
+
 1. ✅ `DefeatBossMission.cs` - ScriptableObject para la misión de derrotar al boss
 
 ### Archivos Modificados
+
 1. ✅ `Boss.cs` - Agregado evento `OnBossDefeated` para el sistema de misiones
 2. ✅ `BossSpawner.cs` - Mejorado para verificar misión específica y spawnear cerca del jugador
 
@@ -32,6 +34,7 @@ public bool requireSpecificMission = true;     // Si debe ser una misión espec�
 ### 2. Spawn Cerca del Jugador
 
 Cuando la misión se completa:
+
 1. ✅ Espera 3 segundos (configurable) para mostrar UI de "Misión Completada"
 2. ✅ Reproduce cinemática (opcional)
 3. ✅ Spawnea el boss cerca del jugador
@@ -60,16 +63,23 @@ Boss.OnBossDefeated += OnBossDefeated;
 1. En el Project, encuentra o crea una misión (ej: `MisionDefeatEnemies.asset`)
 2. Esta será la misión que debe completarse ANTES de que aparezca el boss
 
-### Paso 2: Configurar el BossSpawner
+### Paso 2: Preparar el Boss en la Escena
+
+1. **Arrastra el prefab del boss** a la escena desde `Assets/EduPrefabs/Boss`
+2. **Configura todas las referencias** del boss (arma, NavMesh, etc.)
+3. **DESACTIVA el GameObject del boss** en el Inspector (checkbox al lado del nombre)
+   - ⚠️ **IMPORTANTE**: El boss DEBE estar desactivado al inicio
+
+### Paso 3: Configurar el BossSpawner
 
 1. Encuentra el GameObject con el script `BossSpawner` en tu escena
 2. Configura los siguientes campos:
 
 ```
 Boss Settings:
-├─ Boss Prefab: [Arrastra tu prefab del boss aquí]
-├─ Spawn Point: [Opcional - si no se asigna, usa posición del jugador]
-└─ Instantiate Boss: ✅ (true para instanciar, false para activar)
+├─ Boss GameObject: [Arrastra el boss DESACTIVADO de la jerarquía]
+├─ Spawn Point: [Opcional - posición durante cinemática]
+└─ Instantiate Boss: ❌ (false = activa el boss existente - RECOMENDADO)
 
 Mission Trigger Settings:
 ├─ Required Mission: [Arrastra la misión que debe completarse]
@@ -81,10 +91,17 @@ Cinematic Settings:
 └─ Mission Complete Delay: 3s
 
 Boss Teleport Settings:
-├─ Teleport Boss After Cinematic: ✅
-├─ Teleport Distance: 8m (distancia del jugador)
+├─ Teleport Distance: 8m (distancia del jugador al terminar cinemática)
 └─ Teleport Height Offset: 1.5m (altura sobre el suelo)
 ```
+
+### 🎬 Flujo del Sistema:
+
+1. **Misión completada** → Espera 3s
+2. **Boss se activa** en Spawn Point (o su posición actual si no hay spawn point)
+3. **Cinemática se reproduce** (opcional)
+4. **Boss se teletransporta** cerca del jugador (8m)
+5. **Sistemas de combate activados** → ¡Pelea!
 
 ### Paso 3: Crear Misión de Derrotar al Boss (Opcional)
 
@@ -93,6 +110,7 @@ Si quieres una misión para derrotar al boss:
 1. Click derecho en Project → `Create > Missions > Defeat Boss Mission`
 2. Nombra el asset: `MisionDefeatBoss`
 3. Configura:
+
    - Mission Name: "Derrota al Jefe"
    - Description: "Derrota al poderoso jefe para completar esta misión"
 
@@ -106,8 +124,10 @@ Si quieres una misión para derrotar al boss:
 
 ```csharp
 // En el Inspector del BossSpawner:
+Boss GameObject: Boss (de la jerarquía - DESACTIVADO)
 Required Mission: MisionCleanCampings (requiere 3 campamentos)
 Require Specific Mission: ✅
+Instantiate Boss: ❌ (usa el boss de la escena)
 Teleport Distance: 10m
 ```
 
@@ -128,6 +148,7 @@ Teleport Boss After Cinematic: ✅
 BossSpawner spawner = FindObjectOfType<BossSpawner>();
 
 // Click derecho en el componente BossSpawner → "Force Spawn Boss"
+// Esto activará el boss, lo teletransportará cerca del jugador y habilitará combate
 // O desde código:
 spawner.ForceSpawnBoss();
 ```
@@ -136,9 +157,18 @@ spawner.ForceSpawnBoss();
 
 ## 🎯 Configuración de Distancia y Posición
 
-### Spawn Cerca del Jugador
+### Posicionamiento del Boss
 
-El boss se posiciona:
+El sistema funciona en dos etapas:
+
+#### 1. Durante la Cinemática (ActivateAndPositionBoss)
+
+- Si hay `Spawn Point` asignado: Boss aparece en esa posición
+- Si NO hay `Spawn Point`: Boss permanece en su posición actual en la escena
+
+#### 2. Después de la Cinemática (TeleportBossToPlayer)
+
+- El boss SIEMPRE se teletransporta cerca del jugador
 - **Distancia**: `teleportDistance` metros del jugador (default: 8m)
 - **Altura**: Altura del jugador + `teleportHeightOffset` (default: 1.5m)
 - **Dirección**: Mirando hacia el jugador
@@ -148,11 +178,7 @@ Vector3 teleportPosition = playerPos + direction * teleportDistance;
 teleportPosition.y = playerPos.y + teleportHeightOffset;
 ```
 
-### Si Usas Spawn Point
-
-Si asignas un `Spawn Point`:
-- El boss spawneará exactamente en esa posición/rotación
-- Después de la cinemática, se teletransportará cerca del jugador (si está habilitado)
+💡 **Recomendación**: Deja el `Spawn Point` vacío si solo quieres usar la cinemática actual del boss
 
 ---
 
@@ -161,15 +187,18 @@ Si asignas un `Spawn Point`:
 ### El boss no aparece
 
 ✅ Verifica que:
+
 1. `BossSpawner` está en la escena
-2. `Boss Prefab` está asignado
-3. `Required Mission` está asignada
-4. La misión realmente se completó (revisa consola)
-5. El boss tiene el tag correcto si usas `bossTag`
+2. `Boss GameObject` está asignado (arrastra desde la jerarquía)
+3. El boss GameObject está **DESACTIVADO** al inicio
+4. `Required Mission` está asignada
+5. La misión realmente se completó (revisa consola)
+6. `Instantiate Boss` está en **false** (para usar boss de escena)
 
 ### El boss aparece en posición incorrecta
 
 ✅ Ajusta:
+
 - `Teleport Distance` (más cerca/lejos del jugador)
 - `Teleport Height Offset` (más alto/bajo)
 - Asigna un `Spawn Point` específico
@@ -177,6 +206,7 @@ Si asignas un `Spawn Point`:
 ### La misión de boss no se completa
 
 ✅ Verifica:
+
 1. El boss tiene el script `Boss.cs`
 2. El método `Die()` se llama cuando health <= 0
 3. El evento `OnBossDefeated` se emite
@@ -185,6 +215,7 @@ Si asignas un `Spawn Point`:
 ### La cinemática no funciona
 
 ✅ Asegúrate de:
+
 1. El `Cinematic Timeline` está asignado
 2. El Timeline tiene las pistas configuradas
 3. `Play Cinematic Before Spawn` está activado
@@ -222,9 +253,9 @@ MissionManager.Instance.OnMissionCompleted.AddListener((DefeatEnemiesMission mis
 4. **Verifica si es la misión correcta**
 5. **Espera 3s** (para mostrar UI de "Misión Completada")
 6. **Desactiva UI y controles del jugador**
-7. **Spawnea el boss** (visible pero sin combate)
+7. **Activa el boss GameObject** en su posición (o Spawn Point si está asignado)
 8. **Reproduce cinemática** (opcional)
-9. **Teletransporta boss cerca del jugador**
+9. **Teletransporta boss cerca del jugador** (8m de distancia)
 10. **Habilita combate del boss** (NavMesh, Enemy, Animator)
 11. **Reactiva controles del jugador**
 12. **¡Combate contra el boss!**
@@ -267,10 +298,10 @@ private void PlaySpawnEffects(Vector3 position)
 {
     // Instantiate teleport particles
     GameObject teleportFX = Instantiate(teleportEffect, position, Quaternion.identity);
-    
+
     // Play boss roar sound
     AudioSource.PlayClipAtPoint(bossRoarSound, position);
-    
+
     // Camera shake
     CameraShake.Instance?.Shake(0.5f, 1f);
 }
@@ -279,6 +310,10 @@ private void PlaySpawnEffects(Vector3 position)
 ---
 
 ## 📝 Notas Importantes
+
+⚠️ **El boss GameObject debe estar DESACTIVADO** al inicio de la escena
+
+⚠️ **Usa `Instantiate Boss = false`** para activar el boss con sus configuraciones
 
 ⚠️ **El boss debe tener NavMeshAgent** si está en Fase 2 (movimiento)
 
@@ -289,6 +324,8 @@ private void PlaySpawnEffects(Vector3 position)
 ⚠️ **Los controles del jugador se desactivan** durante la cinemática
 
 ⚠️ **La UI se oculta durante la cinemática** y se restaura después
+
+⚠️ **El boss SIEMPRE se teletransporta** cerca del jugador después de la cinemática (8m)
 
 ---
 

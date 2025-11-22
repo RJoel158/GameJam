@@ -65,7 +65,7 @@ public class BossCinematicEvents : MonoBehaviour
 
         if (bossSpawner != null)
         {
-            bossSpawner.SpawnBoss();
+            bossSpawner.ActivateAndPositionBoss();
         }
         else
         {

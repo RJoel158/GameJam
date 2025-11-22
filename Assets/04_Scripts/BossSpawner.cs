@@ -10,14 +10,14 @@ using StarterAssets;
 public class BossSpawner : MonoBehaviour
 {
     [Header("Boss Settings")]
-    [Tooltip("The boss prefab or GameObject to activate")]
-    public GameObject bossPrefab;
+    [Tooltip("The boss GameObject in the scene (should be inactive at start)")]
+    public GameObject bossGameObject;
 
-    [Tooltip("Position where the boss will spawn")]
+    [Tooltip("Optional spawn point. If null, teleports near player")]
     public Transform spawnPoint;
 
-    [Tooltip("If true, uses the prefab. If false, just activates the boss GameObject")]
-    public bool instantiateBoss = true;
+    [Tooltip("If true, instantiates a prefab. If false, activates existing GameObject (recommended)")]
+    public bool instantiateBoss = false;
 
     [Header("Mission Trigger Settings")]
     [Tooltip("The mission that must be completed before the boss spawns")]
@@ -101,9 +101,10 @@ public class BossSpawner : MonoBehaviour
         }
 
         // Ensure boss is inactive at start
-        if (bossPrefab != null && !instantiateBoss)
+        if (bossGameObject != null && !instantiateBoss)
         {
-            bossPrefab.SetActive(false);
+            bossGameObject.SetActive(false);
+            Debug.Log("<color=cyan>[BossSpawner] Boss GameObject set to inactive</color>");
         }
 
         // Setup cinematic timeline callbacks if available
@@ -186,12 +187,11 @@ public class BossSpawner : MonoBehaviour
     {
         Debug.Log("<color=magenta>[BossSpawner] Starting boss introduction cinematic...</color>");
 
-        // OPCIÓN: Spawnear el boss ANTES de la cinemática (para que sea visible)
-        // Comentar esto si prefieres spawnearlo durante el Timeline con señales
+        // Activar y posicionar el boss ANTES de la cinemática
         if (!bossSpawned)
         {
-            SpawnBoss();
-            Debug.Log("<color=magenta>[BossSpawner] Boss spawned before cinematic</color>");
+            ActivateAndPositionBoss();
+            Debug.Log("<color=magenta>[BossSpawner] Boss activated and positioned before cinematic</color>");
         }
 
         // IMPORTANTE: Configurar el Timeline para usar Unscaled Time
@@ -226,11 +226,8 @@ public class BossSpawner : MonoBehaviour
     {
         Debug.Log("<color=magenta>[BossSpawner] Cinematic finished!</color>");
 
-        // Teletransportar el boss cerca del jugador (si está habilitado)
-        if (teleportBossAfterCinematic)
-        {
-            TeleportBossToPlayer();
-        }
+        // SIEMPRE teletransportar cerca del jugador después de la cinemática
+        TeleportBossToPlayer();
 
         // IMPORTANTE: Habilitar el combate del boss
         EnableBossCombat();
@@ -241,10 +238,11 @@ public class BossSpawner : MonoBehaviour
             EnablePlayerControls();
         }
 
-        // Spawn boss if it wasn't spawned during the timeline
+        // Activar boss si no se activó durante el timeline
         if (!bossSpawned)
         {
-            SpawnBoss();
+            ActivateAndPositionBoss();
+            TeleportBossToPlayer();
         }
     }
 
@@ -328,26 +326,24 @@ public class BossSpawner : MonoBehaviour
             return;
         }
 
-        // Calcular posición cerca del jugador
+        // Calcular posición FRENTE al jugador
         Vector3 playerPos = player.transform.position;
-        Vector3 direction = (spawnedBoss.transform.position - playerPos).normalized;
+        Vector3 playerForward = player.transform.forward;
 
-        // Si el boss está muy cerca o la dirección es inválida, usar dirección hacia adelante del jugador
-        if (direction.magnitude < 0.1f)
-        {
-            direction = player.transform.forward;
-        }
+        // Proyectar solo en el plano horizontal (ignorar rotación vertical)
+        playerForward.y = 0;
+        playerForward.Normalize();
 
-        Vector3 teleportPosition = playerPos + direction * teleportDistance;
+        // Posicionar el boss FRENTE al jugador a la distancia configurada
+        Vector3 teleportPosition = playerPos + playerForward * teleportDistance;
 
-        // ARREGLO: Elevar el boss para que no se entierre
-        // Usar la altura del jugador + un offset adicional para bosses grandes
+        // Usar la misma altura del jugador + offset para evitar que se entierre
         teleportPosition.y = playerPos.y + teleportHeightOffset;
 
         // Teletransportar el boss
         spawnedBoss.transform.position = teleportPosition;
 
-        // Hacer que el boss mire al jugador
+        // Hacer que el boss mire AL JUGADOR (cara a cara)
         Vector3 lookDirection = (playerPos - teleportPosition).normalized;
         lookDirection.y = 0; // Mantener en plano horizontal
         if (lookDirection.magnitude > 0.1f)
@@ -355,7 +351,7 @@ public class BossSpawner : MonoBehaviour
             spawnedBoss.transform.rotation = Quaternion.LookRotation(lookDirection);
         }
 
-        Debug.Log($"<color=magenta>[BossSpawner] Boss teleported near player! Distance: {Vector3.Distance(playerPos, teleportPosition):F2}m, Height: {teleportPosition.y}</color>");
+        Debug.Log($"<color=magenta>[BossSpawner] Boss teleported in front of player! Distance: {Vector3.Distance(playerPos, teleportPosition):F2}m, Position: {teleportPosition}</color>");
 
         // Efecto visual de teletransporte (opcional)
         PlaySpawnEffects(teleportPosition);
@@ -367,13 +363,13 @@ public class BossSpawner : MonoBehaviour
     private IEnumerator SpawnBossDelayed()
     {
         yield return new WaitForSeconds(spawnDelay);
-        SpawnBoss();
+        ActivateAndPositionBoss();
     }
 
     /// <summary>
-    /// Spawns the boss at the designated spawn point
+    /// Activa el boss en la escena y lo posiciona (para la cinemática)
     /// </summary>
-    public void SpawnBoss()
+    public void ActivateAndPositionBoss()
     {
         if (bossSpawned)
         {
@@ -381,55 +377,37 @@ public class BossSpawner : MonoBehaviour
             return;
         }
 
-        if (bossPrefab == null)
+        if (bossGameObject == null)
         {
-            Debug.LogError("<color=red>[BossSpawner] No boss prefab assigned!</color>");
+            Debug.LogError("<color=red>[BossSpawner] No boss GameObject assigned!</color>");
             return;
         }
 
-        Vector3 spawnPosition;
-        Quaternion spawnRotation;
+        Vector3 initialPosition;
+        Quaternion initialRotation;
 
-        // If spawn near player is enabled, calculate position near player
+        // Usar spawn point si está asignado (para la cinemática)
         if (spawnPoint != null)
         {
-            spawnPosition = spawnPoint.position;
-            spawnRotation = spawnPoint.rotation;
+            initialPosition = spawnPoint.position;
+            initialRotation = spawnPoint.rotation;
+            Debug.Log($"<color=green>[BossSpawner] Using spawn point: {spawnPoint.name}</color>");
         }
         else
         {
-            // Spawn near player if no spawn point is set
-            var player = FindAnyObjectByType<ThirdPersonController>();
-            if (player != null)
-            {
-                Vector3 playerPos = player.transform.position;
-                Vector3 direction = player.transform.forward;
-                spawnPosition = playerPos + direction * teleportDistance;
-                spawnPosition.y = playerPos.y + teleportHeightOffset;
-                spawnRotation = Quaternion.LookRotation(-direction);
-            }
-            else
-            {
-                spawnPosition = transform.position;
-                spawnRotation = transform.rotation;
-            }
+            // Si no hay spawn point, dejar en su posición actual
+            initialPosition = bossGameObject.transform.position;
+            initialRotation = bossGameObject.transform.rotation;
+            Debug.Log("<color=yellow>[BossSpawner] No spawn point, using boss current position</color>");
         }
 
-        if (instantiateBoss)
-        {
-            // Instantiate a new boss
-            spawnedBoss = Instantiate(bossPrefab, spawnPosition, spawnRotation);
-            Debug.Log($"<color=green>[BossSpawner] Boss instantiated at {spawnPosition}</color>");
-        }
-        else
-        {
-            // Just activate the existing boss
-            bossPrefab.transform.position = spawnPosition;
-            bossPrefab.transform.rotation = spawnRotation;
-            bossPrefab.SetActive(true);
-            spawnedBoss = bossPrefab;
-            Debug.Log($"<color=green>[BossSpawner] Boss activated at {spawnPosition}</color>");
-        }
+        // Posicionar el boss
+        bossGameObject.transform.position = initialPosition;
+        bossGameObject.transform.rotation = initialRotation;
+
+        // Activar el boss GameObject
+        bossGameObject.SetActive(true);
+        spawnedBoss = bossGameObject;
 
         // Play spawn sound
         if (bossAppearSound != null && audioSource != null)
@@ -438,9 +416,7 @@ public class BossSpawner : MonoBehaviour
         }
 
         bossSpawned = true;
-
-        // Optional: Add spawn effects
-        PlaySpawnEffects(spawnPosition);
+        Debug.Log($"<color=green>[BossSpawner] Boss activated at {initialPosition}</color>");
     }
 
     /// <summary>
@@ -785,7 +761,9 @@ public class BossSpawner : MonoBehaviour
     public void ForceSpawnBoss()
     {
         bossSpawned = false;
-        SpawnBoss();
+        ActivateAndPositionBoss();
+        TeleportBossToPlayer();
+        EnableBossCombat();
     }
 
     /// <summary>

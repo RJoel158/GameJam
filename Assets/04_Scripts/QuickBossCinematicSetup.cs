@@ -71,7 +71,7 @@ public class QuickBossCinematicSetup : MonoBehaviour
         BossSpawner spawner = spawnerObj.AddComponent<BossSpawner>();
 
         // Configuración básica sin cinemática
-        spawner.bossPrefab = bossPrefab;
+        spawner.bossGameObject = bossPrefab;
         spawner.instantiateBoss = true;
         spawner.playCinematicBeforeSpawn = false; // Sin cinemática por defecto
         spawner.spawnDelay = 1f;
@@ -165,7 +165,7 @@ public class QuickBossCinematicSetup : MonoBehaviour
         if (spawner != null)
         {
             Debug.Log($"<color=green>✅ BossSpawner: Encontrado</color>");
-            Debug.Log($"   - Boss Prefab: {(spawner.bossPrefab != null ? spawner.bossPrefab.name : "NO ASIGNADO")}");
+            Debug.Log($"   - Boss GameObject: {(spawner.bossGameObject != null ? spawner.bossGameObject.name : "NO ASIGNADO")}");
             Debug.Log($"   - Spawn Point: {(spawner.spawnPoint != null ? spawner.spawnPoint.position.ToString() : "NO ASIGNADO")}");
             Debug.Log($"   - Cinemática: {(spawner.playCinematicBeforeSpawn ? "SÍ" : "NO")}");
         }

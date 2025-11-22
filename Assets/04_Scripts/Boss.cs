@@ -243,7 +243,10 @@ public class Boss : MonoBehaviour
 
     public void SpawnEnemies()
     {
-        Instantiate(ShieldParticle, transform.position, transform.rotation);
+        if (ShieldParticle != null)
+        {
+            Instantiate(ShieldParticle, transform.position, transform.rotation);
+        }
         sphereCollider.enabled = true;
 
         Instantiate(BasicEnemyPrefab, BasicEnemySpawn.transform.position, BasicEnemySpawn.transform.rotation);

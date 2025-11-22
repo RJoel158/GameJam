@@ -1191,13 +1191,20 @@ MonoBehaviour:
   inAttackAnimation: 0
   isAttacking: 0
   dead: 0
-  health: 100
+  health: 10
   attackCD: 3
   attackRange: 1
   aggroRange: 10
   player: {fileID: 0}
   agent: {fileID: 4524847715481367773}
   animator: {fileID: 4121114977421348330}
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  minAboveGround: 0.25
+  alignToGroundOnStart: 1
+  enablePeriodicAlign: 1
+  alignPeriodSeconds: 5
 --- !u!1 &8808633722892510403
 GameObject:
   m_ObjectHideFlags: 0
