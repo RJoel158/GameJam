@@ -302,6 +302,11 @@ public class Enemy : MonoBehaviour
         if (!dead)
         {
             animator.SetTrigger("Damage");
+            
+            if (PlayerAudioManager.Instance != null)
+            {
+                PlayerAudioManager.Instance.PlayEnemyHurtSound();
+            }
             //CameraShake.Instance.ShakeCamera(2f, 0.2f);
         }
 
@@ -317,6 +322,10 @@ public class Enemy : MonoBehaviour
     {
         //Instantiate(ragdoll, transform.position, transform.rotation);
         animator.SetTrigger("Death");
+        if (PlayerAudioManager.Instance != null)
+        {
+            PlayerAudioManager.Instance.PlayEnemyDieSound();
+        }
 
         // Fire mission event with enemy position
         Debug.Log($"<color=red>[Enemy] Firing OnEnemyDefeated event at position: {transform.position}</color>");
@@ -373,6 +382,12 @@ public class Enemy : MonoBehaviour
 
     public void ExitBasicEnemyAttack()
     {
+        isAttacking = false;
+    }
+
+    public void ImpactEnemy()
+    {
+        inAttackAnimation = false;
         isAttacking = false;
     }
 

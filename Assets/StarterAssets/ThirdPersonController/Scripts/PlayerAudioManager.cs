@@ -15,6 +15,8 @@ namespace StarterAssets
         public AudioClip drawSwordSound;
         [Tooltip("Sonido al guardar la espada")]
         public AudioClip sheathSwordSound;
+        [Tooltip("Sonido de Hard Mode")]
+        public AudioClip hardModeSound;
         [Range(0f, 1f)]
         public float equipmentVolume = 0.8f;
 
@@ -25,6 +27,14 @@ namespace StarterAssets
         public float attackVolume = 0.7f;
         [Tooltip("0=Random, 1=Sequential, 2=Random sin repetir")]
         public int attackSoundMode = 2;
+
+        [Header("▼ COMBATE ESPADA - Ataques")]
+        [Tooltip("Sonidos de Espada")]
+        public AudioClip[] swordSounds;
+        [Range(0f, 1f)]
+        public float swordVolume = 0.7f;
+        [Tooltip("0=Random, 1=Sequential, 2=Random sin repetir")]
+        public int swordSoundMode = 2;
 
         [Header("▼ DAÑO - Recibir golpes")]
         [Tooltip("Sonidos de quejido al recibir daño")]
@@ -51,6 +61,12 @@ namespace StarterAssets
         public AudioClip blockSound;
         [Range(0f, 1f)]
         public float blockVolume = 0.8f;
+
+        [Header("▼ BOSS")]
+        [Tooltip("Sonido del Jefe")]
+        public AudioClip spawnEnemies;
+        [Range(0f, 1f)]
+        public float spawnEnemiesVolume = 0.8f;
 
         // AudioSources privados
         private AudioSource effectsSource;
@@ -137,10 +153,15 @@ namespace StarterAssets
             Debug.Log($"[Audio] ⚔️ Attack Sound {index + 1}/{attackSounds.Length}");
         }
 
+        public void PlayAttackSwordSound()
+        {
+            PlayEffectClip(swordSounds[0], swordVolume, interrupt: true, allowOverlap: false);
+        }
+
         /// <summary>
         /// Reproduce sonido de quejido al recibir daño
         /// </summary>
-        public void PlayHurtSound()
+        public void PlayEnemyHurtSound()
         {
             if (hurtSounds == null || hurtSounds.Length == 0)
             {
@@ -148,10 +169,45 @@ namespace StarterAssets
                 return;
             }
 
-            int randomIndex = Random.Range(0, hurtSounds.Length);
+            //int randomIndex = Random.Range(0, hurtSounds.Length);
             // Para que el feedback de recibir daño sea inmediato, interrumpimos cualquier efecto actual
-            PlayEffectClip(hurtSounds[randomIndex], hurtVolume, interrupt: true, allowOverlap: false);
-            Debug.Log($"[Audio] 😖 Hurt Sound {randomIndex + 1}/{hurtSounds.Length}");
+            PlayEffectClip(hurtSounds[0], hurtVolume, interrupt: true, allowOverlap: false);
+            Debug.Log($"[Audio] 😖 Hurt Sound {0 + 1}/{hurtSounds.Length}");
+        }
+
+        public void PlayEnemyDieSound()
+        {
+            if (hurtSounds == null || hurtSounds.Length == 0)
+            {
+                Debug.LogWarning("[Audio] ⚠️ No hay sonidos de daño configurados");
+                return;
+            }
+
+            //int randomIndex = Random.Range(0, hurtSounds.Length);
+            // Para que el feedback de recibir daño sea inmediato, interrumpimos cualquier efecto actual
+            PlayEffectClip(hurtSounds[4], hurtVolume, interrupt: true, allowOverlap: false);
+            Debug.Log($"[Audio] 😖 Hurt Sound {4 + 1}/{hurtSounds.Length}");
+        }
+
+        public void PlayPlayerHurtSound()
+        {
+            if (hurtSounds == null || hurtSounds.Length == 0)
+            {
+                Debug.LogWarning("[Audio] ⚠️ No hay sonidos de daño configurados");
+                return;
+            }
+
+            //int randomIndex = Random.Range(0, hurtSounds.Length);
+            // Para que el feedback de recibir daño sea inmediato, interrumpimos cualquier efecto actual
+            PlayEffectClip(hurtSounds[1], hurtVolume, interrupt: true, allowOverlap: false);
+            Debug.Log($"[Audio] 😖 Hurt Sound {1 + 1}/{hurtSounds.Length}");
+        }
+
+        public void PlayHardModeSound()
+        {
+            // Para que el feedback de recibir daño sea inmediato, interrumpimos cualquier efecto actual
+            PlayEffectClip(hardModeSound, hurtVolume, interrupt: true, allowOverlap: false);
+            Debug.Log($"[Audio] 😖 HardMode Sound {2 + 1}/{hurtSounds.Length}");
         }
 
         /// <summary>
@@ -189,6 +245,12 @@ namespace StarterAssets
         {
             PlayEffectClip(blockSound, blockVolume, interrupt: true, allowOverlap: false);
             Debug.Log("[Audio] 🛡️ Block");
+        }
+
+        public void PlayBossSpawnEnemies()
+        {
+            PlayEffectClip(spawnEnemies, spawnEnemiesVolume, interrupt: true, allowOverlap: false);
+            Debug.Log("[Audio] Spawn Enemies");
         }
 
         /// <summary>
