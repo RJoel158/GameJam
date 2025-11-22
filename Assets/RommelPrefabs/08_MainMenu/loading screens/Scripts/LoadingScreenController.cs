@@ -7,7 +7,7 @@ using System.Collections;
 public class LoadingScreenController : MonoBehaviour
 {
     [Header("Scene Settings")]
-    public string sceneToLoad = "OpenWorldSceneMerged";  // nombre de la escena a cargar
+    public string sceneToLoad = "Game";  // nombre de la escena a cargar
 
     [Header("Fade Settings")]
     public float fadeDuration = 0.5f;           // duración del fade (negro)

@@ -43,7 +43,7 @@ public class SaveManager : MonoBehaviour
 
     [Header("Runtime / Config")]
     public SaveProfile runtimeProfile;
-    public string openWorldSceneName = "OpenWorldSceneMerged";
+    public string openWorldSceneName = "Game";
     public string saveFileName = "savegame.json";
 
     [HideInInspector]
@@ -89,20 +89,20 @@ public class SaveManager : MonoBehaviour
 
         GameObject canvasGO = new GameObject("SaveManager_FadeCanvas");
         DontDestroyOnLoad(canvasGO);
-        
+
         fadeCanvas = canvasGO.AddComponent<Canvas>();
         fadeCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
         fadeCanvas.sortingOrder = 9999;
-        
+
         canvasGO.AddComponent<UnityEngine.UI.CanvasScaler>();
         canvasGO.AddComponent<UnityEngine.UI.GraphicRaycaster>();
 
         GameObject imageGO = new GameObject("FadeImage");
         imageGO.transform.SetParent(canvasGO.transform, false);
-        
+
         fadeImage = imageGO.AddComponent<UnityEngine.UI.Image>();
         fadeImage.color = Color.black;
-        
+
         RectTransform rt = fadeImage.GetComponent<RectTransform>();
         rt.anchorMin = Vector2.zero;
         rt.anchorMax = Vector2.one;
@@ -177,12 +177,12 @@ public class SaveManager : MonoBehaviour
                 runtimeProfile.maxHealth = data.maxHealth;
                 runtimeProfile.force = data.force;
                 runtimeProfile.maxForce = data.maxForce;
-    
+
                 runtimeProfile.hasSave = true;
-                
-                #if UNITY_EDITOR
+
+#if UNITY_EDITOR
                 UnityEditor.EditorUtility.SetDirty(runtimeProfile);
-                #endif
+#endif
             }
         }
         catch (Exception ex)
@@ -208,7 +208,7 @@ public class SaveManager : MonoBehaviour
         {
             string json = File.ReadAllText(savePath);
             SaveData d = JsonUtility.FromJson<SaveData>(json);
-            
+
             if (runtimeProfile != null)
             {
                 runtimeProfile.playerPosition = new Vector3(d.px, d.py, d.pz);
@@ -218,10 +218,10 @@ public class SaveManager : MonoBehaviour
                 runtimeProfile.force = d.force;
                 runtimeProfile.maxForce = d.maxForce;
                 runtimeProfile.hasSave = true;
-                
-                #if UNITY_EDITOR
+
+#if UNITY_EDITOR
                 UnityEditor.EditorUtility.SetDirty(runtimeProfile);
-                #endif
+#endif
 
                 Debug.Log($"[SaveManager] 📂 Cargado desde disco\n" +
                           $"Posición: {runtimeProfile.playerPosition}\n" +
@@ -297,15 +297,15 @@ public class SaveManager : MonoBehaviour
 
         // 3) Recolectar componentes de movimiento para desactivar
         var toDisable = new System.Collections.Generic.List<Behaviour>();
-        
+
         if (tpc != null) toDisable.Add(tpc);
-        
+
         var sai = player.GetComponent<StarterAssets.StarterAssetsInputs>();
         if (sai != null) toDisable.Add(sai);
-        
+
         var playerInput = player.GetComponent<UnityEngine.InputSystem.PlayerInput>();
         if (playerInput != null) toDisable.Add(playerInput);
-        
+
         var playerController = player.GetComponent<PlayerController>();
         if (playerController != null) toDisable.Add(playerController);
 
@@ -321,7 +321,7 @@ public class SaveManager : MonoBehaviour
         // 5) Manejar física
         var rb = player.GetComponent<Rigidbody>();
         var cc = player.GetComponent<CharacterController>();
-        
+
         bool wasKinematic = false;
         bool ccWasEnabled = false;
 
@@ -332,7 +332,7 @@ public class SaveManager : MonoBehaviour
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
         }
-        
+
         if (cc != null)
         {
             ccWasEnabled = cc.enabled;
@@ -426,7 +426,7 @@ public class SaveManager : MonoBehaviour
         }
 
         yield return null;
-        
+
         // Ocultar pantalla negra
         HideFade();
 

@@ -11,7 +11,7 @@ using UnityEditor.SceneManagement;
 public class LoadingScreenManager : MonoBehaviour
 {
     [Header("Scene Settings")]
-    public string sceneToLoad = "OpenWorldSceneMerged1"; // cambia por tu escena
+    public string sceneToLoad = "Game"; // cambia por tu escena
     [Header("Fade References")]
     public Image fadeImage;                  // ← arrastra tu FadeImage aquí
     public CanvasGroup canvasGroup;          // ← el CanvasGroup de LoadingElements
