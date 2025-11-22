@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Windows;
+using System.Collections;
 
 public class Enemy : MonoBehaviour
 {
@@ -14,6 +15,33 @@ public class Enemy : MonoBehaviour
     public static void TEST_TriggerEnemyDefeated(Vector3 position)
     {
         OnEnemyDefeated?.Invoke(position);
+    }
+
+    /// <summary>
+    /// Public method to force immediate ground alignment. Can be called after spawn.
+    /// </summary>
+    public void AlignNow()
+    {
+        bool ok = GroundUtils.AlignToGround_Average(transform, groundMask, radius:0.5f, samples:4, rayStartOffset:2f, maxDown:50f, smooth:0.25f, minAboveGround: minAboveGround);
+        if (!ok)
+        {
+            Debug.LogWarning($"[Enemy] AlignNow failed for '{gameObject.name}' at {transform.position}");
+        }
+        if (agent != null)
+        {
+            GroundUtils.WarpAgentToNavMesh(agent, 5f);
+        }
+        // Safety clamp after alignment
+        EnsureAboveTerrain();
+    }
+
+    IEnumerator PeriodicAlignRoutine()
+    {
+        while (enabled)
+        {
+            yield return new WaitForSeconds(Mathf.Max(0.5f, alignPeriodSeconds));
+            AlignNow();
+        }
     }
 
     public float _animationBlend;
@@ -38,6 +66,17 @@ public class Enemy : MonoBehaviour
     [SerializeField] GameObject player;
     [SerializeField] NavMeshAgent agent;
     [SerializeField] Animator animator;
+    [Header("Ground Alignment")]
+    [Tooltip("Layer mask used to detect ground. Create a 'Ground' layer and assign ground colliders to it for best results.")]
+    public LayerMask groundMask = ~0;
+    [Tooltip("Minimum height (meters) to keep above terrain when aligning. Increase if objects appear sunk into the ground.")]
+    public float minAboveGround = 0.25f;
+    [Tooltip("If true, the enemy will try to align to ground at Start and warp NavMeshAgent if present.")]
+    public bool alignToGroundOnStart = true;
+    [Tooltip("If true, periodically re-align the enemy to the ground to correct drift/physics issues.")]
+    public bool enablePeriodicAlign = true;
+    [Tooltip("Seconds between periodic alignment attempts (set higher for performance).")]
+    public float alignPeriodSeconds = 5f;
     float timePassed;
     float newDestinationCD = 0.5f;
 
@@ -62,11 +101,34 @@ public class Enemy : MonoBehaviour
         player = GameObject.FindGameObjectWithTag("Player");
         playerThirdPersonController = player.GetComponent<ThirdPersonController>();
 
+        // Align to ground on spawn to avoid floating or being inside geometry
+        if (alignToGroundOnStart)
+        {
+            // Use the averaged method for robustness
+                bool ok = GroundUtils.AlignToGround_Average(transform, groundMask, radius:0.5f, samples:4, rayStartOffset:2f, maxDown:50f, smooth:0.25f, minAboveGround: minAboveGround);
+            if (!ok)
+            {
+                Debug.LogWarning($"[Enemy] Ground alignment failed for '{gameObject.name}' at {transform.position}");
+            }
+
+            // If we have a NavMeshAgent, try to warp it to the closest NavMesh position
+            if (agent != null)
+            {
+                bool warped = GroundUtils.WarpAgentToNavMesh(agent, 5f);
+                if (!warped)
+                {
+                    // try a larger radius
+                    GroundUtils.WarpAgentToNavMesh(agent, 10f);
+                }
+            }
+            // Final safety clamp to ensure we are above the terrain
+            EnsureAboveTerrain();
+        }
         // NOTE: Dropping power-ups on death was causing unwanted objects in scene.
         // The auto-add of EnemyPowerUpDropper has been disabled. If you need drops,
         // re-enable by restoring the code below.
         /*
-        // Asegurar que EnemyPowerUpDropper existe
+            bool ok = GroundUtils.AlignToGround_Average(transform, groundMask, radius:0.5f, samples:4, rayStartOffset:2f, maxDown:50f, smooth:0.25f, minAboveGround: minAboveGround);
         var dropperType = System.Type.GetType("EnemyPowerUpDropper");
         if (dropperType != null && GetComponent(dropperType) == null)
         {
@@ -196,6 +258,43 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    // Ensure the transform is at least `minAboveGround` above the active Terrain (if any).
+    // If an agent exists, warp it to the corrected position as well.
+    private void EnsureAboveTerrain()
+    {
+        if (Terrain.activeTerrain == null) return;
+        Vector3 p = transform.position;
+        float terrainY = Terrain.activeTerrain.SampleHeight(p) + Terrain.activeTerrain.GetPosition().y;
+        float desiredLowest = terrainY + minAboveGround;
+
+        // Determine the lowest rendered point of this GameObject (accounts for mesh pivots/bones)
+        float lowestRendererY = float.MaxValue;
+        var rends = GetComponentsInChildren<Renderer>(true);
+        if (rends != null && rends.Length > 0)
+        {
+            foreach (var r in rends)
+            {
+                if (r == null) continue;
+                lowestRendererY = Mathf.Min(lowestRendererY, r.bounds.min.y);
+            }
+        }
+        else
+        {
+            // Fallback to transform position
+            lowestRendererY = p.y;
+        }
+
+        if (lowestRendererY < desiredLowest)
+        {
+            float delta = desiredLowest - lowestRendererY;
+            transform.position = p + Vector3.up * delta;
+            if (agent != null)
+            {
+                agent.Warp(transform.position);
+            }
+        }
+    }
+
     public void TakeDamage(int damageAmount)
     {
         health -= damageAmount;
@@ -231,6 +330,7 @@ public class Enemy : MonoBehaviour
         {
             Debug.LogError($"[Enemy] Error invoking OnDied: {ex}");
         }
+
 
         OnEnemyDefeated?.Invoke(transform.position);
 
