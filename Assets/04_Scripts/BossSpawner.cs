@@ -113,13 +113,23 @@ public class BossSpawner : MonoBehaviour
             cinematicTimeline.stopped += OnCinematicFinished;
         }
 
-        // Buscar la UI del boss
+        // Buscar la UI del boss (primero intenta BossHealthBarUI, luego SimpleBossHealthBar)
         bossUI = FindAnyObjectByType<BossHealthBarUI>();
         if (bossUI != null)
         {
             // Ocultar la UI al inicio
             bossUI.HideBossUI();
-            Debug.Log("<color=cyan>[BossSpawner] Boss UI found and hidden</color>");
+            Debug.Log("<color=cyan>[BossSpawner] BossHealthBarUI found and hidden</color>");
+        }
+        else
+        {
+            // Intentar con SimpleBossHealthBar
+            var simpleBossUI = FindAnyObjectByType<SimpleBossHealthBar>();
+            if (simpleBossUI != null)
+            {
+                simpleBossUI.HideBossUI();
+                Debug.Log("<color=cyan>[BossSpawner] SimpleBossHealthBar found and hidden</color>");
+            }
         }
     }
 
@@ -297,11 +307,28 @@ public class BossSpawner : MonoBehaviour
             }
 
             bossUI.ShowBossUI();
-            Debug.Log("<color=cyan>[BossSpawner] Boss UI shown</color>");
+            Debug.Log("<color=cyan>[BossSpawner] BossHealthBarUI shown</color>");
         }
         else
         {
-            Debug.LogWarning("<color=orange>[BossSpawner] No BossHealthBarUI found! Run 'Game Jam > Quick Setup > Boss Health & Energy'</color>");
+            // Intentar con SimpleBossHealthBar
+            var simpleBossUI = FindAnyObjectByType<SimpleBossHealthBar>();
+            if (simpleBossUI != null)
+            {
+                // Conectar el boss si no está conectado
+                Boss boss = spawnedBoss.GetComponent<Boss>();
+                if (boss != null)
+                {
+                    simpleBossUI.boss = boss;
+                }
+
+                simpleBossUI.ShowBossUI();
+                Debug.Log("<color=cyan>[BossSpawner] SimpleBossHealthBar shown</color>");
+            }
+            else
+            {
+                Debug.LogWarning("<color=orange>[BossSpawner] No se encontró UI del boss (BossHealthBarUI o SimpleBossHealthBar)</color>");
+            }
         }
 
         Debug.Log("<color=green>[BossSpawner] Boss combat systems enabled!</color>");

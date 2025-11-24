@@ -14,9 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   missionName: Limpia 3 Campamentos
   description: Acaba con todos los caidos
-  enemiesRequired: 3
+  enemiesRequired: 1
   countCampClearsInsteadOfEnemies: 1
-  enemiesDefeated: 0
-  isActive: 1
-  isCompleted: 0
-  defeatPositions: []
+  enemiesDefeated: 1
+  isActive: 0
+  isCompleted: 1
+  defeatPositions:
+  - {x: 54.393787, y: -87.4, z: 418.49203}

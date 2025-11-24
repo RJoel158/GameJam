@@ -192,7 +192,7 @@ public class Boss : MonoBehaviour
                     break;
 
                 case BossPhase.Phase2:
-                    currentPhase = BossPhase.Phase3;
+                    // currentPhase = BossPhase.Phase3;
                     break;
             }
         }
@@ -216,18 +216,11 @@ public class Boss : MonoBehaviour
 
             case BossPhase.Phase2:
                 sphereCollider.enabled = false;
+                ShieldParticle.SetActive(false);
 
                 if (!phase2Triggered)
                 {
                     phase2Triggered = true;
-                    StartCoroutine(ExecuteSpawnWithDelay());
-                }
-                break;
-
-            case BossPhase.Phase3:
-                if (!phase3Triggered)
-                {
-                    phase3Triggered = true;
                     StartCoroutine(ExecuteSpawnWithDelay());
                 }
                 break;
@@ -243,10 +236,7 @@ public class Boss : MonoBehaviour
 
     public void SpawnEnemies()
     {
-        if (ShieldParticle != null)
-        {
-            Instantiate(ShieldParticle, transform.position, transform.rotation);
-        }
+        ShieldParticle.SetActive(true);
         sphereCollider.enabled = true;
 
         Instantiate(BasicEnemyPrefab, BasicEnemySpawn.transform.position, BasicEnemySpawn.transform.rotation);

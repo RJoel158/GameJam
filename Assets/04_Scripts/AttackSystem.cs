@@ -30,7 +30,7 @@ public class AttackSystem : MonoBehaviour
     public void EnterAttack()
     {
         thirdPersonController.isAttacking = true;
-        
+
         if (PlayerAudioManager.Instance != null)
         {
             PlayerAudioManager.Instance.PlayAttackSwordSound();
@@ -71,24 +71,35 @@ public class AttackSystem : MonoBehaviour
 
         if (thirdPersonController.inAttackAnimation)
         {
-            // ERRROR DE DESBORDAMIENTO EN EL ARRAY
-            clipLength = thirdPersonController._animator.GetCurrentAnimatorClipInfo(1)[0].clip.length;
-            clipSpeed = thirdPersonController._animator.GetCurrentAnimatorStateInfo(1).speed;
+            // Validar que la capa tenga clips antes de acceder
+            AnimatorClipInfo[] clipInfo = thirdPersonController._animator.GetCurrentAnimatorClipInfo(1);
 
-            //Debug.Log($"Attack Clip Length: {clipLength} / Speed: {clipSpeed}");
-            //Debug.Log($"Time: {clipLength / clipSpeed}");
-
-            if (timePassed <= (clipLength / clipSpeed) && starterAssetsInputs.attack)
+            if (clipInfo.Length > 0)
             {
-                thirdPersonController._animator.SetTrigger("Attack");
-                timePassed = 0f;
+                clipLength = clipInfo[0].clip.length;
+                clipSpeed = thirdPersonController._animator.GetCurrentAnimatorStateInfo(1).speed;
+
+                //Debug.Log($"Attack Clip Length: {clipLength} / Speed: {clipSpeed}");
+                //Debug.Log($"Time: {clipLength / clipSpeed}");
+
+                if (timePassed <= (clipLength / clipSpeed) && starterAssetsInputs.attack)
+                {
+                    thirdPersonController._animator.SetTrigger("Attack");
+                    timePassed = 0f;
+                }
+
+                if (timePassed >= (clipLength / clipSpeed) || thirdPersonController._animationBlend >= 0.01f)
+                {
+                    thirdPersonController._animator.SetTrigger("ExitCombo");
+                    exitComboTriggered = true;
+                    timePassed = 0f;
+                }
             }
-
-            if (timePassed >= (clipLength / clipSpeed) || thirdPersonController._animationBlend >= 0.01f)
+            else
             {
-                thirdPersonController._animator.SetTrigger("ExitCombo");
-                exitComboTriggered = true;
-                timePassed = 0f;
+                // Si no hay clips en la capa, salir del ataque
+                Debug.LogWarning("<color=orange>[AttackSystem] No hay clips en la capa 1 del Animator</color>");
+                thirdPersonController.inAttackAnimation = false;
             }
         }
     }
