@@ -70,6 +70,22 @@ public class BossSpawner : MonoBehaviour
     [Tooltip("Vertical offset applied to the boss when it appears relative to the portal position (negative = lower)")]
     public float bossSpawnYOffset = -0.5f;
 
+    [Header("Spawn Follow Mode")]
+    [Tooltip("If true, after appearing the boss will follow the player for a short phase instead of edge-walking")]
+    public bool spawnFollowPlayer = true;
+
+    [Tooltip("Duration of the follow phase in seconds")]
+    public float followPhaseDuration = 8f;
+
+    [Tooltip("Desired follow distance from player (meters)")]
+    public float followDistance = 6f;
+
+    [Tooltip("Follow movement speed (m/s)")]
+    public float followSpeed = 2f;
+
+    [Tooltip("Lateral jitter amount (meters) to make following unsettling")]
+    public float followJitter = 0.6f;
+
     [Header("Audio Settings")]
     [Tooltip("Audio to play when boss appears")]
     public AudioClip bossAppearSound;
@@ -567,6 +583,22 @@ public class BossSpawner : MonoBehaviour
 
         // Configure animator next frame to avoid race conditions
         StartCoroutine(ConfigureBossAnimatorNextFrame(spawnedBoss));
+
+        // Start the chosen boss post-spawn phase (follow or edge-walk) if the boss has a GodController
+        var godCtrl = spawnedBoss.GetComponent<GodController>();
+        if (godCtrl != null)
+        {
+            if (spawnFollowPlayer)
+            {
+                godCtrl.StartFollowPhase(followPhaseDuration, followDistance, followSpeed, followJitter);
+                Debug.Log("<color=cyan>[BossSpawner] Started boss follow-player phase via GodController.</color>");
+            }
+            else
+            {
+                godCtrl.StartPhase();
+                Debug.Log("<color=cyan>[BossSpawner] Started boss edge-walk phase via GodController.</color>");
+            }
+        }
     }
 
     /// <summary>

@@ -19,6 +19,10 @@ public class God : MonoBehaviour
     // Referencia al BossController
     private BossController bossController;
 
+    // Invulnerable flag (set by external controller during phases)
+    [HideInInspector]
+    public bool isInvulnerable = false;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -65,6 +69,12 @@ public class God : MonoBehaviour
 
     public void TakeDamage(int dmg)
     {
+        if (isInvulnerable)
+        {
+            Debug.Log("<color=cyan>[God] Ignored damage while invulnerable.</color>");
+            return;
+        }
+
         health -= dmg;
         if (health <= 0)
         {
@@ -72,6 +82,15 @@ public class God : MonoBehaviour
             //Spawner.instance.EnemyKilled();
             Destroy(gameObject);
         }
+    }
+
+    /// <summary>
+    /// External API to set invulnerability (useful for phase control)
+    /// </summary>
+    public void SetInvulnerable(bool flag)
+    {
+        isInvulnerable = flag;
+        Debug.Log($"<color=cyan>[God] Invulnerable = {flag}</color>");
     }
 
     void CheckIfCanShoot()
