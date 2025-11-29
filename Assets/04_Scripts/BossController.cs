@@ -147,8 +147,6 @@ public class BossController : MonoBehaviour
         if (animator != null)
         {
             animator.SetTrigger("Unconscious");
-            // O usa SetBool si tienes un estado continuo
-            // animator.SetBool("IsUnconscious", true);
         }
     }
 
@@ -187,8 +185,6 @@ public class BossController : MonoBehaviour
         if (animator != null)
         {
             animator.SetTrigger("WakeUp");
-            // O usa SetBool
-            // animator.SetBool("IsUnconscious", false);
         }
     }
 
@@ -253,9 +249,6 @@ public class BossController : MonoBehaviour
         {
             col.enabled = false;
         }
-
-        // Opcional: Destruir después de un tiempo
-        // Destroy(gameObject, 5f);
     }
 
     /// <summary>
@@ -296,9 +289,6 @@ public class BossController : MonoBehaviour
         if (isUnconscious && collision.gameObject.CompareTag("Ground"))
         {
             Debug.Log("<color=yellow>[Boss] Hit the ground while unconscious</color>");
-
-            // Opcional: Efecto de impacto
-            // PlayImpactEffect(collision.contacts[0].point);
         }
     }
 
