@@ -76,7 +76,7 @@ public static class AutoAssignBossClips
             var layer = controller.layers[0];
             var sm = layer.stateMachine;
             int assigned = 0;
-            
+
             foreach (var kv in desired)
             {
                 var stateName = kv.Key;
@@ -113,7 +113,7 @@ public static class AutoAssignBossClips
         {
             AssetDatabase.SaveAssets();
             Debug.Log($"<color=green>[AutoAssignBossClips] ✓ Successfully assigned {totalAssigned} animation clips to boss controllers!</color>");
-            
+
             // Create marker file so we don't run this again
             System.IO.File.WriteAllText(markerPath, "Clips assigned on " + System.DateTime.Now.ToString());
             AssetDatabase.Refresh();

@@ -139,7 +139,7 @@ public static class AnimatorInspectorTools
         EditorUtility.DisplayDialog("Assign FALL", $"Assigned clip '{found.name}' to 'Fall' state.", "OK");
     }
 
-    [MenuItem("Game Jam/Inspect/Assign All Boss Clips To Selected Animator")] 
+    [MenuItem("Game Jam/Inspect/Assign All Boss Clips To Selected Animator")]
     public static void AssignAllBossClipsToSelected()
     {
         var go = Selection.activeGameObject;
@@ -361,7 +361,7 @@ public static class AnimatorInspectorTools
         var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(path);
         if (controller == null)
         {
-            EditorUtility.DisplayDialog("Animator Inspector", "Could not load AnimatorController at path." , "OK");
+            EditorUtility.DisplayDialog("Animator Inspector", "Could not load AnimatorController at path.", "OK");
             return;
         }
 

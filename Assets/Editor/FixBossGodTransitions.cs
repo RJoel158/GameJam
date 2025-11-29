@@ -10,7 +10,7 @@ public static class FixBossGodTransitions
     {
         string controllerPath = "Assets/01_Prefabs/BossAnimations/BossGod.controller";
         var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(controllerPath);
-        
+
         if (controller == null)
         {
             EditorUtility.DisplayDialog("Fix Transitions", $"Controller not found at {controllerPath}", "OK");
@@ -43,10 +43,10 @@ public static class FixBossGodTransitions
         newTransition.hasExitTime = false;
         newTransition.duration = 0.1f;
         newTransition.AddCondition(AnimatorConditionMode.If, 0f, "Grounded");
-        
+
         EditorUtility.SetDirty(controller);
         AssetDatabase.SaveAssets();
-        
+
         Debug.Log("<color=green>[FixBossGodTransitions] ✓ Fixed Fall->Idle transition to use bool condition 'Grounded == true'</color>");
         EditorUtility.DisplayDialog("Fix Complete", "Fall->Idle transition fixed! The 'Grounded' parameter now uses a bool condition (If) instead of numeric comparison.", "OK");
     }

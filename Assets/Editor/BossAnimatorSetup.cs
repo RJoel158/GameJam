@@ -8,7 +8,7 @@ public static class BossAnimatorSetup
     private const string controllerPath = "Assets/09_BossAnimations/BossAnimator.controller";
     private const string clipsFolder = "Assets/09_BossAnimations";
 
-    [MenuItem("Game Jam/Setup/Ensure Boss Animator States")] 
+    [MenuItem("Game Jam/Setup/Ensure Boss Animator States")]
     public static void EnsureBossAnimatorStates()
     {
         var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(controllerPath);
@@ -39,7 +39,7 @@ public static class BossAnimatorSetup
         AnimationClip walkClip = FindClipByNameContains(clips, "Walk");
         AnimationClip slashClip = FindClipByNameContains(clips, "Slash");
         AnimationClip deathClip = FindClipByNameContains(clips, "Death");
-        AnimationClip fallClip = FindClipByNameContains(clips, "Fall") ?? FindClipByNameContains(clips, "FreeFall") ;
+        AnimationClip fallClip = FindClipByNameContains(clips, "Fall") ?? FindClipByNameContains(clips, "FreeFall");
 
         // If fall clip not found, create an empty placeholder clip
         if (fallClip == null)
@@ -164,7 +164,7 @@ public static class BossAnimatorSetup
         {
             trans.AddCondition(greaterThan ? AnimatorConditionMode.Greater : AnimatorConditionMode.Less, threshold, param);
         }
-        Debug.Log($"[BossAnimatorSetup] Transition {from.name} -> {to.name} on {param} {(greaterThan?">":"<=")}{threshold}");
+        Debug.Log($"[BossAnimatorSetup] Transition {from.name} -> {to.name} on {param} {(greaterThan ? ">" : "<=")}{threshold}");
     }
 
     private static void EnsureAnyStateTransition(AnimatorStateMachine sm, AnimatorState to, string triggerName, AnimatorConditionMode mode)

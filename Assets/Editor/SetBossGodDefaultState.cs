@@ -10,7 +10,7 @@ public static class SetBossGodDefaultState
     {
         string controllerPath = "Assets/01_Prefabs/BossAnimations/BossGod.controller";
         var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(controllerPath);
-        
+
         if (controller == null)
         {
             EditorUtility.DisplayDialog("Error", $"Controller not found at {controllerPath}", "OK");
@@ -31,20 +31,20 @@ public static class SetBossGodDefaultState
 
         // Set Fall as default state
         sm.defaultState = fallState;
-        
+
         EditorUtility.SetDirty(controller);
         AssetDatabase.SaveAssets();
-        
+
         Debug.Log("<color=green>[SetBossGodDefaultState] ✓ Fall state set as DEFAULT state</color>");
         EditorUtility.DisplayDialog("Success", "Fall is now the default state! Boss will start falling when spawned.", "OK");
     }
-    
+
     [MenuItem("Game Jam/Boss/Set Idle as Default State")]
     public static void SetIdleAsDefault()
     {
         string controllerPath = "Assets/01_Prefabs/BossAnimations/BossGod.controller";
         var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(controllerPath);
-        
+
         if (controller == null)
         {
             EditorUtility.DisplayDialog("Error", $"Controller not found at {controllerPath}", "OK");
@@ -65,10 +65,10 @@ public static class SetBossGodDefaultState
 
         // Set Idle as default state
         sm.defaultState = idleState;
-        
+
         EditorUtility.SetDirty(controller);
         AssetDatabase.SaveAssets();
-        
+
         Debug.Log("<color=green>[SetBossGodDefaultState] ✓ Idle state set as DEFAULT state</color>");
         EditorUtility.DisplayDialog("Success", "Idle is now the default state.", "OK");
     }

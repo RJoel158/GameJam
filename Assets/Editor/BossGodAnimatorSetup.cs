@@ -8,7 +8,7 @@ public static class BossGodAnimatorSetup
     private const string controllerPath = "Assets/01_Prefabs/BossAnimations/BossGod.controller";
     private const string clipsFolder = "Assets/01_Prefabs/BossAnimations";
 
-    [MenuItem("Game Jam/Setup/Configure BossGod Animator")] 
+    [MenuItem("Game Jam/Setup/Configure BossGod Animator")]
     public static void ConfigureBossGodAnimator()
     {
         var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(controllerPath);

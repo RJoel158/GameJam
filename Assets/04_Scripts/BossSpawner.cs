@@ -521,10 +521,10 @@ public class BossSpawner : MonoBehaviour
             bossAnimator.SetFloat("Speed", 0f);
             bossAnimator.SetFloat("MotionSpeed", 0f);
             bossAnimator.SetBool("Moving", false);
-            
+
             // Forzar el estado Fall explícitamente
             bossAnimator.Play("Fall", 0, 0f);
-            
+
             Debug.Log("<color=cyan>[BossSpawner] Boss animator configured: Grounded=false, State=Fall</color>");
         }
         else
