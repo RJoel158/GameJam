@@ -508,6 +508,14 @@ public class BossSpawner : MonoBehaviour
         bossGameObject.SetActive(true);
         spawnedBoss = bossGameObject;
 
+        // Ensure the boss has a God component (used by GodController for invulnerability/damage)
+        var godComp = spawnedBoss.GetComponent<God>();
+        if (godComp == null)
+        {
+            godComp = spawnedBoss.AddComponent<God>();
+            Debug.Log("<color=yellow>[BossSpawner] Added missing 'God' component to boss at spawn time.</color>");
+        }
+
         // Configurar el Animator DESPUÉS de activar (para evitar crash de memoria)
         StartCoroutine(ConfigureBossAnimatorNextFrame(bossGameObject));
 
@@ -526,27 +534,38 @@ public class BossSpawner : MonoBehaviour
     /// </summary>
     private IEnumerator ConfigureBossAnimatorNextFrame(GameObject boss)
     {
-        // Esperar un frame para que el Animator se inicialice completamente
-        yield return null;
+        // Wait until next frame and ensure the boss Animator is active and initialized
+        float timeout = 0.5f;
+        float timer = 0f;
 
-        var bossAnimator = boss.GetComponent<Animator>();
-        if (bossAnimator != null)
+        while (timer < timeout)
         {
-            // Asegurar que está en el aire
-            bossAnimator.SetBool("Grounded", false);
-            bossAnimator.SetFloat("Speed", 0f);
-            bossAnimator.SetFloat("MotionSpeed", 0f);
-            bossAnimator.SetBool("Moving", false);
+            if (boss == null) yield break;
+            if (boss.activeInHierarchy)
+            {
+                var bossAnimator = boss.GetComponent<Animator>();
+                if (bossAnimator != null && bossAnimator.enabled && bossAnimator.runtimeAnimatorController != null)
+                {
+                    // Asegurar que está en el aire
+                    bossAnimator.SetBool("Grounded", false);
+                    bossAnimator.SetFloat("Speed", 0f);
+                    bossAnimator.SetFloat("MotionSpeed", 0f);
+                    bossAnimator.SetBool("Moving", false);
 
-            // Forzar el estado Fall explícitamente
-            bossAnimator.Play("Fall", 0, 0f);
+                    // Forzar el estado Fall explícitamente (guardado en try)
+                    try { bossAnimator.Play("Fall", 0, 0f); }
+                    catch { Debug.LogWarning("<color=yellow>[BossSpawner] Unable to Play 'Fall' state - state may not exist.</color>"); }
 
-            Debug.Log("<color=cyan>[BossSpawner] Boss animator configured: Grounded=false, State=Fall</color>");
+                    Debug.Log("<color=cyan>[BossSpawner] Boss animator configured: Grounded=false, State=Fall</color>");
+                    yield break;
+                }
+            }
+
+            timer += Time.deltaTime;
+            yield return null;
         }
-        else
-        {
-            Debug.LogWarning("<color=yellow>[BossSpawner] No Animator found on boss!</color>");
-        }
+
+        Debug.LogWarning("<color=yellow>[BossSpawner] Timed out waiting for boss Animator to initialize.</color>");
     }
 
     /// <summary>

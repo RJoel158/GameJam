@@ -65,8 +65,58 @@ public class GodController : MonoBehaviour
     [Tooltip("Sound played once when player exits the aura")]
     public AudioClip followAuraExitSfx;
 
+    [Header("Teleport / Projectiles Phase")]
+    [Tooltip("Duration of the teleport+projectile phase (seconds). Placeholder — replace with real logic later.")]
+    public float teleportPhaseDuration = 5f;
+
+    [Tooltip("Delay before starting teleport phase after follow ends (seconds)")]
+    public float teleportPhaseDelay = 0.3f;
+
     [Tooltip("If true, the phase will start automatically when told to StartPhase(); otherwise start manually")]
     public bool startOnEnable = false;
+
+    [Header("Jump Hit VFX")]
+    [Tooltip("Name of the child GameObject to activate when the jump animation finishes (e.g. 'Electro hit')")]
+    public string electroHitChildName = "Electro hit";
+
+    [Tooltip("How long (seconds) to keep the Electro hit GameObject active after the jump finishes (0 = don't auto-disable)")]
+    public float electroHitActiveDuration = 1.0f;
+
+    [Header("Jump Attack Settings")]
+    [Tooltip("Sound to play when the jump attack lands")]
+    public AudioClip jumpAttackSfx;
+
+    [Tooltip("Radius (meters) of the area damage when the jump attack lands")]
+    public float jumpAttackRadius = 3f;
+
+    [Tooltip("Damage applied to the player if inside the radius when the jump attack lands")]
+    public int jumpAttackDamage = 10;
+
+    [Tooltip("Volume multiplier applied when playing the jump attack SFX (Inspector can use >1 to boost)")]
+    public float jumpAttackVolume = 1.2f;
+
+    [Tooltip("Scale multiplier applied to Electro hit ParticleSystems as a visual fallback")]
+    public float electroParticleScale = 1.5f;
+
+    [Header("Electro Hit Fallback")]
+    [Tooltip("Optional fallback particle prefab to spawn at the Electro hit position if the child's particles do not show. Drag a prefab here.")]
+    public GameObject electroHitPrefab;
+
+    [Tooltip("How long (seconds) to keep the fallback prefab active before destroying it")]
+    public float electroHitPrefabDuration = 1f;
+
+    [Tooltip("Priority for the temporary jump SFX AudioSource (lower = higher priority). Use 0 for highest priority.")]
+    public int jumpAttackAudioPriority = 0;
+
+    [Header("Teleport Visual / SFX")]
+    [Tooltip("Optional teleport prefab to spawn when teleport phase starts. Drag the prefab (e.g. Teleport Variant.prefab) here.")]
+    public GameObject teleportPrefab;
+
+    [Tooltip("How long (seconds) to keep the teleport prefab alive before destroying it")]
+    public float teleportPrefabDuration = 2f;
+
+    [Tooltip("Sound to play when the teleport prefab is spawned")]
+    public AudioClip teleportSfx;
 
     private Vector3 centerPosition;
     private float currentAngle = 0f;
@@ -79,6 +129,8 @@ public class GodController : MonoBehaviour
     private float smoothedSpeed = 0f;
     private AudioSource audioSource;
     private bool playerWasInAura = false;
+    private GameObject activeAuraInstance = null;
+    private bool electroActivatedThisJump = false;
 
     private void Awake()
     {
@@ -178,13 +230,13 @@ public class GodController : MonoBehaviour
         prevPosition = transform.position;
 
         // Try to enable or create aura visual if requested
-        GameObject auraInstance = null;
+        activeAuraInstance = null;
         if (followAuraPrefab != null)
         {
-            auraInstance = Instantiate(followAuraPrefab, transform.position, Quaternion.identity, transform);
-            auraInstance.transform.localPosition = Vector3.zero;
+            activeAuraInstance = Instantiate(followAuraPrefab, transform.position, Quaternion.identity, transform);
+            activeAuraInstance.transform.localPosition = Vector3.zero;
             // Optional scale control
-            auraInstance.transform.localScale = Vector3.one * followAuraScale;
+            activeAuraInstance.transform.localScale = Vector3.one * followAuraScale;
         }
         else
         {
@@ -192,8 +244,8 @@ public class GodController : MonoBehaviour
             var child = transform.Find("Star aura");
             if (child != null)
             {
-                auraInstance = child.gameObject;
-                auraInstance.SetActive(true);
+                activeAuraInstance = child.gameObject;
+                activeAuraInstance.SetActive(true);
             }
         }
 
@@ -313,17 +365,786 @@ public class GodController : MonoBehaviour
             animator.SetFloat("MotionSpeed", 0f);
         }
 
-        // Disable or destroy aura visual
-        if (auraInstance != null)
-        {
-            // If it was instantiated by us, destroy; if it was existing child, just deactivate
-            if (followAuraPrefab != null)
-                Destroy(auraInstance, 0.2f);
-            else
-                auraInstance.SetActive(false);
-        }
+        // Disable or destroy aura visual (ensure done even if coroutines were interrupted)
+        DisableActiveAura();
 
         Debug.Log("<color=green>[GodController] Follow phase complete. Boss vulnerable again.</color>");
+
+        // Play JumpAttack animation, then start teleport/projectile phase
+        StartCoroutine(PlayJumpThenTeleportCoroutine(teleportPhaseDelay));
+    }
+
+    private IEnumerator PlayJumpThenTeleportCoroutine(float delayBefore)
+    {
+        // Optional small delay before starting the jump
+        if (delayBefore > 0f)
+            yield return new WaitForSeconds(delayBefore);
+
+        float waitTime = 0.5f; // fallback
+        string animSubstring = "JUMP"; // search for any clip that contains JUMP
+
+        string chosenClipName = null;
+        if (animator != null)
+        {
+            var controller = animator.runtimeAnimatorController;
+            if (controller != null)
+            {
+                // prefer exact JUMPATTACK (case-insensitive)
+                foreach (var clip in controller.animationClips)
+                {
+                    if (clip == null) continue;
+                    if (clip.name.Equals("JUMPATTACK", System.StringComparison.OrdinalIgnoreCase))
+                    {
+                        chosenClipName = clip.name;
+                        waitTime = clip.length;
+                        break;
+                    }
+                }
+
+                // If not found, try any clip that contains 'JUMP' or 'ATTACK'
+                if (chosenClipName == null)
+                {
+                    foreach (var clip in controller.animationClips)
+                    {
+                        if (clip == null) continue;
+                        if (clip.name.IndexOf(animSubstring, System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                            clip.name.IndexOf("ATTACK", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            chosenClipName = clip.name;
+                            waitTime = clip.length;
+                            break;
+                        }
+                    }
+                }
+
+                // If we found a candidate clip, verify the animator actually has a state with that name
+                if (!string.IsNullOrEmpty(chosenClipName))
+                {
+                    bool hasState = false;
+                    try
+                    {
+                        int hash = Animator.StringToHash(chosenClipName);
+                        hasState = animator.HasState(0, hash);
+                    }
+                    catch { hasState = false; }
+
+                    if (hasState)
+                    {
+                        Debug.Log($"[GodController] Playing jump state by name: {chosenClipName}");
+                        try { animator.Play(chosenClipName, 0, 0f); }
+                        catch (System.Exception ex) { Debug.LogWarning($"[GodController] Failed to Play animator state '{chosenClipName}': {ex.Message}"); }
+                    }
+                    else
+                    {
+                        // Try playing by clip name anyway (common when state name == clip name)
+                        Debug.Log($"[GodController] Candidate clip '{chosenClipName}' found but animator.HasState returned false. Attempting Play by clip name anyway.");
+                        try { animator.Play(chosenClipName, 0, 0f); }
+                        catch (System.Exception ex) { Debug.LogWarning($"[GodController] Play fallback failed for '{chosenClipName}': {ex.Message}"); }
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("[GodController] Jump clip not found by name; will try animator parameters/triggers next.");
+                }
+            }
+
+            // If we still didn't play anything, try to find animator parameters that look like a jump/attack trigger and set them
+            bool triggered = false;
+            foreach (var p in animator.parameters)
+            {
+                var nameLower = p.name.ToLowerInvariant();
+                if (nameLower.Contains("jump") || nameLower.Contains("attack"))
+                {
+                    if (p.type == AnimatorControllerParameterType.Trigger)
+                    {
+                        animator.SetTrigger(p.name);
+                        Debug.Log($"[GodController] Set trigger parameter '{p.name}' to attempt jump animation.");
+                        triggered = true;
+                    }
+                    else if (p.type == AnimatorControllerParameterType.Bool)
+                    {
+                        animator.SetBool(p.name, true);
+                        Debug.Log($"[GodController] Set bool parameter '{p.name}' = true to attempt jump animation.");
+                        triggered = true;
+                    }
+                }
+            }
+
+            if (!triggered)
+            {
+                // Last resort: attempt to Play common state names to give more tries before giving up
+                string[] commonNames = new string[] { "JUMPATTACK", "JumpAttack", "Jump Attack", "Jump", "Attack" };
+                foreach (var n in commonNames)
+                {
+                    try
+                    {
+                        if (animator.HasState(0, Animator.StringToHash(n)))
+                        {
+                            Debug.Log($"[GodController] Playing common state name '{n}' via HasState check.");
+                            animator.Play(n, 0, 0f);
+                            triggered = true;
+                            break;
+                        }
+                    }
+                    catch { }
+                }
+
+                if (!triggered)
+                {
+                    Debug.LogWarning("[GodController] Could not find jump/attack state or parameter. Please verify the Animator has a state or a trigger parameter for the jump attack.");
+                }
+            }
+
+            // Deterministic attempt: if the Animator has a trigger param named 'JumpAttack', set it
+            if (animator != null)
+            {
+                foreach (var p in animator.parameters)
+                {
+                    if (p.name == "JumpAttack" && p.type == AnimatorControllerParameterType.Trigger)
+                    {
+                        animator.SetTrigger("JumpAttack");
+                        Debug.Log("[GodController] Set trigger 'JumpAttack' on animator as deterministic fallback.");
+                        // small yield to give animator a frame to respond
+                        yield return null;
+                        Debug.Log($"[GodController] After SetTrigger: current stateInfo.nameHash={animator.GetCurrentAnimatorStateInfo(0).shortNameHash}, normalizedTime={animator.GetCurrentAnimatorStateInfo(0).normalizedTime}");
+                        break;
+                    }
+                }
+            }
+
+            // Activate Electro hit immediately when we trigger/play the jump animation
+            try
+            {
+                electroActivatedThisJump = false;
+                if (!string.IsNullOrEmpty(electroHitChildName))
+                {
+                    var earlyElectro = FindDeepChild(transform, electroHitChildName);
+                    if (earlyElectro != null)
+                    {
+                        ActivateElectroHit(earlyElectro, Mathf.Max(0.05f, electroHitActiveDuration));
+                        electroActivatedThisJump = true;
+                    }
+                }
+            }
+            catch { }
+        }
+
+        // Wait until the animator reports a clip containing 'JUMP' as current, then wait for that state's normalized time >= 1
+        float waitTimer = 0f;
+        float maxWait = Mathf.Max(1f, waitTime * 2f);
+        bool foundJumpClip = false;
+
+        while (waitTimer < maxWait)
+        {
+            waitTimer += Time.deltaTime;
+
+            if (animator != null)
+            {
+                var clips = animator.GetCurrentAnimatorClipInfo(0);
+                if (clips != null && clips.Length > 0)
+                {
+                    foreach (var ci in clips)
+                    {
+                        if (ci.clip != null && ci.clip.name.IndexOf("JUMP", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            foundJumpClip = true;
+                            // wait until state normalized time >= 1 (clip finished)
+                            var state = animator.GetCurrentAnimatorStateInfo(0);
+                            if (state.normalizedTime >= 1f)
+                            {
+                                waitTimer = maxWait; // exit outer loop
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (foundJumpClip == false)
+            {
+                // if not yet found, fallback small wait to allow animator to enter state
+                yield return null;
+            }
+            else
+            {
+                // keep waiting for the state to complete
+                yield return null;
+            }
+        }
+
+        // If we never detected the jump clip, fallback to waitTime
+        if (!foundJumpClip)
+        {
+            yield return new WaitForSeconds(waitTime + 0.05f);
+        }
+
+        // Log current animator clips for debugging
+        if (animator != null)
+        {
+            var cur = animator.GetCurrentAnimatorClipInfo(0);
+            if (cur != null && cur.Length > 0)
+            {
+                foreach (var ci in cur)
+                {
+                    if (ci.clip != null)
+                        Debug.Log($"[GodController] Current animator clip after wait: {ci.clip.name}");
+                }
+            }
+            else
+            {
+                Debug.Log("[GodController] No current animator clip info after wait.");
+            }
+        }
+
+        // Ensure aura is disabled before the jump hit
+        DisableActiveAura();
+
+        // Play jump attack sound if assigned (controller-level fallback)
+        if (jumpAttackSfx != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(jumpAttackSfx);
+        }
+
+        // Activate Electro hit child (if present) right when the jump animation ends
+        Transform electroT = null;
+        if (!string.IsNullOrEmpty(electroHitChildName))
+        {
+            // Use a recursive find in case the child is nested
+            electroT = FindDeepChild(transform, electroHitChildName);
+            if (electroT != null && electroT.gameObject != null)
+            {
+                try
+                {
+                    // Attach or get a TimedAutoDisable helper on the target so scheduled disable survives StopAllCoroutines()
+                    var tad = electroT.gameObject.GetComponent<TimedAutoDisable>();
+                    if (tad == null)
+                        tad = electroT.gameObject.AddComponent<TimedAutoDisable>();
+
+                    // Ensure the object is active then schedule auto-disable
+                    try { Debug.Log($"[GodController] Electro hit target found: {GetTransformPath(electroT)}; activeBefore={electroT.gameObject.activeSelf}; position={electroT.position}"); } catch { }
+                    try { electroT.gameObject.SetActive(true); } catch { }
+                    // Force Electro hit active for exactly electroHitPrefabDuration (user-configurable)
+                    float forceDuration = Mathf.Max(0.05f, electroHitPrefabDuration);
+                    tad.ActivateForSeconds(forceDuration);
+
+                    // If a fallback prefab is assigned, instantiate it now so the visual is guaranteed
+                    try
+                    {
+                        if (electroHitPrefab != null)
+                        {
+                            var prefabGo = Instantiate(electroHitPrefab, electroT.position, Quaternion.identity);
+                            try { prefabGo.transform.localScale *= Mathf.Max(0.01f, electroParticleScale); } catch { }
+                            Destroy(prefabGo, Mathf.Max(0.1f, forceDuration));
+                            Debug.Log("[GodController] Instantiated electroHitPrefab immediately as guaranteed visual fallback.");
+                        }
+                    }
+                    catch { }
+
+                    // Play any AudioSource(s) on the Electro hit child so its own SFX are heard
+                    try
+                    {
+                        var electroAudioSources = electroT.gameObject.GetComponentsInChildren<AudioSource>(true);
+                        bool audioPlayed = false;
+                        foreach (var ea in electroAudioSources)
+                        {
+                            try
+                            {
+                                if (ea == null) continue;
+                                if (ea.clip != null)
+                                {
+                                    ea.Play();
+                                    audioPlayed = true;
+                                }
+                                else if (jumpAttackSfx != null)
+                                {
+                                    ea.PlayOneShot(jumpAttackSfx);
+                                    audioPlayed = true;
+                                }
+                            }
+                            catch { }
+                        }
+                        // Fallback: if no child audio played, play the configured SFX at the electro position so it is audible
+                        if (!audioPlayed && jumpAttackSfx != null)
+                        {
+                            try
+                            {
+                                Debug.Log("[GodController] No child audio played - using PlayOneShot/PlayClipAtPoint fallback for jumpAttackSfx.");
+                                // Prefer this controller's AudioSource so volumeScale can exceed 1 via PlayOneShot
+                                if (audioSource != null)
+                                {
+                                    audioSource.PlayOneShot(jumpAttackSfx, jumpAttackVolume);
+                                }
+                                else
+                                {
+                                    // Last resort: PlayClipAtPoint; clamp volume for PlayClipAtPoint
+                                    AudioSource.PlayClipAtPoint(jumpAttackSfx, electroT.position, Mathf.Clamp(jumpAttackVolume, 0f, 1f));
+                                }
+
+                                // Also play a forced high-priority AudioSource at the electro position so the sound is heard above others
+                                PlayLoudOneShotAt(jumpAttackSfx, electroT.position, jumpAttackVolume, jumpAttackAudioPriority);
+                            }
+                            catch { }
+                        }
+                    }
+                    catch { }
+
+                    // Start any particle systems on the Electro hit so the VFX play reliably
+                    try
+                    {
+                        var parts = electroT.gameObject.GetComponentsInChildren<ParticleSystem>(true);
+                        foreach (var p in parts)
+                        {
+                            try
+                            {
+                                // scale particle size as visual fallback
+                                var main = p.main;
+                                main.startSizeMultiplier *= Mathf.Max(0.01f, electroParticleScale);
+                                p.Play(true);
+                            }
+                            catch { }
+                            try { var rend = p.GetComponent<ParticleSystemRenderer>(); if (rend != null) rend.enabled = true; } catch { }
+                        }
+                        try { Debug.Log($"[GodController] Electro hit started {parts.Length} particle systems (scale x{electroParticleScale})."); } catch { }
+
+                        // If we started particle systems but none appear to be playing, force an emit as a last-resort visual fallback
+                        try
+                        {
+                            bool anyPlaying = false;
+                            foreach (var p in parts)
+                            {
+                                try { if (p != null && (p.isPlaying || p.IsAlive(true))) { anyPlaying = true; break; } } catch { }
+                            }
+                            if (!anyPlaying && parts.Length > 0)
+                            {
+                                Debug.Log("[GodController] No particle was playing - forcing Emit on Electro hit particle systems as fallback.");
+                                foreach (var p in parts)
+                                {
+                                    try { p.Clear(true); p.Emit(24); p.Play(true); } catch { }
+                                }
+
+                                // As last resort, spawn a fallback prefab (if assigned) at the electro position so the effect is visible
+                                try
+                                {
+                                    if (electroHitPrefab != null)
+                                    {
+                                        var go = Instantiate(electroHitPrefab, electroT.position, Quaternion.identity);
+                                        try { go.transform.localScale *= Mathf.Max(0.01f, electroParticleScale); } catch { }
+                                        Destroy(go, Mathf.Max(0.1f, forceDuration));
+                                        Debug.Log("[GodController] Spawned electroHitPrefab fallback at electro position.");
+                                    }
+                                }
+                                catch { }
+                            }
+                        }
+                        catch { }
+                    }
+                    catch { }
+
+                    Debug.Log($"<color=cyan>[GodController] Activated '{electroHitChildName}' (for {electroHitActiveDuration}s) and triggered its audio/particles. activeAfter={electroT.gameObject.activeSelf}</color>");
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogWarning($"[GodController] Failed to activate '{electroHitChildName}': {ex.Message}");
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"[GodController] Child '{electroHitChildName}' not found on boss. Cannot activate Electro hit.");
+            }
+        }
+
+
+        // Determine center for damage: prefer Electro hit position if available (handles offsets)
+        Vector3 damageCenter = (electroT != null) ? electroT.position : transform.position;
+
+        // Apply area damage at damageCenter
+        if (jumpAttackRadius > 0f && jumpAttackDamage > 0)
+        {
+            Collider[] hits = Physics.OverlapSphere(damageCenter, jumpAttackRadius);
+            Debug.Log($"[GodController] OverlapSphere found {hits.Length} colliders within radius {jumpAttackRadius} at damageCenter={damageCenter}.");
+            foreach (var c in hits)
+            {
+                if (c == null) continue;
+                float dist = Vector3.Distance(c.transform.position, damageCenter);
+                Debug.Log($"[GodController] Overlap hit: name={c.gameObject.name}, dist={dist}, layer={c.gameObject.layer}");
+
+                // Prefer StarterAssets controller
+                var tpc = c.GetComponent<StarterAssets.ThirdPersonController>() ?? c.GetComponentInParent<StarterAssets.ThirdPersonController>();
+                if (tpc != null)
+                {
+                    try { tpc.TakeDamage(jumpAttackDamage); Debug.Log($"<color=red>[GodController] Applied {jumpAttackDamage} jump damage to player via TPC.</color>"); }
+                    catch { Debug.LogWarning("[GodController] Failed to call TakeDamage on StarterAssets.ThirdPersonController."); }
+                    continue;
+                }
+
+                // Fallback: attempt a SendMessage to 'TakeDamage' (will call if component supports it)
+                try
+                {
+                    c.gameObject.SendMessage("TakeDamage", jumpAttackDamage, SendMessageOptions.DontRequireReceiver);
+                    Debug.Log($"[GodController] SentMessage TakeDamage to {c.gameObject.name} (fallback).");
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogWarning($"[GodController] SendMessage TakeDamage failed on {c.gameObject.name}: {ex.Message}");
+                }
+            }
+
+            // Extra fallback: if player GameObject exists but wasn't inside the OverlapSphere, apply direct check
+            try
+            {
+                var playerGo = GameObject.FindGameObjectWithTag("Player");
+                if (playerGo != null)
+                {
+                    Vector3 playerPos = playerGo.transform.position;
+                    float pdist3D = Vector3.Distance(playerPos, damageCenter);
+                    float pdistXZ = Vector2.Distance(new Vector2(playerPos.x, playerPos.z), new Vector2(damageCenter.x, damageCenter.z));
+                    Debug.Log($"[GodController] Player distance to damageCenter 3D = {pdist3D}, XZ = {pdistXZ}");
+
+                    // Prefer horizontal (XZ) distance check because Electro hit VFX may be elevated.
+                    if (pdistXZ <= jumpAttackRadius || pdist3D <= jumpAttackRadius)
+                    {
+                        try
+                        {
+                            var ptpc = playerGo.GetComponent<StarterAssets.ThirdPersonController>();
+                            if (ptpc != null)
+                            {
+                                ptpc.TakeDamage(jumpAttackDamage);
+                                Debug.Log($"<color=red>[GodController] Applied {jumpAttackDamage} damage to Player via direct component fallback.</color>");
+                            }
+                            else
+                            {
+                                playerGo.SendMessage("TakeDamage", jumpAttackDamage, SendMessageOptions.DontRequireReceiver);
+                                Debug.Log($"[GodController] SentMessage TakeDamage to Player (direct fallback).");
+                            }
+                        }
+                        catch (System.Exception ex)
+                        {
+                            Debug.LogWarning($"[GodController] Direct damage fallback failed on Player: {ex.Message}");
+                        }
+                    }
+                    else
+                    {
+                        Debug.Log("[GodController] Player was outside the horizontal/jump radius; no direct damage applied.");
+                    }
+                }
+            }
+            catch { }
+        }
+
+        // Start teleport/projectile phase
+        StartTeleportProjectilePhase();
+    }
+
+    private IEnumerator StartTeleportPhaseAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        StartTeleportProjectilePhase();
+    }
+
+    /// <summary>
+    /// Placeholder teleport+projectile phase. Replace with real teleport/projectile behaviour later.
+    /// At the end of the phase this will apply damage equal to 1/4 of the boss' max health.
+    /// </summary>
+    public void StartTeleportProjectilePhase()
+    {
+        StopAllCoroutines();
+        StartCoroutine(TeleportProjectilePhaseCoroutine());
+    }
+
+    private IEnumerator TeleportProjectilePhaseCoroutine()
+    {
+        Debug.Log("<color=cyan>[GodController] Teleport+Projectile phase START</color>");
+
+        // Ensure any electro hit left active from previous step is turned off before starting the teleport phase
+        if (!string.IsNullOrEmpty(electroHitChildName))
+        {
+            Transform electroT = FindDeepChild(transform, electroHitChildName);
+            if (electroT != null && electroT.gameObject != null)
+            {
+                try
+                {
+                    // If TimedAutoDisable exists, cancel its invokes and disable immediately
+                    var tad = electroT.gameObject.GetComponent<TimedAutoDisable>();
+                    if (tad != null)
+                    {
+                        tad.DisableNow();
+                    }
+                    else
+                    {
+                        electroT.gameObject.SetActive(false);
+                    }
+                }
+                catch { }
+                // Spawn teleport prefab and play SFX at the electro position when the electro hit is disabled
+                try
+                {
+                    Vector3 spawnPos = electroT.position;
+                    if (teleportPrefab != null)
+                    {
+                        var go = Instantiate(teleportPrefab, spawnPos, Quaternion.identity);
+                        try { go.transform.localScale *= 1f; } catch { }
+                        Destroy(go, Mathf.Max(0.1f, teleportPrefabDuration));
+                        Debug.Log("[GodController] Spawned teleport prefab at electro position.");
+                    }
+
+                    if (teleportSfx != null)
+                    {
+                        // Prefer controller AudioSource if available
+                        if (audioSource != null)
+                            audioSource.PlayOneShot(teleportSfx, 1f);
+                        // Also fire a loud one-shot at the position for spatial clarity
+                        PlayLoudOneShotAt(teleportSfx, spawnPos, 1f, 0);
+                    }
+                }
+                catch { }
+            }
+        }
+
+        // Ensure aura audio is stopped
+        if (audioSource != null && audioSource.isPlaying && audioSource.clip == followAuraLoopSfx)
+        {
+            audioSource.Stop();
+            audioSource.loop = false;
+        }
+
+        // Here you would implement teleporting and projectile attacks. For now, wait the duration.
+        float timer = 0f;
+        while (timer < teleportPhaseDuration)
+        {
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        // Apply 1/4 max health damage to the boss
+        if (god != null)
+        {
+            int quarter = Mathf.Max(1, god.maxHealth / 4);
+            // Ensure boss is vulnerable to this damage
+            god.SetInvulnerable(false);
+            god.TakeDamage(quarter);
+            Debug.Log($"<color=red>[GodController] Teleport phase complete — applied {quarter} damage to boss (1/4 maxHealth).</color>");
+        }
+        else
+        {
+            Debug.LogWarning("<color=orange>[GodController] No God component found; cannot apply quarter damage.</color>");
+        }
+
+        // After the teleport/projectile phase ends you can transition to next behaviour (not implemented)
+        Debug.Log("<color=cyan>[GodController] Teleport+Projectile phase END</color>");
+    }
+
+    private void DisableActiveAura()
+    {
+        if (activeAuraInstance != null)
+        {
+            Debug.Log($"[GodController] DisableActiveAura called. activeAuraInstance={activeAuraInstance.name}, followAuraPrefab={(followAuraPrefab != null)}");
+            // If the aura was instantiated from a prefab, destroy it shortly after to allow exit VFX to play
+            if (followAuraPrefab != null)
+            {
+                // Stop any audio in the aura before destroying
+                var childAudio = activeAuraInstance.GetComponentsInChildren<AudioSource>(true);
+                foreach (var a in childAudio)
+                {
+                    try { a.Stop(); a.loop = false; } catch { }
+                }
+
+                var parts = activeAuraInstance.GetComponentsInChildren<ParticleSystem>(true);
+                foreach (var p in parts)
+                {
+                    try { p.Stop(true, ParticleSystemStopBehavior.StopEmitting); } catch { }
+                }
+
+                Destroy(activeAuraInstance, 0.2f);
+            }
+            else
+            {
+                try
+                {
+                    // Stop audio and particles inside the existing child aura as well
+                    var childAudio = activeAuraInstance.GetComponentsInChildren<AudioSource>(true);
+                    foreach (var a in childAudio) { try { a.Stop(); a.loop = false; } catch { } }
+                    var parts = activeAuraInstance.GetComponentsInChildren<ParticleSystem>(true);
+                    foreach (var p in parts) { try { p.Stop(true, ParticleSystemStopBehavior.StopEmitting); } catch { } }
+                    activeAuraInstance.SetActive(false);
+                }
+                catch { }
+            }
+
+            // Clear reference after handling
+            activeAuraInstance = null;
+        }
+
+        // stop audio loop played by this controller (fallback)
+        if (audioSource != null)
+        {
+            if (audioSource.isPlaying && audioSource.clip == followAuraLoopSfx)
+            {
+                audioSource.Stop();
+                audioSource.loop = false;
+            }
+        }
+
+        playerWasInAura = false;
+        // Additional safety sweep
+        StopAnyLingeringAuraEffects();
+    }
+
+    // Extra safety: stop any lingering aura audio/particles under the boss by name match
+    private void StopAnyLingeringAuraEffects()
+    {
+        try
+        {
+            foreach (var a in GetComponentsInChildren<AudioSource>(true))
+            {
+                if (a == null || a.clip == null) continue;
+                var name = a.gameObject.name.ToLowerInvariant();
+                if (name.Contains("aura") || name.Contains("star aura") || name.Contains("follow"))
+                {
+                    try { a.Stop(); a.loop = false; } catch { }
+                }
+            }
+
+            foreach (var p in GetComponentsInChildren<ParticleSystem>(true))
+            {
+                if (p == null) continue;
+                var name = p.gameObject.name.ToLowerInvariant();
+                if (name.Contains("aura") || name.Contains("star aura") || name.Contains("follow"))
+                {
+                    try { p.Stop(true, ParticleSystemStopBehavior.StopEmitting); } catch { }
+                }
+            }
+        }
+        catch { }
+    }
+
+    // Recursive child search
+    private Transform FindDeepChild(Transform parent, string name)
+    {
+        if (parent == null) return null;
+        foreach (Transform child in parent)
+        {
+            if (child.name == name) return child;
+            var found = FindDeepChild(child, name);
+            if (found != null) return found;
+        }
+        return null;
+    }
+
+    // Returns a slash-separated hierarchy path for a Transform (for debugging)
+    private string GetTransformPath(Transform t)
+    {
+        if (t == null) return "<null>";
+        string path = t.name;
+        var cur = t.parent;
+        while (cur != null)
+        {
+            path = cur.name + "/" + path;
+            cur = cur.parent;
+        }
+        return path;
+    }
+
+    private IEnumerator DeactivateAfterDelay(GameObject go, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if (go != null)
+        {
+            try { go.SetActive(false); }
+            catch { }
+        }
+    }
+
+    // Play a loud one-shot audio clip at position using a temporary AudioSource with high priority.
+    private void PlayLoudOneShotAt(AudioClip clip, Vector3 pos, float volume = 1f, int priority = 0)
+    {
+        if (clip == null) return;
+        try
+        {
+            var go = new GameObject("_JumpSfxOneShot");
+            go.transform.position = pos;
+            var src = go.AddComponent<AudioSource>();
+            src.clip = clip;
+            src.spatialBlend = 1f; // 3D
+            src.priority = Mathf.Clamp(priority, 0, 256);
+            src.volume = Mathf.Max(0f, volume);
+            src.playOnAwake = false;
+            src.minDistance = 0.1f;
+            src.maxDistance = Mathf.Max(10f, src.maxDistance);
+            src.rolloffMode = AudioRolloffMode.Linear;
+            try { src.Play(); } catch { src.PlayOneShot(clip, volume); }
+            Destroy(go, clip.length + 0.2f);
+        }
+        catch { }
+    }
+
+    // Activates the Electro hit visual/audio for a given transform for the requested duration.
+    private void ActivateElectroHit(Transform electroT, float duration)
+    {
+        if (electroT == null || electroT.gameObject == null) return;
+        try
+        {
+            var go = electroT.gameObject;
+            // Attach or get TimedAutoDisable to survive StopAllCoroutines
+            var tad = go.GetComponent<TimedAutoDisable>();
+            if (tad == null) tad = go.AddComponent<TimedAutoDisable>();
+
+            try { Debug.Log($"[GodController] (early) Activating Electro hit: {GetTransformPath(electroT)}; activeBefore={go.activeSelf}; position={electroT.position}"); } catch { }
+            try { go.SetActive(true); } catch { }
+            tad.ActivateForSeconds(duration);
+
+            // Play child audio if available
+            try
+            {
+                var electroAudioSources = go.GetComponentsInChildren<AudioSource>(true);
+                bool played = false;
+                foreach (var ea in electroAudioSources)
+                {
+                    try
+                    {
+                        if (ea == null) continue;
+                        if (ea.clip != null) { ea.Play(); played = true; }
+                        else if (jumpAttackSfx != null) { ea.PlayOneShot(jumpAttackSfx); played = true; }
+                    }
+                    catch { }
+                }
+                if (!played && jumpAttackSfx != null)
+                {
+                    if (audioSource != null) audioSource.PlayOneShot(jumpAttackSfx, jumpAttackVolume);
+                    PlayLoudOneShotAt(jumpAttackSfx, electroT.position, jumpAttackVolume, jumpAttackAudioPriority);
+                }
+            }
+            catch { }
+
+            // Start child particles and scale them
+            try
+            {
+                var parts = go.GetComponentsInChildren<ParticleSystem>(true);
+                foreach (var p in parts)
+                {
+                    try { var main = p.main; main.startSizeMultiplier *= Mathf.Max(0.01f, electroParticleScale); p.Play(true); } catch { }
+                    try { var rend = p.GetComponent<ParticleSystemRenderer>(); if (rend != null) rend.enabled = true; } catch { }
+                }
+                Debug.Log($"[GodController] (early) Started {parts.Length} particle systems for Electro hit.");
+            }
+            catch { }
+
+            // Instantiate fallback prefab immediately if assigned (guaranteed visual)
+            try
+            {
+                if (electroHitPrefab != null)
+                {
+                    var prefabGo = Instantiate(electroHitPrefab, electroT.position, Quaternion.identity);
+                    try { prefabGo.transform.localScale *= Mathf.Max(0.01f, electroParticleScale); } catch { }
+                    Destroy(prefabGo, Mathf.Max(0.1f, duration));
+                    Debug.Log("[GodController] (early) Instantiated electroHitPrefab fallback at electro position.");
+                }
+            }
+            catch { }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning($"[GodController] ActivateElectroHit failed: {ex.Message}");
+        }
     }
 
     private IEnumerator EdgePhaseCoroutine()

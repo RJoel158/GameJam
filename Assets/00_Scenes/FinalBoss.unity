@@ -654,6 +654,11 @@ PrefabInstance:
       addedObject: {fileID: 1530481333}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1b320da360a11b14eb489ed1390bd45d, type: 3}
+--- !u!4 &429883228 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1388872548669538631, guid: a164e676dbbd6e54587237e619372c98, type: 3}
+  m_PrefabInstance: {fileID: 2137405522}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &458966844 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: f1c69f18d20eccc4fb25b5b0ceb2d38b, type: 3}
@@ -776,7 +781,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 255a1d698ab780143972a57de32baca7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  edgePhaseDuration: 20
+  edgePhaseDuration: 15
   edgeRadius: 4
   walkSpeed: 1.8
   facePlayerDuringWalk: 1
@@ -791,11 +796,23 @@ MonoBehaviour:
   followAuraPrefab: {fileID: 1313255431}
   followAuraScale: 1
   followAuraRadius: 2.5
-  burnDPS: 100
-  followAuraEnterSfx: {fileID: 0}
-  followAuraLoopSfx: {fileID: 0}
-  followAuraExitSfx: {fileID: 0}
+  burnDPS: 200
+  followAuraEnterSfx: {fileID: 8300000, guid: bd9d391265dc8dc46be14ae9e855b92b, type: 3}
+  followAuraLoopSfx: {fileID: 8300000, guid: 2d2a3dd413e7c1d4abfe92c88d7c92c8, type: 3}
+  followAuraExitSfx: {fileID: 8300000, guid: 29b57213a2d6bfc4fb5f81e0ceeabba9, type: 3}
+  teleportPhaseDuration: 5
+  teleportPhaseDelay: 0.3
   startOnEnable: 0
+  electroHitChildName: Electro hit
+  electroHitActiveDuration: 2
+  jumpAttackSfx: {fileID: 8300000, guid: 0885f446e2446f7419cead76410f9da0, type: 3}
+  jumpAttackRadius: 12
+  jumpAttackDamage: 800
+  jumpAttackVolume: 2
+  electroParticleScale: 3
+  electroHitPrefab: {fileID: 2965222256817593503, guid: a164e676dbbd6e54587237e619372c98, type: 3}
+  electroHitPrefabDuration: 1
+  jumpAttackAudioPriority: 0
 --- !u!1001 &524913578
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2462,6 +2479,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: f1c69f18d20eccc4fb25b5b0ceb2d38b, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1313255432}
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: f1c69f18d20eccc4fb25b5b0ceb2d38b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 429883228}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f1c69f18d20eccc4fb25b5b0ceb2d38b, type: 3}
       insertIndex: -1
@@ -2807,6 +2827,79 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+--- !u!1001 &2137405522
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 458966849}
+    m_Modifications:
+    - target: {fileID: 1388872548669538631, guid: a164e676dbbd6e54587237e619372c98, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1388872548669538631, guid: a164e676dbbd6e54587237e619372c98, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1388872548669538631, guid: a164e676dbbd6e54587237e619372c98, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1388872548669538631, guid: a164e676dbbd6e54587237e619372c98, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1388872548669538631, guid: a164e676dbbd6e54587237e619372c98, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1388872548669538631, guid: a164e676dbbd6e54587237e619372c98, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1388872548669538631, guid: a164e676dbbd6e54587237e619372c98, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1388872548669538631, guid: a164e676dbbd6e54587237e619372c98, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 1388872548669538631, guid: a164e676dbbd6e54587237e619372c98, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1388872548669538631, guid: a164e676dbbd6e54587237e619372c98, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2965222256817593503, guid: a164e676dbbd6e54587237e619372c98, type: 3}
+      propertyPath: m_Name
+      value: Electro hit
+      objectReference: {fileID: 0}
+    - target: {fileID: 2965222256817593503, guid: a164e676dbbd6e54587237e619372c98, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2988904399259556545, guid: a164e676dbbd6e54587237e619372c98, type: 3}
+      propertyPath: looping
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4033287822461114141, guid: a164e676dbbd6e54587237e619372c98, type: 3}
+      propertyPath: looping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6985151058703206228, guid: a164e676dbbd6e54587237e619372c98, type: 3}
+      propertyPath: looping
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: a164e676dbbd6e54587237e619372c98, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
