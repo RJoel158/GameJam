@@ -106,7 +106,9 @@ public class GodController : MonoBehaviour
     public float electroHitPrefabDuration = 1f;
 
     [Tooltip("Priority for the temporary jump SFX AudioSource (lower = higher priority). Use 0 for highest priority.")]
-    public int jumpAttackAudioPriority = 0;
+    public int jumpAttackAudioPriority = 64;
+    [Tooltip("Priority for teleport audio one-shot (lower = higher priority). Default 64.")]
+    public int teleportAudioPriority = 64;
 
     [Header("Teleport Visual / SFX")]
     [Tooltip("Optional teleport prefab to spawn when teleport phase starts. Drag the prefab (e.g. Teleport Variant.prefab) here.")]
@@ -117,6 +119,19 @@ public class GodController : MonoBehaviour
 
     [Tooltip("Sound to play when the teleport prefab is spawned")]
     public AudioClip teleportSfx;
+
+    [Header("Boss Music")]
+    [Tooltip("Looping music clip to play while the boss is in the follow phase")]
+    public AudioClip bossLoopMusic;
+
+    [Tooltip("Volume for the boss loop music (0..1)")]
+    [Range(0f, 1f)]
+    public float bossMusicVolume = 0.7f;
+
+    [Tooltip("If true, the boss loop music will start when the follow phase begins")]
+    public bool bossMusicLoopOnFollow = true;
+
+    private AudioSource bossMusicSource;
 
     private Vector3 centerPosition;
     private float currentAngle = 0f;
@@ -131,6 +146,12 @@ public class GodController : MonoBehaviour
     private bool playerWasInAura = false;
     private GameObject activeAuraInstance = null;
     private bool electroActivatedThisJump = false;
+    // Cached renderer/collider states for Hide/Show
+    private Renderer[] _cachedRenderers;
+    private bool[] _cachedRenderersEnabled;
+    private Collider[] _cachedColliders;
+    private bool[] _cachedCollidersEnabled;
+    private bool _animatorWasEnabled = true;
 
     private void Awake()
     {
@@ -237,6 +258,8 @@ public class GodController : MonoBehaviour
             activeAuraInstance.transform.localPosition = Vector3.zero;
             // Optional scale control
             activeAuraInstance.transform.localScale = Vector3.one * followAuraScale;
+            // start boss music if configured
+            try { if (bossMusicLoopOnFollow) StartBossMusic(); } catch { }
         }
         else
         {
@@ -246,6 +269,7 @@ public class GodController : MonoBehaviour
             {
                 activeAuraInstance = child.gameObject;
                 activeAuraInstance.SetActive(true);
+                try { if (bossMusicLoopOnFollow) StartBossMusic(); } catch { }
             }
         }
 
@@ -367,6 +391,9 @@ public class GodController : MonoBehaviour
 
         // Disable or destroy aura visual (ensure done even if coroutines were interrupted)
         DisableActiveAura();
+
+        // stop boss music as follow phase ends
+        try { StopBossMusic(); } catch { }
 
         Debug.Log("<color=green>[GodController] Follow phase complete. Boss vulnerable again.</color>");
 
@@ -892,11 +919,13 @@ public class GodController : MonoBehaviour
                         // Prefer controller AudioSource if available
                         if (audioSource != null)
                             audioSource.PlayOneShot(teleportSfx, 1f);
-                        // Also fire a loud one-shot at the position for spatial clarity
-                        PlayLoudOneShotAt(teleportSfx, spawnPos, 1f, 0);
+                        // Also fire a loud one-shot at the position for spatial clarity (use teleportAudioPriority)
+                        PlayLoudOneShotAt(teleportSfx, spawnPos, 1f, teleportAudioPriority);
                     }
                 }
                 catch { }
+                // Hide the boss visually to create the disappearance illusion
+                try { HideBoss(); } catch { }
             }
         }
 
@@ -928,6 +957,9 @@ public class GodController : MonoBehaviour
         {
             Debug.LogWarning("<color=orange>[GodController] No God component found; cannot apply quarter damage.</color>");
         }
+
+        // Reveal the boss again after teleport/projectile phase
+        try { ShowBoss(); } catch { }
 
         // After the teleport/projectile phase ends you can transition to next behaviour (not implemented)
         Debug.Log("<color=cyan>[GodController] Teleport+Projectile phase END</color>");
@@ -1055,7 +1087,7 @@ public class GodController : MonoBehaviour
     }
 
     // Play a loud one-shot audio clip at position using a temporary AudioSource with high priority.
-    private void PlayLoudOneShotAt(AudioClip clip, Vector3 pos, float volume = 1f, int priority = 0)
+    private void PlayLoudOneShotAt(AudioClip clip, Vector3 pos, float volume = 1f, int priority = 64)
     {
         if (clip == null) return;
         try
@@ -1075,6 +1107,108 @@ public class GodController : MonoBehaviour
             Destroy(go, clip.length + 0.2f);
         }
         catch { }
+    }
+
+    private void StartBossMusic()
+    {
+        if (bossLoopMusic == null) return;
+        try
+        {
+            if (bossMusicSource == null)
+            {
+                bossMusicSource = gameObject.AddComponent<AudioSource>();
+                bossMusicSource.playOnAwake = false;
+                bossMusicSource.loop = true;
+                bossMusicSource.spatialBlend = 0f; // 2D music
+                // Give boss music highest priority so it won't be culled when many SFX play
+                bossMusicSource.priority = 0;
+                bossMusicSource.ignoreListenerPause = true;
+            }
+            bossMusicSource.clip = bossLoopMusic;
+            bossMusicSource.volume = Mathf.Clamp01(bossMusicVolume);
+            if (!bossMusicSource.isPlaying)
+                bossMusicSource.Play();
+            Debug.Log("[GodController] Boss loop music started.");
+        }
+        catch { }
+    }
+
+    private void StopBossMusic()
+    {
+        try
+        {
+            if (bossMusicSource != null && bossMusicSource.isPlaying)
+            {
+                bossMusicSource.Stop();
+                Debug.Log("[GodController] Boss loop music stopped.");
+            }
+        }
+        catch { }
+    }
+
+    // Hides the boss visually and disables its colliders/animator without deactivating the GameObject
+    private void HideBoss()
+    {
+        // cache renderers
+        _cachedRenderers = GetComponentsInChildren<Renderer>(true);
+        if (_cachedRenderers != null)
+        {
+            _cachedRenderersEnabled = new bool[_cachedRenderers.Length];
+            for (int i = 0; i < _cachedRenderers.Length; ++i)
+            {
+                try { _cachedRenderersEnabled[i] = _cachedRenderers[i].enabled; _cachedRenderers[i].enabled = false; } catch { _cachedRenderersEnabled[i] = false; }
+            }
+        }
+
+        // cache colliders
+        _cachedColliders = GetComponentsInChildren<Collider>(true);
+        if (_cachedColliders != null)
+        {
+            _cachedCollidersEnabled = new bool[_cachedColliders.Length];
+            for (int i = 0; i < _cachedColliders.Length; ++i)
+            {
+                try { _cachedCollidersEnabled[i] = _cachedColliders[i].enabled; _cachedColliders[i].enabled = false; } catch { _cachedCollidersEnabled[i] = false; }
+            }
+        }
+
+        // disable animator so it doesn't update visuals
+        if (animator != null)
+        {
+            _animatorWasEnabled = animator.enabled;
+            animator.enabled = false;
+        }
+
+        // as extra, stop any audio and particles on the boss root
+        try { StopAnyLingeringAuraEffects(); } catch { }
+
+        Debug.Log("[GodController] Boss hidden for teleport illusion.");
+    }
+
+    // Restores previously hidden renderers/colliders/animator
+    private void ShowBoss()
+    {
+        if (_cachedRenderers != null && _cachedRenderersEnabled != null)
+        {
+            for (int i = 0; i < _cachedRenderers.Length && i < _cachedRenderersEnabled.Length; ++i)
+            {
+                try { if (_cachedRenderers[i] != null) _cachedRenderers[i].enabled = _cachedRenderersEnabled[i]; } catch { }
+            }
+        }
+
+        if (_cachedColliders != null && _cachedCollidersEnabled != null)
+        {
+            for (int i = 0; i < _cachedColliders.Length && i < _cachedCollidersEnabled.Length; ++i)
+            {
+                try { if (_cachedColliders[i] != null) _cachedColliders[i].enabled = _cachedCollidersEnabled[i]; } catch { }
+            }
+        }
+
+        if (animator != null)
+        {
+            try { animator.enabled = _animatorWasEnabled; } catch { }
+        }
+
+        Debug.Log("[GodController] Boss revealed after teleport phase.");
     }
 
     // Activates the Electro hit visual/audio for a given transform for the requested duration.
