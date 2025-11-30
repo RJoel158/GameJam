@@ -820,6 +820,20 @@ MonoBehaviour:
   bossLoopMusic: {fileID: 8300000, guid: 0885f446e2446f7419cead76410f9da0, type: 3}
   bossMusicVolume: 0.7
   bossMusicLoopOnFollow: 1
+  meteorPrefab: {fileID: 7957833072274404953, guid: 3355f6bfa6db8b24281b827de929694c, type: 3}
+  meteorImpactPrefab: {fileID: 5034656251238326012, guid: 9de2fa19f0390d44491264d9cab8cec5, type: 3}
+  meteorSpawnHeight: 12
+  meteorSpawnInterval: 1
+  meteorFallSpeed: 8
+  meteorAoEDamagePerSecond: 200
+  meteorAoERadius: 7
+  meteorAoEDuration: 2
+  meteorSpawnSfx: {fileID: 8300000, guid: ecc7da60df76ac046b0b38d12453a59e, type: 3}
+  meteorSpawnSfxVolume: 1
+  meteorSpawnSfxPriority: 0
+  meteorImpactSfx: {fileID: 0}
+  meteorImpactSfxVolume: 1
+  meteorImpactSfxPriority: 0
 --- !u!82 &458966853
 AudioSource:
   m_ObjectHideFlags: 0
@@ -839,7 +853,7 @@ AudioSource:
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
-  Priority: 128
+  Priority: 163
   DopplerLevel: 1
   MinDistance: 1
   MaxDistance: 500

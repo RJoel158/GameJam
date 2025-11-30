@@ -133,6 +133,50 @@ public class GodController : MonoBehaviour
 
     private AudioSource bossMusicSource;
 
+    [Header("Meteor Rain (Second Phase)")]
+    [Tooltip("Prefab for the meteor object. If null, a simple sphere will be used.")]
+    public GameObject meteorPrefab;
+
+    [Tooltip("Particle prefab to spawn on meteor impact (e.g. Laser AOE prefab). Assign the prefab from Assets/Hovl Studio/.../Laser AOE.prefab.")]
+    public GameObject meteorImpactPrefab;
+
+    [Tooltip("Height (world units) above the player where meteors spawn")]
+    public float meteorSpawnHeight = 12f;
+
+    [Tooltip("Interval (seconds) between spawned meteors during the rain")]
+    public float meteorSpawnInterval = 0.5f;
+
+    [Tooltip("Downward speed for meteors (m/s)")]
+    public float meteorFallSpeed = 12f;
+
+    [Tooltip("Damage per second applied by the impact AoE while the player stays inside")]
+    public float meteorAoEDamagePerSecond = 4f;
+
+    [Tooltip("Radius (meters) of the impact AoE")]
+    public float meteorAoERadius = 1.5f;
+
+    [Tooltip("How long (seconds) the impact AoE persists and applies damage")]
+    public float meteorAoEDuration = 2f;
+
+    // Internal cancellation token for meteor coroutine
+    private Coroutine meteorRainCoroutine = null;
+    [Tooltip("Sound to play when a meteor spawns (appears)")]
+    public AudioClip meteorSpawnSfx;
+
+    [Tooltip("Volume for meteor spawn SFX")]
+    public float meteorSpawnSfxVolume = 1f;
+
+    [Tooltip("Priority for meteor spawn SFX (lower = higher priority). Use 0 for highest priority so it won't be interrupted.")]
+    public int meteorSpawnSfxPriority = 0;
+    [Tooltip("Sound to play when a meteor impacts (assign the clip used for each impact)")]
+    public AudioClip meteorImpactSfx;
+
+    [Tooltip("Volume for meteor impact SFX")]
+    public float meteorImpactSfxVolume = 1f;
+
+    [Tooltip("Priority for meteor impact SFX (lower = higher priority). Use 0 for highest priority so other sounds won't interrupt it.")]
+    public int meteorImpactSfxPriority = 0;
+
     private Vector3 centerPosition;
     private float currentAngle = 0f;
     private bool isWalking = false;
@@ -937,11 +981,22 @@ public class GodController : MonoBehaviour
         }
 
         // Here you would implement teleporting and projectile attacks. For now, wait the duration.
+        // Start meteor rain as part of the teleport/projectile phase
+        if (meteorRainCoroutine != null) StopCoroutine(meteorRainCoroutine);
+        meteorRainCoroutine = StartCoroutine(MeteorRainCoroutine());
+
         float timer = 0f;
         while (timer < teleportPhaseDuration)
         {
             timer += Time.deltaTime;
             yield return null;
+        }
+
+        // Stop the meteor rain when this phase finishes
+        if (meteorRainCoroutine != null)
+        {
+            try { StopCoroutine(meteorRainCoroutine); } catch { }
+            meteorRainCoroutine = null;
         }
 
         // Apply 1/4 max health damage to the boss
@@ -963,6 +1018,82 @@ public class GodController : MonoBehaviour
 
         // After the teleport/projectile phase ends you can transition to next behaviour (not implemented)
         Debug.Log("<color=cyan>[GodController] Teleport+Projectile phase END</color>");
+    }
+
+    private IEnumerator MeteorRainCoroutine()
+    {
+        Debug.Log("[GodController] Meteor rain START");
+        while (true)
+        {
+            // spawn meteor targeted at player XZ
+            try
+            {
+                GameObject playerGo = GameObject.FindGameObjectWithTag("Player");
+                Vector3 spawnPos = Vector3.zero;
+                Vector3 targetPos = transform.position;
+                if (playerGo != null)
+                {
+                    targetPos = playerGo.transform.position;
+                    spawnPos = new Vector3(targetPos.x, targetPos.y + meteorSpawnHeight, targetPos.z);
+                }
+                else
+                {
+                    // fallback above boss
+                    spawnPos = transform.position + Vector3.up * meteorSpawnHeight;
+                    targetPos = transform.position;
+                }
+
+                GameObject meteor = null;
+                if (meteorPrefab != null)
+                {
+                    meteor = Instantiate(meteorPrefab, spawnPos, Quaternion.identity);
+                }
+                else
+                {
+                    meteor = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    meteor.transform.position = spawnPos;
+                    meteor.transform.localScale = Vector3.one * 0.6f;
+                    var mr = meteor.GetComponent<Renderer>(); if (mr != null) { try { mr.material.color = Color.red; } catch { } }
+                    // remove collider (we'll handle damage via AoE on impact)
+                    var col = meteor.GetComponent<Collider>(); if (col != null) Destroy(col);
+                }
+
+                if (meteor != null)
+                {
+                    var mp = meteor.GetComponent<MeteorProjectile>();
+                    if (mp == null) mp = meteor.AddComponent<MeteorProjectile>();
+                    mp.fallSpeed = meteorFallSpeed;
+                    mp.targetPosition = targetPos;
+                    mp.impactPrefab = meteorImpactPrefab;
+                    mp.impactPrefabScale = 1f;
+                    mp.impactRadius = meteorAoERadius;
+                    mp.impactDPS = meteorAoEDamagePerSecond;
+                    mp.impactDuration = meteorAoEDuration;
+                    // pass SFX settings so meteor can play a high-priority impact sound
+                    mp.impactSfx = meteorImpactSfx;
+                    mp.impactSfxVolume = meteorImpactSfxVolume;
+                    mp.impactSfxPriority = meteorImpactSfxPriority;
+                    // Play spawn SFX for this meteor (so a sound plays when it appears)
+                    try
+                    {
+                        if (meteorSpawnSfx != null)
+                        {
+                            if (audioSource != null) audioSource.PlayOneShot(meteorSpawnSfx, meteorSpawnSfxVolume);
+                            PlayLoudOneShotAt(meteorSpawnSfx, spawnPos, meteorSpawnSfxVolume, meteorSpawnSfxPriority);
+                        }
+                    }
+                    catch { }
+                }
+
+                // wait interval
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogWarning("[GodController] Meteor spawn failed: " + ex.Message);
+            }
+
+            yield return new WaitForSeconds(Mathf.Max(0.05f, meteorSpawnInterval));
+        }
     }
 
     private void DisableActiveAura()
