@@ -59,9 +59,43 @@ public class BossSpawner : MonoBehaviour
     [Range(0f, 5f)]
     public float teleportHeightOffset = 1.5f;
 
+    [Tooltip("Time (seconds) between portal spawn and boss appearing")]
+    [Range(0f, 3f)]
+    public float portalLeadTime = 0.6f;
+
+    [Tooltip("Multiplier applied to the spawn effect (portal) scale")]
+    [Range(0.1f, 5f)]
+    public float spawnEffectScale = 1.6f;
+
+    [Tooltip("Vertical offset applied to the boss when it appears relative to the portal position (negative = lower)")]
+    public float bossSpawnYOffset = -0.5f;
+
+    [Header("Spawn Follow Mode")]
+    [Tooltip("If true, after appearing the boss will follow the player for a short phase instead of edge-walking")]
+    public bool spawnFollowPlayer = true;
+
+    [Tooltip("Duration of the follow phase in seconds")]
+    public float followPhaseDuration = 8f;
+
+    [Tooltip("Desired follow distance from player (meters)")]
+    public float followDistance = 6f;
+
+    [Tooltip("Follow movement speed (m/s)")]
+    public float followSpeed = 2f;
+
+    [Tooltip("Lateral jitter amount (meters) to make following unsettling")]
+    public float followJitter = 0.6f;
+
     [Header("Audio Settings")]
     [Tooltip("Audio to play when boss appears")]
     public AudioClip bossAppearSound;
+
+    [Header("Visual Spawn Effect")]
+    [Tooltip("Optional visual effect prefab (e.g. Hovl Studio portal) to play when boss teleports/spawns")]
+    public GameObject spawnEffectPrefab;
+
+    [Tooltip("How long (seconds) to keep the spawned effect before destroying it (0 = keep)")]
+    public float spawnEffectDuration = 5f;
 
     private AudioSource audioSource;
     private GameObject spawnedBoss;
@@ -367,21 +401,59 @@ public class BossSpawner : MonoBehaviour
         // Usar la misma altura del jugador + offset para evitar que se entierre
         teleportPosition.y = playerPos.y + teleportHeightOffset;
 
-        // Teletransportar el boss
-        spawnedBoss.transform.position = teleportPosition;
-
-        // Hacer que el boss mire AL JUGADOR (cara a cara)
-        Vector3 lookDirection = (playerPos - teleportPosition).normalized;
-        lookDirection.y = 0; // Mantener en plano horizontal
-        if (lookDirection.magnitude > 0.1f)
+        // Primero: crear el portal/efecto en la posición objetivo (portal aparece antes)
+        if (spawnEffectPrefab != null)
         {
-            spawnedBoss.transform.rotation = Quaternion.LookRotation(lookDirection);
+            Vector3 portalPos = teleportPosition;
+            GameObject vfx = Instantiate(spawnEffectPrefab, portalPos, Quaternion.identity);
+
+            // Escalar el portal para dar más presencia
+            vfx.transform.localScale = Vector3.one * spawnEffectScale;
+
+            // Orientar hacia el jugador
+            Vector3 lookDir = (playerPos - portalPos);
+            lookDir.y = 0f;
+            if (lookDir.sqrMagnitude > 0.01f)
+                vfx.transform.rotation = Quaternion.LookRotation(lookDir);
+
+            vfx.transform.SetParent(this.transform, true);
+
+            if (spawnEffectDuration > 0f)
+            {
+                Destroy(vfx, spawnEffectDuration);
+            }
+
+            Debug.Log($"<color=cyan>[BossSpawner] Spawned portal VFX at {portalPos} (scale x{spawnEffectScale})</color>");
         }
 
-        Debug.Log($"<color=magenta>[BossSpawner] Boss teleported in front of player! Distance: {Vector3.Distance(playerPos, teleportPosition):F2}m, Position: {teleportPosition}</color>");
+        // Si queremos que el portal aparezca antes, ocultamos al boss y lo posicionamos después de un delay
+        if (portalLeadTime > 0f)
+        {
+            // Temporarily hide boss so it appears emerging from portal
+            bool wasActive = spawnedBoss.activeSelf;
+            spawnedBoss.SetActive(false);
 
-        // Efecto visual de teletransporte (opcional)
-        PlaySpawnEffects(teleportPosition);
+            StartCoroutine(DelayedPlaceBoss(teleportPosition, playerPos, portalLeadTime, wasActive));
+        }
+        else
+        {
+            // Teletransportar el boss inmediatamente (ajustando su Y por bossSpawnYOffset)
+            Vector3 finalPos = teleportPosition + Vector3.up * bossSpawnYOffset;
+            spawnedBoss.transform.position = finalPos;
+
+            // Hacer que el boss mire AL JUGADOR (cara a cara)
+            Vector3 lookDirection = (playerPos - finalPos).normalized;
+            lookDirection.y = 0; // Mantener en plano horizontal
+            if (lookDirection.magnitude > 0.1f)
+            {
+                spawnedBoss.transform.rotation = Quaternion.LookRotation(lookDirection);
+            }
+
+            Debug.Log($"<color=magenta>[BossSpawner] Boss teleported in front of player! Distance: {Vector3.Distance(playerPos, finalPos):F2}m, Position: {finalPos}</color>");
+
+            // Efecto visual de teletransporte (opcional)
+            PlaySpawnEffects(teleportPosition);
+        }
     }
 
     /// <summary>
@@ -432,9 +504,20 @@ public class BossSpawner : MonoBehaviour
         bossGameObject.transform.position = initialPosition;
         bossGameObject.transform.rotation = initialRotation;
 
-        // Activar el boss GameObject
+        // Activar el boss GameObject PRIMERO
         bossGameObject.SetActive(true);
         spawnedBoss = bossGameObject;
+
+        // Ensure the boss has a God component (used by GodController for invulnerability/damage)
+        var godComp = spawnedBoss.GetComponent<God>();
+        if (godComp == null)
+        {
+            godComp = spawnedBoss.AddComponent<God>();
+            Debug.Log("<color=yellow>[BossSpawner] Added missing 'God' component to boss at spawn time.</color>");
+        }
+
+        // Configurar el Animator DESPUÉS de activar (para evitar crash de memoria)
+        StartCoroutine(ConfigureBossAnimatorNextFrame(bossGameObject));
 
         // Play spawn sound
         if (bossAppearSound != null && audioSource != null)
@@ -447,6 +530,97 @@ public class BossSpawner : MonoBehaviour
     }
 
     /// <summary>
+    /// Configura el Animator del boss en el siguiente frame (para evitar crashes de memoria)
+    /// </summary>
+    private IEnumerator ConfigureBossAnimatorNextFrame(GameObject boss)
+    {
+        // Wait until next frame and ensure the boss Animator is active and initialized
+        float timeout = 0.5f;
+        float timer = 0f;
+
+        while (timer < timeout)
+        {
+            if (boss == null) yield break;
+            if (boss.activeInHierarchy)
+            {
+                var bossAnimator = boss.GetComponent<Animator>();
+                if (bossAnimator != null && bossAnimator.enabled && bossAnimator.runtimeAnimatorController != null)
+                {
+                    // Asegurar que está en el aire
+                    bossAnimator.SetBool("Grounded", false);
+                    bossAnimator.SetFloat("Speed", 0f);
+                    bossAnimator.SetFloat("MotionSpeed", 0f);
+                    bossAnimator.SetBool("Moving", false);
+
+                    // Forzar el estado Fall explícitamente (guardado en try)
+                    try { bossAnimator.Play("Fall", 0, 0f); }
+                    catch { Debug.LogWarning("<color=yellow>[BossSpawner] Unable to Play 'Fall' state - state may not exist.</color>"); }
+
+                    Debug.Log("<color=cyan>[BossSpawner] Boss animator configured: Grounded=false, State=Fall</color>");
+                    yield break;
+                }
+            }
+
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        Debug.LogWarning("<color=yellow>[BossSpawner] Timed out waiting for boss Animator to initialize.</color>");
+    }
+
+    /// <summary>
+    /// Espera un tiempo y coloca/activa al boss para que parezca salir del portal
+    /// </summary>
+    private IEnumerator DelayedPlaceBoss(Vector3 teleportPosition, Vector3 playerPos, float delay, bool restoreActive)
+    {
+        yield return new WaitForSeconds(delay);
+
+        if (spawnedBoss == null)
+        {
+            Debug.LogWarning("<color=orange>[BossSpawner] spawnedBoss lost before delayed place.</color>");
+            yield break;
+        }
+
+        Vector3 finalPos = teleportPosition + Vector3.up * bossSpawnYOffset;
+        spawnedBoss.transform.position = finalPos;
+
+        // Hacer que el boss mire AL JUGADOR (cara a cara)
+        Vector3 lookDirection = (playerPos - finalPos).normalized;
+        lookDirection.y = 0; // Mantener en plano horizontal
+        if (lookDirection.magnitude > 0.1f)
+        {
+            spawnedBoss.transform.rotation = Quaternion.LookRotation(lookDirection);
+        }
+
+        // Reactivar el boss si estaba activo originalmente
+        spawnedBoss.SetActive(restoreActive);
+
+        Debug.Log($"<color=magenta>[BossSpawner] Boss placed after portal delay. Position: {finalPos}</color>");
+
+        // Play spawn effects at the same position (in case not spawned earlier)
+        PlaySpawnEffects(teleportPosition);
+
+        // Configure animator next frame to avoid race conditions
+        StartCoroutine(ConfigureBossAnimatorNextFrame(spawnedBoss));
+
+        // Start the chosen boss post-spawn phase (follow or edge-walk) if the boss has a GodController
+        var godCtrl = spawnedBoss.GetComponent<GodController>();
+        if (godCtrl != null)
+        {
+            if (spawnFollowPlayer)
+            {
+                godCtrl.StartFollowPhase(followPhaseDuration, followDistance, followSpeed, followJitter);
+                Debug.Log("<color=cyan>[BossSpawner] Started boss follow-player phase via GodController.</color>");
+            }
+            else
+            {
+                godCtrl.StartPhase();
+                Debug.Log("<color=cyan>[BossSpawner] Started boss edge-walk phase via GodController.</color>");
+            }
+        }
+    }
+
+    /// <summary>
     /// Play visual/audio effects when boss spawns
     /// </summary>
     private void PlaySpawnEffects(Vector3 position)
@@ -454,13 +628,80 @@ public class BossSpawner : MonoBehaviour
         // You can add particle effects, screen shake, etc. here
         Debug.Log($"<color=yellow>[BossSpawner] Playing spawn effects at {position}</color>");
 
-        // Example: Find and play a particle system
-        // ParticleSystem spawnVFX = GetComponentInChildren<ParticleSystem>();
-        // if (spawnVFX != null)
-        // {
-        //     spawnVFX.transform.position = position;
-        //     spawnVFX.Play();
-        // }
+        // If a spawnEffectPrefab is assigned in the inspector (e.g. Hovl Studio portal), instantiate it
+        if (spawnEffectPrefab != null)
+        {
+            GameObject vfx = Instantiate(spawnEffectPrefab, position, Quaternion.identity);
+
+            // Orient the VFX to face the player if possible
+            var player = FindAnyObjectByType<ThirdPersonController>();
+            if (player != null)
+            {
+                Vector3 lookDir = player.transform.position - position;
+                lookDir.y = 0f;
+                if (lookDir.sqrMagnitude > 0.01f)
+                    vfx.transform.rotation = Quaternion.LookRotation(lookDir);
+            }
+
+            // Parent to spawner for scene cleanliness
+            vfx.transform.SetParent(this.transform, true);
+
+            if (spawnEffectDuration > 0f)
+            {
+                Destroy(vfx, spawnEffectDuration);
+            }
+        }
+        else
+        {
+            // Example fallback: play any ParticleSystem child
+            ParticleSystem spawnVFX = GetComponentInChildren<ParticleSystem>();
+            if (spawnVFX != null)
+            {
+                spawnVFX.transform.position = position;
+                spawnVFX.Play();
+                if (spawnEffectDuration > 0f)
+                {
+                    Destroy(spawnVFX.gameObject, spawnEffectDuration);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Public helper: teleports the boss in front of the player and optionally plays a given effect prefab at the boss position.
+    /// This is intended for use by separate scripts (e.g. a Player spawn notifier).
+    /// </summary>
+    public void TeleportBossToPlayerWithEffect(GameObject effectPrefab, float effectDuration = 0f)
+    {
+        // Ensure boss is active/instantiated
+        if (!bossSpawned)
+        {
+            ActivateAndPositionBoss();
+        }
+
+        // Teleport using existing logic (this will also call PlaySpawnEffects using the configured spawnEffectPrefab)
+        TeleportBossToPlayer();
+
+        // If an explicit effectPrefab was provided, instantiate it at the boss's position
+        if (effectPrefab != null && spawnedBoss != null)
+        {
+            GameObject vfx = Instantiate(effectPrefab, spawnedBoss.transform.position, Quaternion.identity);
+
+            // orient toward player
+            var player = FindAnyObjectByType<ThirdPersonController>();
+            if (player != null)
+            {
+                Vector3 lookDir = player.transform.position - spawnedBoss.transform.position;
+                lookDir.y = 0f;
+                if (lookDir.sqrMagnitude > 0.01f)
+                    vfx.transform.rotation = Quaternion.LookRotation(lookDir);
+            }
+
+            vfx.transform.SetParent(this.transform, true);
+
+            if (effectDuration > 0f)
+                Destroy(vfx, effectDuration);
+        }
     }
 
     /// <summary>
@@ -790,6 +1031,18 @@ public class BossSpawner : MonoBehaviour
         bossSpawned = false;
         ActivateAndPositionBoss();
         TeleportBossToPlayer();
+        EnableBossCombat();
+    }
+
+    [ContextMenu("Force Spawn Boss With VFX")]
+    public void ForceSpawnBossWithVFX()
+    {
+        bossSpawned = false;
+        ActivateAndPositionBoss();
+
+        // Use the configured spawnEffectPrefab and duration
+        TeleportBossToPlayerWithEffect(spawnEffectPrefab, spawnEffectDuration);
+
         EnableBossCombat();
     }
 

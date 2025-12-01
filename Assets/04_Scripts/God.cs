@@ -19,6 +19,14 @@ public class God : MonoBehaviour
     // Referencia al BossController
     private BossController bossController;
 
+    // Invulnerable flag (set by external controller during phases)
+    [HideInInspector]
+    public bool isInvulnerable = false;
+
+    // Defensive flags to avoid spamming logs
+    private bool warnedFirePointMissing = false;
+    private bool warnedBulletMissing = false;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -39,6 +47,37 @@ public class God : MonoBehaviour
 
         // Obtener referencia al BossController
         bossController = GetComponent<BossController>();
+
+        // Defensive: try to find a firePoint transform if not assigned
+        if (firePoint == null)
+        {
+            // common child names
+            string[] candidates = new string[] { "FirePoint", "firePoint", "Muzzle", "BulletSpawn", "Fire_Point" };
+            foreach (var name in candidates)
+            {
+                var t = transform.Find(name);
+                if (t != null)
+                {
+                    firePoint = t;
+                    Debug.Log($"<color=cyan>[God] Auto-assigned firePoint to child '{name}'.</color>");
+                    break;
+                }
+            }
+
+            // fallback: any child named 'firepoint' ignoring case
+            if (firePoint == null)
+            {
+                foreach (Transform child in transform)
+                {
+                    if (child.name.ToLowerInvariant().Contains("fire") || child.name.ToLowerInvariant().Contains("muzzle") || child.name.ToLowerInvariant().Contains("bullet"))
+                    {
+                        firePoint = child;
+                        Debug.Log($"<color=cyan>[God] Auto-assigned firePoint to child '{child.name}' (fallback).</color>");
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     // Update is called once per frame
@@ -58,13 +97,30 @@ public class God : MonoBehaviour
             transform.rotation = Quaternion.Euler(0f, targetRotation.eulerAngles.y, 0f);
         }
 
-        // 🔹 Hace que el firePoint mire directamente al jugador
-        Vector3 fireDirection = player.transform.position - firePoint.position;
-        firePoint.rotation = Quaternion.LookRotation(fireDirection);
+        // 🔹 Hace que el firePoint mire directamente al jugador (si existe)
+        if (firePoint != null)
+        {
+            Vector3 fireDirection = player.transform.position - firePoint.position;
+            firePoint.rotation = Quaternion.LookRotation(fireDirection);
+        }
+        else
+        {
+            if (!warnedFirePointMissing)
+            {
+                Debug.LogWarning("<color=orange>[God] firePoint is not assigned. Skipping firePoint rotation and shooting. Assign a Transform or child named 'FirePoint'.</color>");
+                warnedFirePointMissing = true;
+            }
+        }
     }
 
     public void TakeDamage(int dmg)
     {
+        if (isInvulnerable)
+        {
+            Debug.Log("<color=cyan>[God] Ignored damage while invulnerable.</color>");
+            return;
+        }
+
         health -= dmg;
         if (health <= 0)
         {
@@ -72,6 +128,15 @@ public class God : MonoBehaviour
             //Spawner.instance.EnemyKilled();
             Destroy(gameObject);
         }
+    }
+
+    /// <summary>
+    /// External API to set invulnerability (useful for phase control)
+    /// </summary>
+    public void SetInvulnerable(bool flag)
+    {
+        isInvulnerable = flag;
+        Debug.Log($"<color=cyan>[God] Invulnerable = {flag}</color>");
     }
 
     void CheckIfCanShoot()
@@ -94,8 +159,27 @@ public class God : MonoBehaviour
             // Solo disparar si tiene energía (o si no tiene BossController)
             if (canShoot)
             {
-                //AudioManager.instance.PlayRandomPitchSFX(shootSFX);
-                Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+                if (bulletPrefab == null)
+                {
+                    if (!warnedBulletMissing)
+                    {
+                        Debug.LogWarning("<color=orange>[God] bulletPrefab is not assigned. Unable to spawn projectiles.</color>");
+                        warnedBulletMissing = true;
+                    }
+                }
+                else if (firePoint == null)
+                {
+                    if (!warnedFirePointMissing)
+                    {
+                        Debug.LogWarning("<color=orange>[God] firePoint is not assigned. Unable to spawn projectiles.</color>");
+                        warnedFirePointMissing = true;
+                    }
+                }
+                else
+                {
+                    //AudioManager.instance.PlayRandomPitchSFX(shootSFX);
+                    Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+                }
             }
         }
     }

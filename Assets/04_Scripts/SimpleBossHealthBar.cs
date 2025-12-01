@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /// <summary>
@@ -8,8 +9,11 @@ using UnityEngine.UI;
 public class SimpleBossHealthBar : MonoBehaviour
 {
     [Header("Boss Reference")]
-    [Tooltip("El boss que estamos monitoreando")]
+    [Tooltip("El componente Boss que estamos monitoreando (se intentará resolver automáticamente si se deja vacío)")]
     public Boss boss;
+
+    [Tooltip("En lugar de asignar el componente Boss directamente, arrastra aquí el GameObject del boss y el sistema intentará resolver el componente automáticamente.")]
+    public GameObject bossObject;
 
     [Header("UI Elements")]
     [Tooltip("Image con fillAmount para la barra de vida")]
@@ -36,7 +40,7 @@ public class SimpleBossHealthBar : MonoBehaviour
     public float criticalHealthThreshold = 0.25f;
 
     [Header("Settings")]
-    public string bossName = "JEFE";
+    public string bossName = "G O T T";
     public bool hideWhenDead = true;
     public bool hideWhenInactive = true;
     public bool smoothUpdate = true;
@@ -45,9 +49,18 @@ public class SimpleBossHealthBar : MonoBehaviour
     [Header("Debug")]
     public bool showDebugLogs = false;
 
+    [Tooltip("Si es true, la UI se mostrará automáticamente en Start() si se resolvió el boss. Útil para pruebas en Play mode.")]
+    public bool autoShowWhenBossAssigned = true;
+
+    [Tooltip("Si es true, la barra del boss permanecerá siempre activa en pantalla (ignora auto-hide).")]
+    public bool alwaysShow = false;
+
     private GameObject uiContainer;
     private float currentFillAmount;
     private bool wasInactive = false; // Para detectar cuando el boss se activa
+
+    // Global request flag so Show requests survive script execution order
+    private static bool globalShowRequested = false;
 
     void Start()
     {
@@ -72,12 +85,30 @@ public class SimpleBossHealthBar : MonoBehaviour
         // IMPORTANTE: Ocultar al inicio y esperar a que el boss se active
         if (uiContainer != null)
         {
-            uiContainer.SetActive(false);
-            Debug.Log("[SimpleBossHealthBar] UI ocultada al inicio - esperando al boss");
+            // If a global show was already requested by another script, keep visible
+            if (globalShowRequested || (autoShowWhenBossAssigned && boss != null) || alwaysShow)
+            {
+                uiContainer.SetActive(true);
+                Debug.Log("[SimpleBossHealthBar] UI mantenida activa al inicio (global request/autoShow/alwaysShow).");
+            }
+            else
+            {
+                uiContainer.SetActive(false);
+                Debug.Log("[SimpleBossHealthBar] UI ocultada al inicio - esperando al boss");
+            }
         }
 
         // Buscar el boss (incluso si está inactivo)
         FindBoss();
+
+        // If we resolved a boss at startup and auto-show is enabled, show the UI immediately
+        if (autoShowWhenBossAssigned && boss != null)
+        {
+            Debug.Log("[SimpleBossHealthBar] boss encontrado en Start() y autoShowWhenBossAssigned=true -> mostrando UI.");
+            wasInactive = false;
+            hideWhenInactive = false;
+            if (uiContainer != null) uiContainer.SetActive(true);
+        }
     }
 
     void Update()
@@ -95,27 +126,76 @@ public class SimpleBossHealthBar : MonoBehaviour
 
     void FindBoss()
     {
-        // Buscar el boss incluso si está inactivo usando Resources
-        Boss[] allBosses = Resources.FindObjectsOfTypeAll<Boss>();
-        foreach (Boss b in allBosses)
+        // 1) If a GameObject was explicitly assigned, try resolve Boss from it first
+        if (boss == null && bossObject != null)
         {
-            // Verificar que sea un objeto de la escena y no un prefab
-            if (b.gameObject.scene.name != null)
+            var fromObj = bossObject.GetComponent<Boss>() ?? bossObject.GetComponentInChildren<Boss>(true);
+            if (fromObj != null)
             {
-                boss = b;
-                Debug.Log($"<color=green>[SimpleBossHealthBar] Boss encontrado: {boss.gameObject.name} (Activo: {boss.gameObject.activeInHierarchy})</color>");
-                break;
+                boss = fromObj;
+                Debug.Log($"<color=green>[SimpleBossHealthBar] Boss resuelto desde bossObject: {boss.gameObject.name} (Activo: {boss.gameObject.activeInHierarchy})</color>");
+                return;
+            }
+            else
+            {
+                Debug.LogWarning($"[SimpleBossHealthBar] bossObject asignado ('{bossObject.name}') no contiene componente Boss.");
             }
         }
 
-        if (boss == null)
+        // 2) Search all loaded scenes' root GameObjects and their children (handles scene setups)
+        for (int s = 0; s < SceneManager.sceneCount; ++s)
         {
-            Debug.LogWarning("[SimpleBossHealthBar] No se encontró Boss en la escena!");
+            var scene = SceneManager.GetSceneAt(s);
+            if (!scene.isLoaded) continue;
+            var roots = scene.GetRootGameObjects();
+            foreach (var root in roots)
+            {
+                var found = root.GetComponentInChildren<Boss>(true);
+                if (found != null)
+                {
+                    boss = found;
+                    Debug.Log($"<color=green>[SimpleBossHealthBar] Boss resuelto desde escena '{scene.name}' root '{root.name}' -> {boss.gameObject.name} (Activo: {boss.gameObject.activeInHierarchy})</color>");
+                    return;
+                }
+            }
         }
+
+        // 3) Fallback: Resources.FindObjectsOfTypeAll to include disabled objects and assets
+        Boss[] allBosses = Resources.FindObjectsOfTypeAll<Boss>();
+        if (allBosses != null && allBosses.Length > 0)
+        {
+            Debug.Log($"[SimpleBossHealthBar] Resources.FindObjectsOfTypeAll found {allBosses.Length} Boss instances (listing)...");
+            foreach (Boss b in allBosses)
+            {
+                string sceneName = "<no-scene>";
+                try { sceneName = b.gameObject.scene.name; } catch { }
+                Debug.Log($"  - {b.gameObject.name} (active={b.gameObject.activeInHierarchy}) scene={sceneName}");
+                // pick first that appears to be part of a scene
+                if (b.gameObject.scene.name != null)
+                {
+                    boss = b;
+                    Debug.Log($"<color=green>[SimpleBossHealthBar] Boss seleccionado: {boss.gameObject.name} (Activo: {boss.gameObject.activeInHierarchy})</color>");
+                    return;
+                }
+            }
+        }
+
+        Debug.LogWarning("[SimpleBossHealthBar] No se encontró Boss en la escena tras las búsquedas; asegúrate de que exista un componente 'Boss' en el GameObject del boss o asigna 'bossObject' en el inspector.");
     }
 
     void UpdateVisibility()
     {
+        if (alwaysShow)
+        {
+            // If alwaysShow is enabled, force visible and skip other rules
+            if (uiContainer != null && !uiContainer.activeSelf)
+            {
+                uiContainer.SetActive(true);
+                Debug.Log("[SimpleBossHealthBar] alwaysShow=true -> forcing UI visible.");
+            }
+            return;
+        }
+
         bool shouldShow = true;
 
         // Ocultar si el boss está muerto
@@ -209,16 +289,22 @@ public class SimpleBossHealthBar : MonoBehaviour
 
         wasInactive = false; // Resetear el flag
         hideWhenInactive = false; // IMPORTANTE: Desactivar auto-hide para que permanezca visible
+        // mark global request so Start() won't hide it later
+        globalShowRequested = true;
 
-        if (uiContainer != null)
+        // Ensure uiContainer is valid even if Start() hasn't run yet
+        if (uiContainer == null)
         {
-            uiContainer.SetActive(true);
-            Debug.Log("<color=green>[SimpleBossHealthBar] ✅ UI ACTIVADA MANUALMENTE - Debe estar visible ahora!</color>");
+            uiContainer = this.gameObject;
+            if (uiContainer == null)
+            {
+                Debug.LogError("<color=red>[SimpleBossHealthBar] ❌ ERROR: uiContainer es null y no se pudo resolver fallback!</color>");
+                return;
+            }
         }
-        else
-        {
-            Debug.LogError("<color=red>[SimpleBossHealthBar] ❌ ERROR: uiContainer es null!</color>");
-        }
+
+        uiContainer.SetActive(true);
+        Debug.Log("<color=green>[SimpleBossHealthBar] ✅ UI ACTIVADA MANUALMENTE - Debe estar visible ahora!</color>");
     }    /// <summary>
          /// Oculta la UI del boss
          /// </summary>
@@ -229,9 +315,34 @@ public class SimpleBossHealthBar : MonoBehaviour
             Debug.Log("[SimpleBossHealthBar] HideBossUI() llamado");
         }
 
+        // If alwaysShow is enabled, ignore hide requests
+        if (alwaysShow)
+        {
+            if (showDebugLogs) Debug.Log("[SimpleBossHealthBar] HideBossUI ignored because alwaysShow=true");
+            return;
+        }
+
+        // cancel global request
+        globalShowRequested = false;
+
+        if (uiContainer == null)
+        {
+            uiContainer = this.gameObject;
+        }
+
         if (uiContainer != null)
         {
             uiContainer.SetActive(false);
         }
+    }
+
+    /// <summary>
+    /// Force refresh the UI immediately (resolve boss if missing, update visibility and health bar).
+    /// </summary>
+    public void RefreshUI()
+    {
+        if (boss == null) FindBoss();
+        UpdateVisibility();
+        UpdateHealthBar();
     }
 }
