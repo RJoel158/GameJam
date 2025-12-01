@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &5322237153121731205
+--- !u!1 &6300608961911979668
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,40 +8,107 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 7989145985067500734}
-  - component: {fileID: 6362045889808799649}
-  - component: {fileID: 7903471705885533851}
-  - component: {fileID: 7878668314737922434}
+  - component: {fileID: 5911155125603399306}
+  - component: {fileID: 8387676448584417292}
+  - component: {fileID: 6878518174451416855}
   m_Layer: 0
-  m_Name: FastEnemy_Garras
+  m_Name: GarraWeapon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &7989145985067500734
+--- !u!4 &5911155125603399306
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5322237153121731205}
+  m_GameObject: {fileID: 6300608961911979668}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.00000003306421, y: 0.48249716, z: -0.000000018213761, w: 0.8758976}
-  m_LocalPosition: {x: 0.00652, y: -0.00376, z: 0.0145}
-  m_LocalScale: {x: 0.002813335, y: 0.002813335, z: 0.002813335}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.005, y: 0.197, z: 0.287}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4216836363954460623}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!135 &8387676448584417292
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6300608961911979668}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.07841492
+  m_Center: {x: 0.01637268, y: 0, z: -0.0040893555}
+--- !u!114 &6878518174451416855
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6300608961911979668}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49051e3971f7722498fa47be67176c09, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &7274434883880682574
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7914131514270406053}
+  - component: {fileID: 1628315128584917010}
+  - component: {fileID: 4398886392738505511}
+  - component: {fileID: 9172906807262043039}
+  - component: {fileID: 9091086329088061792}
+  m_Layer: 0
+  m_Name: FastEnemy_Garras1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7914131514270406053
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7274434883880682574}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 265.7127, y: 136.33891, z: 422.5744}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 6548881343845377474}
+  - {fileID: 4216836363954460623}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!195 &6362045889808799649
+--- !u!195 &1628315128584917010
 NavMeshAgent:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5322237153121731205}
+  m_GameObject: {fileID: 7274434883880682574}
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.35
@@ -57,13 +124,35 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
---- !u!136 &7903471705885533851
+--- !u!95 &4398886392738505511
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7274434883880682574}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: ed4fe8d3646c83b4fae7b93d07df306d, type: 3}
+  m_Controller: {fileID: 9100000, guid: 9ad22d9b9af23354f84d04503320534e, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!136 &9172906807262043039
 CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5322237153121731205}
+  m_GameObject: {fileID: 7274434883880682574}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -80,13 +169,13 @@ CapsuleCollider:
   m_Height: 1.0112457
   m_Direction: 1
   m_Center: {x: 0, y: 0.5079727, z: -0.0040740967}
---- !u!54 &7878668314737922434
+--- !u!54 &9091086329088061792
 Rigidbody:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5322237153121731205}
+  m_GameObject: {fileID: 7274434883880682574}
   serializedVersion: 4
   m_Mass: 1
   m_Drag: 0
@@ -107,79 +196,13 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
---- !u!1 &8839069215364788984
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 7477562221128547555}
-  - component: {fileID: 5174320567507154007}
-  - component: {fileID: 9139014775003414233}
-  m_Layer: 0
-  m_Name: GarraWeapon
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &7477562221128547555
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8839069215364788984}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.005, y: 0.197, z: 0.287}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 6548881343845377474}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!135 &5174320567507154007
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8839069215364788984}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.07841492
-  m_Center: {x: 0.01637268, y: 0, z: -0.0040893555}
---- !u!114 &9139014775003414233
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8839069215364788984}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 49051e3971f7722498fa47be67176c09, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!1001 &6730899710626447913
+--- !u!1001 &4399892770237050916
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 7989145985067500734}
+    m_TransformParent: {fileID: 7914131514270406053}
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: ed4fe8d3646c83b4fae7b93d07df306d, type: 3}
       propertyPath: m_LocalPosition.x
@@ -234,29 +257,24 @@ PrefabInstance:
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: ed4fe8d3646c83b4fae7b93d07df306d, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 7477562221128547555}
+      addedObject: {fileID: 5911155125603399306}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: ed4fe8d3646c83b4fae7b93d07df306d, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 5738654541100977797}
+      addedObject: {fileID: 138717713557126352}
   m_SourcePrefab: {fileID: 100100000, guid: ed4fe8d3646c83b4fae7b93d07df306d, type: 3}
---- !u!95 &865359863544020920 stripped
-Animator:
-  m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: ed4fe8d3646c83b4fae7b93d07df306d, type: 3}
-  m_PrefabInstance: {fileID: 6730899710626447913}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &5884406247404765048 stripped
+--- !u!1 &3589059907359657333 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: ed4fe8d3646c83b4fae7b93d07df306d, type: 3}
-  m_PrefabInstance: {fileID: 6730899710626447913}
+  m_PrefabInstance: {fileID: 4399892770237050916}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &5738654541100977797
+--- !u!114 &138717713557126352
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5884406247404765048}
+  m_GameObject: {fileID: 3589059907359657333}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 84432f86ba8d8304fab9bc32a6b297f6, type: 3}
@@ -268,7 +286,7 @@ MonoBehaviour:
   playerDetected: 0
   targetSpeed: 0
   playerThirdPersonController: {fileID: 0}
-  CapsuleEnemyCollider: {fileID: 0}
+  CapsuleEnemyCollider: {fileID: 9172906807262043039}
   inAttackAnimation: 0
   isAttacking: 0
   dead: 0
@@ -276,9 +294,9 @@ MonoBehaviour:
   attackCD: 3
   attackRange: 1
   aggroRange: 15
-  player: {fileID: 0}
-  agent: {fileID: 6362045889808799649}
-  animator: {fileID: 865359863544020920}
+  player: {fileID: 4416926081852918481, guid: 64dce48905ffd9b4293e595fa6941544, type: 3}
+  agent: {fileID: 1628315128584917010}
+  animator: {fileID: 7810678267010698677}
   groundMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -292,8 +310,13 @@ MonoBehaviour:
   fastEnemyDamage: 8
   fastAttackSounds: []
   fastDeathSound: {fileID: 0}
---- !u!4 &6548881343845377474 stripped
+--- !u!4 &4216836363954460623 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: ed4fe8d3646c83b4fae7b93d07df306d, type: 3}
-  m_PrefabInstance: {fileID: 6730899710626447913}
+  m_PrefabInstance: {fileID: 4399892770237050916}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &7810678267010698677 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: ed4fe8d3646c83b4fae7b93d07df306d, type: 3}
+  m_PrefabInstance: {fileID: 4399892770237050916}
   m_PrefabAsset: {fileID: 0}

@@ -167,7 +167,7 @@ Para usar las animaciones:
 **D) Rigidbody:**
 - Add Component → Rigidbody
 - Use Gravity: ✅
-- Is Kinematic: ❌
+- Is Kinematic: ✅ (DEBE estar activado para evitar empujar al jugador)
 - Constraints: Freeze Rotation X, Y, Z
 
 **E) FastEnemy Script:**
