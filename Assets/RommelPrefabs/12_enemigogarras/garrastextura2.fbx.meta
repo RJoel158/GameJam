@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 243885d656495044086801c13739a371
+guid: 3b6914abf1c64a74f98f95274cd329f9
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
@@ -7,13 +7,13 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: tripo_mat_1c4e1542
-    second: {fileID: 2100000, guid: 53b1f8d807d7e1d4a9d0fa684b35c0f8, type: 2}
+      name: tripo_mat_c2ea442d
+    second: {fileID: 2100000, guid: 59a30936e4f8cc948bf5e232c1d046b5, type: 2}
   - first:
       type: UnityEngine:Texture2D
       assembly: UnityEngine.CoreModule
-      name: knight3dmodel_basecolor
-    second: {fileID: 2800000, guid: 11595758f82928243b90562e88572072, type: 3}
+      name: garrastextura2_basecolor
+    second: {fileID: 2800000, guid: 1e898a970f162c2458607120478924f5, type: 3}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -32,7 +32,7 @@ ModelImporter:
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
     importConstraints: 0
-    animationCompression: 3
+    animationCompression: 1
     animationRotationError: 0.5
     animationPositionError: 0.5
     animationScaleError: 0.5
@@ -101,13 +101,13 @@ ModelImporter:
     globalScale: 1
     rootMotionBoneName: 
     hasTranslationDoF: 0
-    hasExtraRoot: 1
+    hasExtraRoot: 0
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
   autoGenerateAvatarMappingIfUnspecified: 1
   animationType: 2
   humanoidOversampling: 1
-  avatarSetup: 1
+  avatarSetup: 0
   addHumanoidExtraRootOnlyWhenUsingAvatar: 1
   importBlendShapeDeformPercent: 1
   remapMaterialsIfMaterialImportModeIsNone: 0
