@@ -258,6 +258,20 @@ public class Boss : MonoBehaviour
         {
             health -= damageAmount;
             animator.SetTrigger("Damage");
+
+            Debug.Log($"<color=magenta>[Boss] TakeDamage called on '{gameObject.name}': -{damageAmount} -> health={health}/{maxHealth}</color>");
+
+            // If a SimpleBossHealthBar exists and is bound to this boss, refresh it immediately
+            try
+            {
+                var sb = FindObjectOfType<SimpleBossHealthBar>(true);
+                if (sb != null && sb.boss == this)
+                {
+                    sb.RefreshUI();
+                    Debug.Log($"[Boss] Refreshed SimpleBossHealthBar for '{gameObject.name}' after TakeDamage.");
+                }
+            }
+            catch { }
         }
 
         if (health <= 0)

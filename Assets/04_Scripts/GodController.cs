@@ -1049,10 +1049,27 @@ public class GodController : MonoBehaviour
                 try { bossComp = FindObjectOfType<Boss>(); } catch { bossComp = null; }
             }
 
-            if (bossComp != null)
+                if (bossComp != null)
             {
                 int quarter = Mathf.Max(1, bossComp.maxHealth / 4);
+
+                // Record old health to detect whether TakeDamage actually modified it
+                int oldHealth = bossComp.health;
                 bossComp.TakeDamage(quarter);
+
+                // If TakeDamage didn't change health (possible hook/override), force-apply the damage
+                if (bossComp.health == oldHealth)
+                {
+                    bossComp.health = Mathf.Max(0, bossComp.health - quarter);
+                    Debug.LogWarning($"<color=yellow>[GodController] bossComp.TakeDamage did not change health — forced -{quarter} on '{bossComp.gameObject.name}'. New health={bossComp.health}/{bossComp.maxHealth}</color>");
+                    // Mark dead if needed
+                    if (bossComp.health <= 0)
+                    {
+                        bossComp.dead = true;
+                        Debug.LogWarning($"<color=yellow>[GodController] Boss '{bossComp.gameObject.name}' forced dead due to forced damage.</color>");
+                    }
+                }
+
                 Debug.Log($"<color=red>[GodController] Teleport phase complete — applied {quarter} damage to Boss component '{bossComp.gameObject.name}' (1/4 maxHealth). New boss health={bossComp.health}/{bossComp.maxHealth}</color>");
 
                 // Update any boss UI immediately
@@ -1086,6 +1103,19 @@ public class GodController : MonoBehaviour
                     Debug.Log($"<color=red>[GodController] Teleport phase complete — applied {quarter} damage to god (1/4 maxHealth).</color>");
 
                     Debug.Log($"<color=yellow>[GodController] Note: applied damage to God because no Boss component was found on this object.</color>");
+
+                    // Refresh any SimpleBossHealthBar that may be showing by binding it to this God instance
+                    try
+                    {
+                        var sb = FindObjectOfType<SimpleBossHealthBar>(true);
+                        if (sb != null)
+                        {
+                            sb.god = god;
+                            sb.RefreshUI();
+                            Debug.Log($"[GodController] Refreshed SimpleBossHealthBar for God '{god.gameObject.name}'.");
+                        }
+                    }
+                    catch { }
                 }
                 else
                 {

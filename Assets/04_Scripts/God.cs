@@ -78,6 +78,11 @@ public class God : MonoBehaviour
                 }
             }
         }
+
+        // Ensure initial health matches maxHealth by default
+        health = maxHealth;
+        healthPercent = (maxHealth > 0) ? (health * 100f) / maxHealth : 100f;
+        Debug.Log($"<color=green>[God] Initialized health for '{gameObject.name}': {health}/{maxHealth}</color>");
     }
 
     // Update is called once per frame
@@ -121,11 +126,12 @@ public class God : MonoBehaviour
             return;
         }
 
+        int old = health;
         health -= dmg;
+        Debug.Log($"<color=magenta>[God] TakeDamage called on '{gameObject.name}': -{dmg} -> health={health}/{maxHealth}</color>");
         if (health <= 0)
         {
-            //AudioManager.instance.PlayRandomPitchSFX(explosionSFX);
-            //Spawner.instance.EnemyKilled();
+            Debug.Log($"<color=red>[God] '{gameObject.name}' died due to TakeDamage.</color>");
             Destroy(gameObject);
         }
     }

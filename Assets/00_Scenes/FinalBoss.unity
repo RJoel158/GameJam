@@ -841,7 +841,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 255a1d698ab780143972a57de32baca7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  edgePhaseDuration: 30
+  edgePhaseDuration: 5
   edgeRadius: 4
   walkSpeed: 2.5
   facePlayerDuringWalk: 1
@@ -860,7 +860,7 @@ MonoBehaviour:
   followAuraEnterSfx: {fileID: 8300000, guid: bd9d391265dc8dc46be14ae9e855b92b, type: 3}
   followAuraLoopSfx: {fileID: 8300000, guid: 2d2a3dd413e7c1d4abfe92c88d7c92c8, type: 3}
   followAuraExitSfx: {fileID: 8300000, guid: 29b57213a2d6bfc4fb5f81e0ceeabba9, type: 3}
-  teleportPhaseDuration: 30
+  teleportPhaseDuration: 5
   teleportPhaseDelay: 0.3
   startOnEnable: 0
   electroHitChildName: Electro hit
