@@ -133,6 +133,10 @@ public class GodController : MonoBehaviour
 
     private AudioSource bossMusicSource;
 
+    [Header("UI")]
+    [Tooltip("Display name to show on the boss health UI (overrides default)")]
+    public string bossDisplayName = "BOSS";
+
     [Header("Meteor Rain (Second Phase)")]
     [Tooltip("Prefab for the meteor object. If null, a simple sphere will be used.")]
     public GameObject meteorPrefab;
@@ -200,7 +204,23 @@ public class GodController : MonoBehaviour
     private void Awake()
     {
         centerPosition = transform.position;
+        // Try to resolve God component robustly: self, children, or any in scene
         god = GetComponent<God>();
+        if (god == null)
+        {
+            god = GetComponentInChildren<God>(true);
+            if (god != null)
+                Debug.Log($"[GodController] Auto-resolved God via GetComponentInChildren -> {god.gameObject.name}");
+        }
+        if (god == null)
+        {
+            var anyGod = FindAnyObjectByType<God>();
+            if (anyGod != null)
+            {
+                god = anyGod;
+                Debug.Log($"[GodController] Fallback: found God via FindAnyObjectByType -> {god.gameObject.name}");
+            }
+        }
         animator = GetComponent<Animator>();
         if (animator == null)
         {
@@ -231,7 +251,7 @@ public class GodController : MonoBehaviour
         }
         if (god == null)
         {
-            Debug.LogWarning("<color=orange>[GodController] No God component found on boss; invulnerability API will be unavailable.</color>");
+            Debug.LogWarning("<color=orange>[GodController] No God component found on boss; invulnerability API will be unavailable. Will try to resolve again before applying phase damage.</color>");
         }
     }
 
@@ -316,6 +336,21 @@ public class GodController : MonoBehaviour
                 try { if (bossMusicLoopOnFollow) StartBossMusic(); } catch { }
             }
         }
+
+        // Try to show boss UI (if present) and set display name
+        try
+        {
+            var bossComp = GetComponent<Boss>();
+            var bossUI = FindObjectOfType<SimpleBossHealthBar>(true);
+            if (bossUI != null)
+            {
+                if (bossComp != null) bossUI.boss = bossComp;
+                bossUI.bossName = string.IsNullOrEmpty(bossDisplayName) ? (bossComp != null ? bossComp.gameObject.name : bossUI.bossName) : bossDisplayName;
+                bossUI.ShowBossUI();
+                Debug.Log("[GodController] SimpleBossHealthBar found and shown.");
+            }
+        }
+        catch { }
 
         float burnAccumulator = 0f;
         playerWasInAura = false;
@@ -999,18 +1034,68 @@ public class GodController : MonoBehaviour
             meteorRainCoroutine = null;
         }
 
-        // Apply 1/4 max health damage to the boss
-        if (god != null)
+        // Apply 1/4 max health damage to the boss (preferencing Boss component if present)
+        try
         {
-            int quarter = Mathf.Max(1, god.maxHealth / 4);
-            // Ensure boss is vulnerable to this damage
-            god.SetInvulnerable(false);
-            god.TakeDamage(quarter);
-            Debug.Log($"<color=red>[GodController] Teleport phase complete — applied {quarter} damage to boss (1/4 maxHealth).</color>");
+            // Try to locate a Boss component first (preferred for UI sync)
+            Boss bossComp = null;
+            try { bossComp = GetComponent<Boss>(); } catch { bossComp = null; }
+            if (bossComp == null)
+            {
+                try { bossComp = GetComponentInChildren<Boss>(true); } catch { bossComp = null; }
+            }
+            if (bossComp == null)
+            {
+                try { bossComp = FindObjectOfType<Boss>(); } catch { bossComp = null; }
+            }
+
+            if (bossComp != null)
+            {
+                int quarter = Mathf.Max(1, bossComp.maxHealth / 4);
+                bossComp.TakeDamage(quarter);
+                Debug.Log($"<color=red>[GodController] Teleport phase complete — applied {quarter} damage to Boss component '{bossComp.gameObject.name}' (1/4 maxHealth). New boss health={bossComp.health}/{bossComp.maxHealth}</color>");
+
+                // Update any boss UI immediately
+                try
+                {
+                    var sb = FindObjectOfType<SimpleBossHealthBar>(true);
+                    if (sb != null)
+                    {
+                        sb.boss = bossComp; // ensure UI is bound to the damaged boss
+                        sb.RefreshUI();
+                        Debug.Log($"[GodController] Refreshed SimpleBossHealthBar for '{bossComp.gameObject.name}'.");
+                    }
+                }
+                catch { }
+            }
+            else
+            {
+                // No Boss component found; try to use God if available
+                if (god == null)
+                {
+                    god = GetComponentInChildren<God>(true) ?? FindObjectOfType<God>();
+                    if (god != null)
+                        Debug.Log($"[GodController] Late-resolved God -> {god.gameObject.name}");
+                }
+
+                if (god != null)
+                {
+                    int quarter = Mathf.Max(1, god.maxHealth / 4);
+                    god.SetInvulnerable(false);
+                    god.TakeDamage(quarter);
+                    Debug.Log($"<color=red>[GodController] Teleport phase complete — applied {quarter} damage to god (1/4 maxHealth).</color>");
+
+                    Debug.Log($"<color=yellow>[GodController] Note: applied damage to God because no Boss component was found on this object.</color>");
+                }
+                else
+                {
+                    Debug.LogWarning("<color=orange>[GodController] No God or Boss component found; cannot apply quarter damage.</color>");
+                }
+            }
         }
-        else
+        catch (System.Exception ex)
         {
-            Debug.LogWarning("<color=orange>[GodController] No God component found; cannot apply quarter damage.</color>");
+            Debug.LogWarning($"[GodController] Exception while applying phase damage: {ex.Message}");
         }
 
         // Reveal the boss again after teleport/projectile phase
