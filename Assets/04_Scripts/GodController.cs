@@ -1049,7 +1049,7 @@ public class GodController : MonoBehaviour
                 try { bossComp = FindObjectOfType<Boss>(); } catch { bossComp = null; }
             }
 
-                if (bossComp != null)
+            if (bossComp != null)
             {
                 int quarter = Mathf.Max(1, bossComp.maxHealth / 4);
 
