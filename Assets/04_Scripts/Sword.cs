@@ -29,7 +29,7 @@ public class Sword : MonoBehaviour
     }
 
     private void OnTriggerEnter(Collider other)
-    {
+    {   
         // Verificar si puede atacar
         if (!canHit || thirdPersonController.dead || !thirdPersonController.isAttacking)
             return;
@@ -68,6 +68,17 @@ public class Sword : MonoBehaviour
 
             //canHit = false;
             //Debug.Log($"<color=red>[Sword] GOLPEASTE AL BOSS por {damage} de daño!</color>");
+        }
+
+        if (other.CompareTag("Wizard"))
+        {
+            Wizard wizard = other.GetComponent<Wizard>();
+            if (wizard != null)
+            {
+                wizard.TakeDamage(damage);
+                canHit = false;
+                Debug.Log($"<color=yellow>[Sword] Golpeaste a un enemigo por {damage} de daño!</color>");
+            }
         }
     }
 }
