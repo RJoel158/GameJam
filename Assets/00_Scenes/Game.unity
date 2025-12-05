@@ -136,7 +136,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &11942480
 Transform:
   m_ObjectHideFlags: 0
@@ -2007,9 +2007,13 @@ PrefabInstance:
       propertyPath: m_Radius
       value: 0.3
       objectReference: {fileID: 0}
+    - target: {fileID: 6509946225153301115, guid: afb65fe53ce11fe4e943318d67e938e2, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7888693072203916551, guid: afb65fe53ce11fe4e943318d67e938e2, type: 3}
       propertyPath: m_Mass
-      value: 0.9
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7888693072203916551, guid: afb65fe53ce11fe4e943318d67e938e2, type: 3}
       propertyPath: m_Constraints
@@ -2029,19 +2033,27 @@ PrefabInstance:
       objectReference: {fileID: 1025221711}
     - target: {fileID: 8661740913124540804, guid: afb65fe53ce11fe4e943318d67e938e2, type: 3}
       propertyPath: attackCD
-      value: 5
+      value: 1.8
       objectReference: {fileID: 0}
     - target: {fileID: 8661740913124540804, guid: afb65fe53ce11fe4e943318d67e938e2, type: 3}
       propertyPath: aggroRange
-      value: 20
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 8661740913124540804, guid: afb65fe53ce11fe4e943318d67e938e2, type: 3}
       propertyPath: attackRange
-      value: 3
+      value: 2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8661740913124540804, guid: afb65fe53ce11fe4e943318d67e938e2, type: 3}
+      propertyPath: fastEnemyDamage
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 8661740913124540804, guid: afb65fe53ce11fe4e943318d67e938e2, type: 3}
+      propertyPath: fastEnemyHealth
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8661740913124540804, guid: afb65fe53ce11fe4e943318d67e938e2, type: 3}
       propertyPath: speedMultiplier
-      value: 1.6
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 8661740913124540804, guid: afb65fe53ce11fe4e943318d67e938e2, type: 3}
       propertyPath: CapsuleEnemyCollider
@@ -2049,7 +2061,7 @@ PrefabInstance:
       objectReference: {fileID: 295905979}
     - target: {fileID: 8661740913124540804, guid: afb65fe53ce11fe4e943318d67e938e2, type: 3}
       propertyPath: attackCooldownMultiplier
-      value: 1
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 8661740913124540804, guid: afb65fe53ce11fe4e943318d67e938e2, type: 3}
       propertyPath: playerThirdPersonController
