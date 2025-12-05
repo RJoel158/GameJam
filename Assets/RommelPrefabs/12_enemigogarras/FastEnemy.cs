@@ -27,6 +27,8 @@ public class FastEnemy : Enemy
     public AudioClip fastDeathSound;
 
     private float originalAttackCD;
+    private bool hasPlayedDeathSound = false;
+    private bool deathTriggered = false;
 
     void Start()
     {
@@ -66,6 +68,17 @@ public class FastEnemy : Enemy
         Debug.Log($"<color=green>[FastEnemy] Inicializado - Health: {health}, Speed: {agent?.speed}, Damage: {fastEnemyDamage}</color>");
     }
 
+    void LateUpdate()
+    {
+        // LateUpdate() se ejecuta DESPUÉS de Update(), así no interfiere con Enemy.cs
+        // Detectar cuando el enemigo muere
+        if (dead && !deathTriggered)
+        {
+            deathTriggered = true;
+            OnDeathCustom();
+        }
+    }
+
     /// <summary>
     /// Override del método de daño para usar el daño específico del fast enemy
     /// </summary>
@@ -91,6 +104,45 @@ public class FastEnemy : Enemy
 
     /// <summary>
     /// Override del comportamiento de muerte para reproducir sonido específico
+    /// </summary>
+    private void OnDeathCustom()
+    {
+        Debug.Log("<color=purple>[FastEnemy] ¡Enemigo murió! Activando animación de muerte...</color>");
+        
+        // Reproducir sonido de muerte
+        if (fastDeathSound != null && !hasPlayedDeathSound)
+        {
+            AudioSource.PlayClipAtPoint(fastDeathSound, transform.position, 1f);
+            hasPlayedDeathSound = true;
+            Debug.Log("<color=purple>[FastEnemy] Sonido de muerte reproducido</color>");
+        }
+
+        // Activar animación de muerte
+        Animator anim = GetComponent<Animator>();
+        if (anim != null)
+        {
+            anim.SetBool("Dead", true);
+            Debug.Log("<color=purple>[FastEnemy] Parámetro 'Dead' activado en Animator</color>");
+        }
+        else
+        {
+            Debug.LogWarning("<color=orange>[FastEnemy] No se encontró Animator para animación de muerte</color>");
+        }
+
+        // Desactivar el NavMeshAgent para que no siga moviéndose
+        NavMeshAgent agent = GetComponent<NavMeshAgent>();
+        if (agent != null)
+        {
+            agent.enabled = false;
+        }
+
+        // Destruir el GameObject completo después de 3 segundos (para que termine la animación)
+        Destroy(gameObject, 3f);
+        Debug.Log("<color=purple>[FastEnemy] GameObject será destruido en 3 segundos</color>");
+    }
+
+    /// <summary>
+    /// Método obsoleto - mantener para compatibilidad
     /// </summary>
     protected void OnDeath()
     {

@@ -5251,9 +5251,21 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1025221711}
     - target: {fileID: 957757847758735792, guid: 65313558bec21414a9c73ff9c918362c, type: 3}
+      propertyPath: fastDeathSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 39b07d454a5b5364b9a3509deac53b76, type: 3}
+    - target: {fileID: 957757847758735792, guid: 65313558bec21414a9c73ff9c918362c, type: 3}
+      propertyPath: fastAttackSounds.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 957757847758735792, guid: 65313558bec21414a9c73ff9c918362c, type: 3}
       propertyPath: playerThirdPersonController
       value: 
       objectReference: {fileID: 1025221714}
+    - target: {fileID: 957757847758735792, guid: 65313558bec21414a9c73ff9c918362c, type: 3}
+      propertyPath: 'fastAttackSounds.Array.data[0]'
+      value: 
+      objectReference: {fileID: 8300000, guid: 18d3d0d7efafb374490315b51130e930, type: 3}
     - target: {fileID: 6225578227769934119, guid: 65313558bec21414a9c73ff9c918362c, type: 3}
       propertyPath: m_Name
       value: goblin_enemy_1
