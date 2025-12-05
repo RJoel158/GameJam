@@ -29,11 +29,13 @@ public class FastEnemy : Enemy
     private float originalAttackCD;
     private bool hasPlayedDeathSound = false;
     private bool deathTriggered = false;
+    private int lastHealth = -1;
 
     void Start()
     {
         // Override de stats para hacerlo rápido y débil
         health = fastEnemyHealth;
+        lastHealth = health;
 
         // Ajustar velocidad del NavMeshAgent
         NavMeshAgent agent = GetComponent<NavMeshAgent>();
@@ -71,6 +73,20 @@ public class FastEnemy : Enemy
     void LateUpdate()
     {
         // LateUpdate() se ejecuta DESPUÉS de Update(), así no interfiere con Enemy.cs
+        
+        // Interceptar ANTES de que Enemy.cs llame a Die()
+        if (health <= 0 && lastHealth > 0 && !hasPlayedDeathSound)
+        {
+            // El enemigo acaba de morir, reproducir sonido ANTES de que PlayerAudioManager lo haga
+            if (fastDeathSound != null)
+            {
+                AudioSource.PlayClipAtPoint(fastDeathSound, transform.position, 1f);
+                hasPlayedDeathSound = true;
+                Debug.Log("<color=purple>[FastEnemy] Sonido de muerte personalizado reproducido</color>");
+            }
+        }
+        lastHealth = health;
+        
         // Detectar cuando el enemigo muere
         if (dead && !deathTriggered)
         {
@@ -107,28 +123,10 @@ public class FastEnemy : Enemy
     /// </summary>
     private void OnDeathCustom()
     {
-        Debug.Log("<color=purple>[FastEnemy] ¡Enemigo murió! Activando animación de muerte...</color>");
+        Debug.Log("<color=purple>[FastEnemy] ¡Enemigo murió! Preparando destrucción...</color>");
         
-        // Reproducir sonido de muerte
-        if (fastDeathSound != null && !hasPlayedDeathSound)
-        {
-            AudioSource.PlayClipAtPoint(fastDeathSound, transform.position, 1f);
-            hasPlayedDeathSound = true;
-            Debug.Log("<color=purple>[FastEnemy] Sonido de muerte reproducido</color>");
-        }
-
-        // Activar animación de muerte
-        Animator anim = GetComponent<Animator>();
-        if (anim != null)
-        {
-            anim.SetBool("Dead", true);
-            Debug.Log("<color=purple>[FastEnemy] Parámetro 'Dead' activado en Animator</color>");
-        }
-        else
-        {
-            Debug.LogWarning("<color=orange>[FastEnemy] No se encontró Animator para animación de muerte</color>");
-        }
-
+        // El sonido ya se reprodujo en LateUpdate(), solo desactivar agente y destruir
+        
         // Desactivar el NavMeshAgent para que no siga moviéndose
         NavMeshAgent agent = GetComponent<NavMeshAgent>();
         if (agent != null)
