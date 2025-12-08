@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using StarterAssets;
+using UnityEngine;
 
 public class Wizard : MonoBehaviour
 {
@@ -103,7 +104,14 @@ public class Wizard : MonoBehaviour
 
     public void WizardShoot()
     {
-        Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+        Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);   
+    }
+
+    public void WizardShootSound()
+    {
+        // Reproducir sonido de dispara al jugador
+        if (PlayerAudioManager.Instance != null)
+            PlayerAudioManager.Instance.PlayWizardShootSound();
     }
 
     public void WizardResetShoot()
