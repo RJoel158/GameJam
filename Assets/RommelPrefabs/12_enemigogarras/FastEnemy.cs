@@ -125,7 +125,21 @@ public class FastEnemy : Enemy
     {
         Debug.Log("<color=purple>[FastEnemy] ¡Enemigo murió! Preparando destrucción...</color>");
         
-        // El sonido ya se reprodujo en LateUpdate(), solo desactivar agente y destruir
+        // El sonido ya se reprodujo en LateUpdate(), ahora activar animación
+        
+        // Activar animación de muerte en el Animator
+        Animator anim = GetComponent<Animator>();
+        if (anim != null)
+        {
+            // Activar AMBOS parámetros según la configuración del Animator
+            anim.SetBool("Dead", true);
+            anim.SetTrigger("Death");
+            Debug.Log("<color=purple>[FastEnemy] Parámetros 'Dead' y 'Death' activados en Animator</color>");
+        }
+        else
+        {
+            Debug.LogWarning("<color=orange>[FastEnemy] No se encontró Animator para animación de muerte</color>");
+        }
         
         // Desactivar el NavMeshAgent para que no siga moviéndose
         NavMeshAgent agent = GetComponent<NavMeshAgent>();
