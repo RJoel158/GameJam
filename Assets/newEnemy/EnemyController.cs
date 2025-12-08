@@ -13,6 +13,7 @@ public class EnemyController : MonoBehaviour
     
     [Header("Animation")]
     [SerializeField] float animationBlendSpeed = 10f;
+    [SerializeField] string speedParameterName = "isRun";
     
     [Header("Health")]
     [SerializeField] int maxHealth = 100;
@@ -32,6 +33,7 @@ public class EnemyController : MonoBehaviour
     private bool hasHitPlayer = false;
     private bool audioHasPlayed = false;
     private AudioSource audioSource;
+    private int isRunHash;
 
     private void Start()
     {
@@ -39,6 +41,9 @@ public class EnemyController : MonoBehaviour
         animator = GetComponent<Animator>();
         agent = GetComponent<NavMeshAgent>();
         audioSource = GetComponent<AudioSource>();
+        
+        // Cachear el hash del parámetro isRun
+        isRunHash = Animator.StringToHash(speedParameterName);
         
         // Si no hay AudioSource, intentar crear uno
         if (audioSource == null)
@@ -124,8 +129,10 @@ public class EnemyController : MonoBehaviour
             transform.rotation = Quaternion.Euler(0f, targetRotation.eulerAngles.y, 0f);
         }
         
-        // Actualizar animación
-        animator.SetFloat("Speed", animationBlend);
+        // Actualizar animación - usar SetBool en lugar de SetFloat para isRun
+        bool shouldRun = animationBlend > 0.5f;
+        animator.SetBool(isRunHash, shouldRun);
+        Debug.Log($"[EnemyController] Setting isRun to: {shouldRun} (blend: {animationBlend}");
     }
 
     // Visualizar rango de detección
