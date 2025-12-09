@@ -68,6 +68,12 @@ namespace StarterAssets
         [Range(0f, 1f)]
         public float spawnEnemiesVolume = 0.8f;
 
+        [Header("▼ WIZARD")]
+        [Tooltip("Sonido del Mago")]
+        public AudioClip shootPlayer;
+        [Range(0f, 1f)]
+        public float shootPlayerVolume = 0.8f;
+
         // AudioSources privados
         private AudioSource effectsSource;
         private AudioSource ambientSource;
@@ -285,6 +291,13 @@ namespace StarterAssets
                 effectsSource.volume = volume;
                 effectsSource.Play();
             }
+        }
+
+        public void PlayWizardShootSound()
+        {
+            // Para que el feedback de recibir daño sea inmediato, interrumpimos cualquier efecto actual
+            PlayEffectClip(shootPlayer, shootPlayerVolume, interrupt: true, allowOverlap: false);
+            Debug.Log($"[Audio] Shoot Player Sound");
         }
 
         #endregion

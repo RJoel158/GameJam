@@ -4787,6 +4787,8 @@ MonoBehaviour:
   blockVolume: 0.8
   spawnEnemies: {fileID: 8300000, guid: 017b817ca8dfceb4ab051d317931a35c, type: 3}
   spawnEnemiesVolume: 0.8
+  shootPlayer: {fileID: 8300000, guid: 261b6d9a9850eda4499df9260af0d4ab, type: 3}
+  shootPlayerVolume: 0.8
 --- !u!4 &1292427731
 Transform:
   m_ObjectHideFlags: 0
