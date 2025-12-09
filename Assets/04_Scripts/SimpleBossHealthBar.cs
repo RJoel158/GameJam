@@ -12,6 +12,9 @@ public class SimpleBossHealthBar : MonoBehaviour
     [Tooltip("El componente Boss que estamos monitoreando (se intentará resolver automáticamente si se deja vacío)")]
     public Boss boss;
 
+    [Tooltip("Componente God alternativo (si el boss usa God en lugar de Boss)")]
+    private God godBoss;
+
     [Tooltip("En lugar de asignar el componente Boss directamente, arrastra aquí el GameObject del boss y el sistema intentará resolver el componente automáticamente.")]
     public GameObject bossObject;
 
@@ -102,9 +105,9 @@ public class SimpleBossHealthBar : MonoBehaviour
         FindBoss();
 
         // If we resolved a boss at startup and auto-show is enabled, show the UI immediately
-        if (autoShowWhenBossAssigned && boss != null)
+        if (autoShowWhenBossAssigned && (boss != null || godBoss != null))
         {
-            Debug.Log("[SimpleBossHealthBar] boss encontrado en Start() y autoShowWhenBossAssigned=true -> mostrando UI.");
+            Debug.Log("[SimpleBossHealthBar] boss/god encontrado en Start() y autoShowWhenBossAssigned=true -> mostrando UI.");
             wasInactive = false;
             hideWhenInactive = false;
             if (uiContainer != null) uiContainer.SetActive(true);
@@ -113,7 +116,7 @@ public class SimpleBossHealthBar : MonoBehaviour
 
     void Update()
     {
-        if (boss == null)
+        if (boss == null && godBoss == null)
         {
             // Buscar el boss activamente (incluso si está inactivo)
             FindBoss();
@@ -127,7 +130,7 @@ public class SimpleBossHealthBar : MonoBehaviour
     void FindBoss()
     {
         // 1) If a GameObject was explicitly assigned, try resolve Boss from it first
-        if (boss == null && bossObject != null)
+        if (boss == null && godBoss == null && bossObject != null)
         {
             var fromObj = bossObject.GetComponent<Boss>() ?? bossObject.GetComponentInChildren<Boss>(true);
             if (fromObj != null)
@@ -136,9 +139,18 @@ public class SimpleBossHealthBar : MonoBehaviour
                 Debug.Log($"<color=green>[SimpleBossHealthBar] Boss resuelto desde bossObject: {boss.gameObject.name} (Activo: {boss.gameObject.activeInHierarchy})</color>");
                 return;
             }
+
+            // Try God component if Boss not found
+            var godObj = bossObject.GetComponent<God>() ?? bossObject.GetComponentInChildren<God>(true);
+            if (godObj != null)
+            {
+                godBoss = godObj;
+                Debug.Log($"<color=green>[SimpleBossHealthBar] God resuelto desde bossObject: {godBoss.gameObject.name} (Activo: {godBoss.gameObject.activeInHierarchy})</color>");
+                return;
+            }
             else
             {
-                Debug.LogWarning($"[SimpleBossHealthBar] bossObject asignado ('{bossObject.name}') no contiene componente Boss.");
+                Debug.LogWarning($"[SimpleBossHealthBar] bossObject asignado ('{bossObject.name}') no contiene componente Boss ni God.");
             }
         }
 
@@ -155,6 +167,15 @@ public class SimpleBossHealthBar : MonoBehaviour
                 {
                     boss = found;
                     Debug.Log($"<color=green>[SimpleBossHealthBar] Boss resuelto desde escena '{scene.name}' root '{root.name}' -> {boss.gameObject.name} (Activo: {boss.gameObject.activeInHierarchy})</color>");
+                    return;
+                }
+
+                // Try God if Boss not found
+                var foundGod = root.GetComponentInChildren<God>(true);
+                if (foundGod != null)
+                {
+                    godBoss = foundGod;
+                    Debug.Log($"<color=green>[SimpleBossHealthBar] God resuelto desde escena '{scene.name}' root '{root.name}' -> {godBoss.gameObject.name} (Activo: {godBoss.gameObject.activeInHierarchy})</color>");
                     return;
                 }
             }
@@ -180,7 +201,26 @@ public class SimpleBossHealthBar : MonoBehaviour
             }
         }
 
-        Debug.LogWarning("[SimpleBossHealthBar] No se encontró Boss en la escena tras las búsquedas; asegúrate de que exista un componente 'Boss' en el GameObject del boss o asigna 'bossObject' en el inspector.");
+        // 4) Try God as last resort
+        God[] allGods = Resources.FindObjectsOfTypeAll<God>();
+        if (allGods != null && allGods.Length > 0)
+        {
+            Debug.Log($"[SimpleBossHealthBar] Resources.FindObjectsOfTypeAll found {allGods.Length} God instances (listing)...");
+            foreach (God g in allGods)
+            {
+                string sceneName = "<no-scene>";
+                try { sceneName = g.gameObject.scene.name; } catch { }
+                Debug.Log($"  - {g.gameObject.name} (active={g.gameObject.activeInHierarchy}) scene={sceneName}");
+                if (g.gameObject.scene.name != null)
+                {
+                    godBoss = g;
+                    Debug.Log($"<color=green>[SimpleBossHealthBar] God seleccionado: {godBoss.gameObject.name} (Activo: {godBoss.gameObject.activeInHierarchy})</color>");
+                    return;
+                }
+            }
+        }
+
+        Debug.LogWarning("[SimpleBossHealthBar] No se encontró Boss ni God en la escena tras las búsquedas; asegúrate de que exista un componente 'Boss' o 'God' en el GameObject del boss o asigna 'bossObject' en el inspector.");
     }
 
     void UpdateVisibility()
@@ -198,8 +238,23 @@ public class SimpleBossHealthBar : MonoBehaviour
 
         bool shouldShow = true;
 
+        // Determine which component we're using
+        bool isDead = false;
+        bool isActive = false;
+
+        if (boss != null)
+        {
+            isDead = boss.dead;
+            isActive = boss.gameObject.activeInHierarchy;
+        }
+        else if (godBoss != null)
+        {
+            isDead = (godBoss.health <= 0);
+            isActive = godBoss.gameObject.activeInHierarchy;
+        }
+
         // Ocultar si el boss está muerto
-        if (hideWhenDead && boss.dead)
+        if (hideWhenDead && isDead)
         {
             shouldShow = false;
             if (showDebugLogs)
@@ -209,8 +264,7 @@ public class SimpleBossHealthBar : MonoBehaviour
         }
 
         // Ocultar si el boss no está activo
-        bool bossIsActive = boss.gameObject.activeInHierarchy;
-        if (hideWhenInactive && !bossIsActive)
+        if (hideWhenInactive && !isActive)
         {
             shouldShow = false;
             wasInactive = true;
@@ -219,7 +273,7 @@ public class SimpleBossHealthBar : MonoBehaviour
                 Debug.Log("[SimpleBossHealthBar] Ocultando - boss inactivo");
             }
         }
-        else if (bossIsActive && wasInactive)
+        else if (isActive && wasInactive)
         {
             // El boss acaba de activarse
             shouldShow = true;
@@ -238,8 +292,27 @@ public class SimpleBossHealthBar : MonoBehaviour
     {
         if (healthFillImage == null) return;
 
+        // Get health values from either Boss or God
+        int currentHealth = 0;
+        int maxHealth = 1;
+
+        if (boss != null)
+        {
+            currentHealth = boss.health;
+            maxHealth = boss.maxHealth;
+        }
+        else if (godBoss != null)
+        {
+            currentHealth = godBoss.health;
+            maxHealth = godBoss.maxHealth;
+        }
+        else
+        {
+            return; // No boss reference available
+        }
+
         // Calcular porcentaje de vida (0-1)
-        float healthPercent = Mathf.Clamp01((float)boss.health / (float)boss.maxHealth);
+        float healthPercent = Mathf.Clamp01((float)currentHealth / (float)maxHealth);
 
         // Actualizar fill amount (con o sin suavizado)
         if (smoothUpdate)
@@ -270,7 +343,7 @@ public class SimpleBossHealthBar : MonoBehaviour
         // Actualizar texto numérico (opcional)
         if (healthText != null)
         {
-            healthText.text = $"{boss.health} / {boss.maxHealth}";
+            healthText.text = $"{currentHealth} / {maxHealth}";
         }
     }
 
@@ -282,7 +355,7 @@ public class SimpleBossHealthBar : MonoBehaviour
         Debug.Log("<color=cyan>[SimpleBossHealthBar] ===== ShowBossUI() LLAMADO =====</color>");
 
         // Buscar el boss si no está asignado
-        if (boss == null)
+        if (boss == null && godBoss == null)
         {
             FindBoss();
         }

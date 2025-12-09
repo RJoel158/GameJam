@@ -736,15 +736,18 @@ public class GodController : MonoBehaviour
                     // If a fallback prefab is assigned, instantiate it now so the visual is guaranteed
                     try
                     {
-                        if (electroHitPrefab != null)
+                        if (electroHitPrefab != null && electroT != null)
                         {
                             var prefabGo = Instantiate(electroHitPrefab, electroT.position, Quaternion.identity);
-                            try { prefabGo.transform.localScale *= Mathf.Max(0.01f, electroParticleScale); } catch { }
-                            Destroy(prefabGo, Mathf.Max(0.1f, forceDuration));
-                            Debug.Log("[GodController] Instantiated electroHitPrefab immediately as guaranteed visual fallback.");
+                            if (prefabGo != null)
+                            {
+                                try { prefabGo.transform.localScale *= Mathf.Max(0.01f, electroParticleScale); } catch { }
+                                Destroy(prefabGo, Mathf.Max(0.1f, forceDuration));
+                                Debug.Log("[GodController] Instantiated electroHitPrefab immediately as guaranteed visual fallback.");
+                            }
                         }
                     }
-                    catch { }
+                    catch (System.Exception ex) { Debug.LogWarning($"[GodController] electroHitPrefab instantiation error: {ex.Message}"); }
 
                     // Play any AudioSource(s) on the Electro hit child so its own SFX are heard
                     try
@@ -831,15 +834,18 @@ public class GodController : MonoBehaviour
                                 // As last resort, spawn a fallback prefab (if assigned) at the electro position so the effect is visible
                                 try
                                 {
-                                    if (electroHitPrefab != null)
+                                    if (electroHitPrefab != null && electroT != null)
                                     {
                                         var go = Instantiate(electroHitPrefab, electroT.position, Quaternion.identity);
-                                        try { go.transform.localScale *= Mathf.Max(0.01f, electroParticleScale); } catch { }
-                                        Destroy(go, Mathf.Max(0.1f, forceDuration));
-                                        Debug.Log("[GodController] Spawned electroHitPrefab fallback at electro position.");
+                                        if (go != null)
+                                        {
+                                            try { go.transform.localScale *= Mathf.Max(0.01f, electroParticleScale); } catch { }
+                                            Destroy(go, Mathf.Max(0.1f, forceDuration));
+                                            Debug.Log("[GodController] Spawned electroHitPrefab fallback at electro position.");
+                                        }
                                     }
                                 }
-                                catch { }
+                                catch (System.Exception ex) { Debug.LogWarning($"[GodController] Fallback prefab spawn error: {ex.Message}"); }
                             }
                         }
                         catch { }
@@ -866,11 +872,23 @@ public class GodController : MonoBehaviour
         // Apply area damage at damageCenter
         if (jumpAttackRadius > 0f && jumpAttackDamage > 0)
         {
-            Collider[] hits = Physics.OverlapSphere(damageCenter, jumpAttackRadius);
+            Collider[] hits = null;
+            try
+            {
+                hits = Physics.OverlapSphere(damageCenter, jumpAttackRadius);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogWarning($"[GodController] OverlapSphere error: {ex.Message}");
+                yield break;
+            }
+
+            if (hits == null) yield break;
+
             Debug.Log($"[GodController] OverlapSphere found {hits.Length} colliders within radius {jumpAttackRadius} at damageCenter={damageCenter}.");
             foreach (var c in hits)
             {
-                if (c == null) continue;
+                if (c == null || c.gameObject == null) continue;
                 float dist = Vector3.Distance(c.transform.position, damageCenter);
                 Debug.Log($"[GodController] Overlap hit: name={c.gameObject.name}, dist={dist}, layer={c.gameObject.layer}");
 
@@ -949,7 +967,7 @@ public class GodController : MonoBehaviour
 
     /// <summary>
     /// Placeholder teleport+projectile phase. Replace with real teleport/projectile behaviour later.
-    /// At the end of the phase this will apply damage equal to 1/4 of the boss' max health.
+    /// At the end of the phase this will apply damage equal to 1/3 (33%) of the boss' max health.
     /// </summary>
     public void StartTeleportProjectilePhase()
     {
@@ -1034,7 +1052,7 @@ public class GodController : MonoBehaviour
             meteorRainCoroutine = null;
         }
 
-        // Apply 1/4 max health damage to the boss (preferencing Boss component if present)
+        // Apply 1/3 max health damage to the boss (preferencing Boss component if present)
         try
         {
             // Try to locate a Boss component first (preferred for UI sync)
@@ -1051,9 +1069,9 @@ public class GodController : MonoBehaviour
 
             if (bossComp != null)
             {
-                int quarter = Mathf.Max(1, bossComp.maxHealth / 4);
-                bossComp.TakeDamage(quarter);
-                Debug.Log($"<color=red>[GodController] Teleport phase complete — applied {quarter} damage to Boss component '{bossComp.gameObject.name}' (1/4 maxHealth). New boss health={bossComp.health}/{bossComp.maxHealth}</color>");
+                int third = Mathf.Max(1, bossComp.maxHealth / 3);
+                bossComp.TakeDamage(third);
+                Debug.Log($"<color=red>[GodController] Teleport phase complete — applied {third} damage to Boss component '{bossComp.gameObject.name}' (1/3 maxHealth = 33%). New boss health={bossComp.health}/{bossComp.maxHealth}</color>");
 
                 // Update any boss UI immediately
                 try
@@ -1080,16 +1098,29 @@ public class GodController : MonoBehaviour
 
                 if (god != null)
                 {
-                    int quarter = Mathf.Max(1, god.maxHealth / 4);
+                    int third = Mathf.Max(1, god.maxHealth / 3);
                     god.SetInvulnerable(false);
-                    god.TakeDamage(quarter);
-                    Debug.Log($"<color=red>[GodController] Teleport phase complete — applied {quarter} damage to god (1/4 maxHealth).</color>");
+                    god.TakeDamage(third);
+                    Debug.Log($"<color=red>[GodController] Teleport phase complete — applied {third} damage to god (1/3 maxHealth = 33%). New god health={god.health}/{god.maxHealth}</color>");
+
+                    // Update UI even when using God component
+                    try
+                    {
+                        var sb = FindObjectOfType<SimpleBossHealthBar>(true);
+                        if (sb != null)
+                        {
+                            // Force UI to refresh with current God health
+                            sb.RefreshUI();
+                            Debug.Log($"[GodController] Refreshed SimpleBossHealthBar after God damage. God health={god.health}/{god.maxHealth}");
+                        }
+                    }
+                    catch { }
 
                     Debug.Log($"<color=yellow>[GodController] Note: applied damage to God because no Boss component was found on this object.</color>");
                 }
                 else
                 {
-                    Debug.LogWarning("<color=orange>[GodController] No God or Boss component found; cannot apply quarter damage.</color>");
+                    Debug.LogWarning("<color=orange>[GodController] No God or Boss component found; cannot apply phase damage (1/3 maxHealth).</color>");
                 }
             }
         }
@@ -1434,28 +1465,33 @@ public class GodController : MonoBehaviour
         try
         {
             var go = electroT.gameObject;
+            if (go == null) return;
+
             // Attach or get TimedAutoDisable to survive StopAllCoroutines
             var tad = go.GetComponent<TimedAutoDisable>();
             if (tad == null) tad = go.AddComponent<TimedAutoDisable>();
 
             try { Debug.Log($"[GodController] (early) Activating Electro hit: {GetTransformPath(electroT)}; activeBefore={go.activeSelf}; position={electroT.position}"); } catch { }
             try { go.SetActive(true); } catch { }
-            tad.ActivateForSeconds(duration);
+            if (tad != null) tad.ActivateForSeconds(duration);
 
             // Play child audio if available
             try
             {
                 var electroAudioSources = go.GetComponentsInChildren<AudioSource>(true);
                 bool played = false;
-                foreach (var ea in electroAudioSources)
+                if (electroAudioSources != null)
                 {
-                    try
+                    foreach (var ea in electroAudioSources)
                     {
-                        if (ea == null) continue;
-                        if (ea.clip != null) { ea.Play(); played = true; }
-                        else if (jumpAttackSfx != null) { ea.PlayOneShot(jumpAttackSfx); played = true; }
+                        try
+                        {
+                            if (ea == null || ea.gameObject == null) continue;
+                            if (ea.clip != null) { ea.Play(); played = true; }
+                            else if (jumpAttackSfx != null) { ea.PlayOneShot(jumpAttackSfx); played = true; }
+                        }
+                        catch { }
                     }
-                    catch { }
                 }
                 if (!played && jumpAttackSfx != null)
                 {
@@ -1469,27 +1505,34 @@ public class GodController : MonoBehaviour
             try
             {
                 var parts = go.GetComponentsInChildren<ParticleSystem>(true);
-                foreach (var p in parts)
+                if (parts != null)
                 {
-                    try { var main = p.main; main.startSizeMultiplier *= Mathf.Max(0.01f, electroParticleScale); p.Play(true); } catch { }
-                    try { var rend = p.GetComponent<ParticleSystemRenderer>(); if (rend != null) rend.enabled = true; } catch { }
+                    foreach (var p in parts)
+                    {
+                        if (p == null || p.gameObject == null) continue;
+                        try { var main = p.main; main.startSizeMultiplier *= Mathf.Max(0.01f, electroParticleScale); p.Play(true); } catch { }
+                        try { var rend = p.GetComponent<ParticleSystemRenderer>(); if (rend != null) rend.enabled = true; } catch { }
+                    }
+                    Debug.Log($"[GodController] (early) Started {parts.Length} particle systems for Electro hit.");
                 }
-                Debug.Log($"[GodController] (early) Started {parts.Length} particle systems for Electro hit.");
             }
             catch { }
 
             // Instantiate fallback prefab immediately if assigned (guaranteed visual)
             try
             {
-                if (electroHitPrefab != null)
+                if (electroHitPrefab != null && electroT != null)
                 {
                     var prefabGo = Instantiate(electroHitPrefab, electroT.position, Quaternion.identity);
-                    try { prefabGo.transform.localScale *= Mathf.Max(0.01f, electroParticleScale); } catch { }
-                    Destroy(prefabGo, Mathf.Max(0.1f, duration));
-                    Debug.Log("[GodController] (early) Instantiated electroHitPrefab fallback at electro position.");
+                    if (prefabGo != null)
+                    {
+                        try { prefabGo.transform.localScale *= Mathf.Max(0.01f, electroParticleScale); } catch { }
+                        Destroy(prefabGo, Mathf.Max(0.1f, duration));
+                        Debug.Log("[GodController] (early) Instantiated electroHitPrefab fallback at electro position.");
+                    }
                 }
             }
-            catch { }
+            catch (System.Exception ex) { Debug.LogWarning($"[GodController] electroHitPrefab early instantiation error: {ex.Message}"); }
         }
         catch (System.Exception ex)
         {

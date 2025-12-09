@@ -9,7 +9,7 @@ public class God : MonoBehaviour
     [Header("Stadistics")]
     [Range(0f, 100f)]
     public float healthPercent = 100f;
-    public int health = 1000;
+    public int health = 2000;
     public int maxHealth = 2000;
 
     [SerializeField] float aggroRange = 4f;
