@@ -502,7 +502,8 @@ namespace StarterAssets
                 //     PlayerAudioManager.Instance.PlayBlockSound();
             }
 
-            if (health <= 0)
+
+            if (health <= 0 && !dead)
             {
                 dead = true;
                 Die();
