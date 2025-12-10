@@ -26,6 +26,7 @@ public class Boss : MonoBehaviour
     public GameObject BasicEnemyPrefab;
     public GameObject SpawnParticle;
     public GameObject ShieldParticle;
+    public GameObject portalPrefab;
 
     public bool spawnEnemies = false;
     public Animator animator;
@@ -270,6 +271,32 @@ public class Boss : MonoBehaviour
     void Die()
     {
         animator.SetTrigger("Death");
+
+        // Spawear portal cuando el Boss muere
+        if (portalPrefab != null)
+        {
+            GameObject spawnedPortal = Instantiate(portalPrefab, transform.position, Quaternion.identity);
+            spawnedPortal.SetActive(true);
+            
+            // Activar todos los componentes hijo por si acaso
+            foreach (Transform child in spawnedPortal.transform)
+            {
+                child.gameObject.SetActive(true);
+            }
+            
+            // Activar ParticleSystem si existe
+            ParticleSystem ps = spawnedPortal.GetComponent<ParticleSystem>();
+            if (ps != null)
+            {
+                ps.Play();
+            }
+            
+            Debug.Log($"<color=cyan>[Boss] Portal spawned at {transform.position}</color>");
+        }
+        else
+        {
+            Debug.LogWarning("[Boss] Portal prefab not assigned!");
+        }
 
         // Emit boss defeated event at the boss's position
         Debug.Log($"<color=red>[Boss] Boss defeated! Emitting OnBossDefeated event at {transform.position}</color>");

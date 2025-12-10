@@ -43,6 +43,10 @@ public class BossController : MonoBehaviour
     [Tooltip("Referencia al God script para controlar disparos")]
     public God godScript;
 
+    [Header("Portal (On Death)")]
+    [Tooltip("Prefab del portal a spawnear cuando el boss muere")]
+    public GameObject portalPrefab;
+
     private NavMeshAgent navAgent;
     private Animator animator;
     private Rigidbody rb;
@@ -224,6 +228,32 @@ public class BossController : MonoBehaviour
         isUnconscious = false;
 
         Debug.Log("<color=red>[Boss] Boss defeated!</color>");
+
+        // Spawnear portal cuando el boss muere
+        if (portalPrefab != null)
+        {
+            GameObject spawnedPortal = Instantiate(portalPrefab, transform.position, Quaternion.identity);
+            spawnedPortal.SetActive(true);
+            
+            // Activar todos los componentes hijo por si acaso
+            foreach (Transform child in spawnedPortal.transform)
+            {
+                child.gameObject.SetActive(true);
+            }
+            
+            // Activar ParticleSystem si existe
+            ParticleSystem ps = spawnedPortal.GetComponent<ParticleSystem>();
+            if (ps != null)
+            {
+                ps.Play();
+            }
+            
+            Debug.Log($"<color=cyan>[BossController] Portal spawned at {transform.position}</color>");
+        }
+        else
+        {
+            Debug.LogWarning("[BossController] Portal prefab not assigned!");
+        }
 
         // Deshabilitar IA
         if (navAgent != null)
