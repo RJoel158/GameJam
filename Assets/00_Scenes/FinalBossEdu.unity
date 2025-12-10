@@ -1056,6 +1056,61 @@ Transform:
   - {fileID: 1104493426}
   m_Father: {fileID: 1865122665}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &341638581
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 341638583}
+  - component: {fileID: 341638582}
+  m_Layer: 0
+  m_Name: VictoryManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &341638582
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 341638581}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4d937de978f1cf4aa9195e8b0ed15d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  videoPath: Assets/00_Scenes/CinematicaFinal.mp4
+  videoPlayer: {fileID: 0}
+  videoDisplay: {fileID: 0}
+  youWinSprite: {fileID: 21300000, guid: 59d02cc27e087f346bccb1b7f5c32a2f, type: 3}
+  youWinImage: {fileID: 0}
+  youWinBackground: {fileID: 0}
+  youWinFadeDuration: 1.5
+  youWinDisplayTime: 3
+  victoryMusic: {fileID: 0}
+  victoryMusicVolume: 0.8
+  mainMenuSceneName: MainMenu
+--- !u!4 &341638583
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 341638581}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.800003, y: 66.885, z: -2.1000023}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &347348556
 GameObject:
   m_ObjectHideFlags: 0
@@ -1135,7 +1190,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &356102557
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1853,8 +1908,8 @@ MonoBehaviour:
   teleportPrefab: {fileID: 1401032460}
   teleportPrefabDuration: 3
   teleportSfx: {fileID: 8300000, guid: b7de4827b92c17c4ebfd255eb7be4aae, type: 3}
-  bossLoopMusic: {fileID: 8300000, guid: 0885f446e2446f7419cead76410f9da0, type: 3}
-  bossMusicVolume: 0.7
+  bossLoopMusic: {fileID: 8300000, guid: 55c95128591408146b2199d50fd2519a, type: 3}
+  bossMusicVolume: 1
   bossMusicLoopOnFollow: 1
   bossDisplayName: BOSS
   meteorPrefab: {fileID: 7957833072274404953, guid: 3355f6bfa6db8b24281b827de929694c, type: 3}
@@ -3516,6 +3571,68 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.0025991052, y: 0.18655992, z: -0.0056686103}
     m_Extent: {x: 0.43467373, y: 0.5472332, z: 0.33832377}
   m_DirtyAABB: 0
+--- !u!1 &891964195
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 891964198}
+  - component: {fileID: 891964197}
+  - component: {fileID: 891964196}
+  m_Layer: 0
+  m_Name: Plane
+  m_TagString: Void
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!65 &891964196
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 891964195}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 10.216677, y: 0.39568144, z: 8.581098}
+  m_Center: {x: 0.099462785, y: 0.30215922, z: 0.03315338}
+--- !u!33 &891964197
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 891964195}
+  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!4 &891964198
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 891964195}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.8, y: -66.7, z: 0.007595}
+  m_LocalScale: {x: 20.198, y: 20.198, z: 20.198}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &905985870
 GameObject:
   m_ObjectHideFlags: 0
@@ -6797,7 +6914,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3190219576147118976, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.5700002
+      value: 0.5699997
       objectReference: {fileID: 0}
     - target: {fileID: 3190219576147118976, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
       propertyPath: m_LocalPosition.z
@@ -9112,9 +9229,9 @@ MonoBehaviour:
   firePoint: {fileID: 799711770}
   bulletPrefab: {fileID: 6665236116171655518, guid: 4fbac74f1bc1fb046957ab42b0c122a7, type: 3}
   healthPercent: 100
-  health: 100
-  maxHealth: 100
-  aggroRange: 4
+  health: 50
+  maxHealth: 50
+  aggroRange: 5
   timer: 0
   timeBtwShoot: 1
   canShoot: 0
@@ -9619,3 +9736,5 @@ SceneRoots:
   - {fileID: 1225017892}
   - {fileID: 557461791}
   - {fileID: 1442569803}
+  - {fileID: 891964198}
+  - {fileID: 341638583}

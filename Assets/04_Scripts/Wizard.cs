@@ -117,6 +117,10 @@ public class Wizard : MonoBehaviour
         if (health <= 0)
         {
             Debug.Log($"<color=red>[Wizard] ¡MUERTO! health={health}</color>");
+
+            // Notificar al boss que un wizard murió
+            NotifyBossOfDeath();
+
             //AudioManager.instance.PlayRandomPitchSFX(explosionSFX);
             animator.SetBool("Dead", true);
             Destroy(gameObject, 3);
@@ -125,6 +129,21 @@ public class Wizard : MonoBehaviour
         {
             Debug.Log($"[Wizard] Setting 'Hit' trigger on animator");
             animator.SetTrigger("Hit");
+        }
+    }
+
+    private void NotifyBossOfDeath()
+    {
+        // Buscar el GodController y notificar la muerte
+        GodController godController = FindAnyObjectByType<GodController>();
+        if (godController != null)
+        {
+            godController.OnWizardKilled();
+            Debug.Log($"<color=green>[Wizard] ✓ Notificado al GodController sobre muerte de wizard</color>");
+        }
+        else
+        {
+            Debug.LogWarning("<color=orange>[Wizard] No se encontró GodController para notificar la muerte</color>");
         }
     }
     void CheckIfCanShoot()
@@ -146,7 +165,7 @@ public class Wizard : MonoBehaviour
 
     public void WizardShoot()
     {
-        Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);   
+        Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
     }
 
     public void WizardShootSound()

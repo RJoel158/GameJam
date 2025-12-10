@@ -32,15 +32,15 @@ public class SimpleBossHealthBar : MonoBehaviour
     public TMPro.TextMeshProUGUI healthText;
 
     [Header("Colors")]
-    public Color fullHealthColor = new Color(0.8f, 0.1f, 0.1f, 1f); // Rojo
-    public Color lowHealthColor = new Color(1f, 0.5f, 0f, 1f); // Naranja
-    public Color criticalHealthColor = Color.yellow;
+    public Color fullHealthColor = new Color(0.9f, 0.15f, 0.15f, 1f); // Rojo brillante
+    public Color lowHealthColor = new Color(1f, 0.4f, 0f, 1f); // Naranja intenso más visible
+    public Color criticalHealthColor = new Color(1f, 0.9f, 0f, 1f); // Amarillo más brillante
     public Color backgroundColor = new Color(0f, 0f, 0f, 0.6f);
 
     [Range(0f, 1f)]
-    public float lowHealthThreshold = 0.5f;
+    public float lowHealthThreshold = 0.67f; // 67% = después de 1ra fase (pierde 33%)
     [Range(0f, 1f)]
-    public float criticalHealthThreshold = 0.25f;
+    public float criticalHealthThreshold = 0.34f; // 34% = después de 2da fase (pierde otro 33%)
 
     [Header("Settings")]
     public string bossName = "G O T T";
@@ -325,17 +325,23 @@ public class SimpleBossHealthBar : MonoBehaviour
             healthFillImage.fillAmount = healthPercent;
         }
 
-        // Cambiar color según la vida
+        // Cambiar color según la vida con transiciones suaves y visibles
         Color targetColor = fullHealthColor;
         if (healthPercent <= criticalHealthThreshold)
         {
+            // Tercera fase (≤34%): Amarillo brillante
             targetColor = criticalHealthColor;
         }
         else if (healthPercent <= lowHealthThreshold)
         {
-            // Interpolar entre rojo y naranja
+            // Segunda fase (34%-67%): Transición de naranja a amarillo
             float t = (healthPercent - criticalHealthThreshold) / (lowHealthThreshold - criticalHealthThreshold);
-            targetColor = Color.Lerp(lowHealthColor, fullHealthColor, t);
+            targetColor = Color.Lerp(criticalHealthColor, lowHealthColor, t);
+        }
+        else
+        {
+            // Primera fase (>67%): Rojo brillante
+            targetColor = fullHealthColor;
         }
 
         healthFillImage.color = targetColor;

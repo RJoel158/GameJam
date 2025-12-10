@@ -124,8 +124,18 @@ public class God : MonoBehaviour
         health -= dmg;
         if (health <= 0)
         {
-            //AudioManager.instance.PlayRandomPitchSFX(explosionSFX);
-            //Spawner.instance.EnemyKilled();
+            Debug.Log("<color=green>[God] ¡Boss derrotado! Iniciando secuencia de victoria...</color>");
+
+            // Trigger victory sequence
+            if (VictoryManager.Instance != null)
+            {
+                VictoryManager.Instance.TriggerVictory();
+            }
+            else
+            {
+                Debug.LogError("[God] VictoryManager no encontrado en la escena!");
+            }
+
             Destroy(gameObject);
         }
     }

@@ -230,6 +230,26 @@ namespace StarterAssets
             HandleResetBlock();
         }
 
+        void checkFall()
+        {
+            // Este método no es necesario ya que usamos OnTriggerEnter para detectar el Void
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+            // Detectar si el jugador cae al vacío (colisiona con un objeto etiquetado como "Void")
+            if (other.CompareTag("Void"))
+            {
+                Debug.Log("<color=red>[Player] ¡Cayó al vacío! Muerte instantánea.</color>");
+                health = 0;
+                if (!dead)
+                {
+                    dead = true;
+                    Die();
+                }
+            }
+        }
+
         private void LateUpdate()
         {
             CameraRotation();
@@ -512,9 +532,54 @@ namespace StarterAssets
 
         void Die()
         {
+            Debug.Log("<color=red>[Player] Die() llamado - Iniciando muerte del jugador</color>");
+
             //Instantiate(ragdoll, transform.position, transform.rotation);
             _animator.SetTrigger("Death");
+
+            // Activar pantalla de Game Over buscando el DeathScreenManager en la escena
+            StartCoroutine(TriggerDeathScreenDelayed());
+
             //Destroy(this.gameObject);
+        }
+
+        private System.Collections.IEnumerator TriggerDeathScreenDelayed()
+        {
+            // Pequeña espera para que la animación de muerte empiece
+            yield return new WaitForSeconds(0.5f);
+
+            // Buscar el DeathScreenManager en la escena usando GameObject
+            GameObject deathManagerObj = GameObject.Find("DeathScreenManager");
+
+            if (deathManagerObj == null)
+            {
+                // Intentar buscar cualquier objeto que tenga el componente
+                var allObjects = FindObjectsOfType<MonoBehaviour>();
+                foreach (var obj in allObjects)
+                {
+                    if (obj.GetType().Name == "DeathScreenManager")
+                    {
+                        deathManagerObj = obj.gameObject;
+                        break;
+                    }
+                }
+            }
+
+            if (deathManagerObj != null)
+            {
+                Debug.Log("<color=green>[Player] DeathScreenManager encontrado, activando pantalla de Game Over</color>");
+                // Llamar al método TriggerDeathScreen usando SendMessage
+                deathManagerObj.SendMessage("TriggerDeathScreen", SendMessageOptions.DontRequireReceiver);
+            }
+            else
+            {
+                Debug.LogError("<color=red>[Player] ERROR: DeathScreenManager no encontrado en la escena! Reiniciando escena directamente...</color>");
+                // Fallback: reiniciar escena directamente si no hay DeathScreenManager
+                yield return new WaitForSeconds(2f);
+                UnityEngine.SceneManagement.SceneManager.LoadScene(
+                    UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex
+                );
+            }
         }
 
         private void DrawSheathSword()
