@@ -181,6 +181,16 @@ public class GodController : MonoBehaviour
     [Tooltip("Priority for meteor impact SFX (lower = higher priority). Use 0 for highest priority so other sounds won't interrupt it.")]
     public int meteorImpactSfxPriority = 0;
 
+    [Header("Portal (On Death)")]
+    [Tooltip("Prefab del portal a spawnearse cuando el boss muere")]
+    public GameObject portalPrefab;
+
+    [Tooltip("Delay en segundos antes de que aparezca el portal")]
+    public float portalSpawnDelay = 3f;
+
+    [Tooltip("Distancia hacia atrás donde aparecerá el portal (en metros)")]
+    public float portalBackDistance = 5f;
+
     private Vector3 centerPosition;
     private float currentAngle = 0f;
     private bool isWalking = false;
@@ -1771,6 +1781,61 @@ public class GodController : MonoBehaviour
         catch (System.Exception ex)
         {
             Debug.LogError($"[GodController] Excepción al aplicar daño por wizard: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Spawneará el portal 3 segundos después de matar al boss, posicionado atrás de donde fue derrotado
+    /// </summary>
+    public void SpawnPortalWithDelay()
+    {
+        // Asegurar que el portal prefab esté desactivado inicialmente
+        if (portalPrefab != null)
+        {
+            portalPrefab.SetActive(false);
+            Debug.Log("[GodController] Portal prefab desactivado inicialmente");
+        }
+        
+        StartCoroutine(SpawnPortalCoroutine());
+    }
+
+    private IEnumerator SpawnPortalCoroutine()
+    {
+        Debug.Log($"[GodController] Portal spawn iniciado. Aparecerá en {portalSpawnDelay} segundos atrás de la posición del boss");
+        
+        // Guardar la posición actual del boss
+        Vector3 bossDeathPosition = transform.position;
+        
+        // Esperar el delay
+        yield return new WaitForSeconds(portalSpawnDelay);
+        
+        // Calcular posición atrás del boss
+        Vector3 portalPosition = bossDeathPosition - transform.forward * portalBackDistance;
+        
+        // Spawnear el portal
+        if (portalPrefab != null)
+        {
+            GameObject spawnedPortal = Instantiate(portalPrefab, portalPosition, Quaternion.identity);
+            spawnedPortal.SetActive(true);
+            
+            // Activar todos los componentes hijo
+            foreach (Transform child in spawnedPortal.transform)
+            {
+                child.gameObject.SetActive(true);
+            }
+            
+            // Activar ParticleSystem si existe
+            ParticleSystem ps = spawnedPortal.GetComponent<ParticleSystem>();
+            if (ps != null)
+            {
+                ps.Play();
+            }
+            
+            Debug.Log($"<color=cyan>[GodController] Portal spawned en {portalPosition} después de {portalSpawnDelay}s</color>");
+        }
+        else
+        {
+            Debug.LogWarning("[GodController] Portal prefab not assigned!");
         }
     }
 

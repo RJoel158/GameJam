@@ -28,6 +28,10 @@ public class Boss : MonoBehaviour
     public GameObject ShieldParticle;
     public GameObject portalPrefab;
 
+    [Header("Portal Configuration")]
+    [SerializeField] private float portalSpawnDelay = 3f;
+    [SerializeField] private float portalBackDistance = 5f;
+
     public bool spawnEnemies = false;
     public Animator animator;
     public SphereCollider sphereCollider;
@@ -287,31 +291,8 @@ public class Boss : MonoBehaviour
     {
         animator.SetTrigger("Death");
 
-        // Spawear portal cuando el Boss muere
-        if (portalPrefab != null)
-        {
-            GameObject spawnedPortal = Instantiate(portalPrefab, transform.position, Quaternion.identity);
-            spawnedPortal.SetActive(true);
-            
-            // Activar todos los componentes hijo por si acaso
-            foreach (Transform child in spawnedPortal.transform)
-            {
-                child.gameObject.SetActive(true);
-            }
-            
-            // Activar ParticleSystem si existe
-            ParticleSystem ps = spawnedPortal.GetComponent<ParticleSystem>();
-            if (ps != null)
-            {
-                ps.Play();
-            }
-            
-            Debug.Log($"<color=cyan>[Boss] Portal spawned at {transform.position}</color>");
-        }
-        else
-        {
-            Debug.LogWarning("[Boss] Portal prefab not assigned!");
-        }
+        // Spawn portal with 3-second delay positioned behind boss
+        StartCoroutine(SpawnPortalWithDelay());
 
         // Emit boss defeated event at the boss's position
         Debug.Log($"<color=red>[Boss] Boss defeated! Emitting OnBossDefeated event at {transform.position}</color>");
@@ -350,5 +331,52 @@ public class Boss : MonoBehaviour
     public void SpawnPortal()
     {
         portalPrefab.SetActive(true);
+    }
+
+    private IEnumerator SpawnPortalWithDelay()
+    {
+        Debug.Log($"[Boss] Portal spawn iniciado. Aparecerá en {portalSpawnDelay} segundos atrás de la posición del boss");
+        
+        // Asegurar que el portal prefab esté desactivado inicialmente
+        if (portalPrefab != null)
+        {
+            portalPrefab.SetActive(false);
+            Debug.Log("[Boss] Portal prefab desactivado inicialmente");
+        }
+        
+        // Guardar la posición actual del boss
+        Vector3 bossDeathPosition = transform.position;
+        
+        // Esperar el delay
+        yield return new WaitForSeconds(portalSpawnDelay);
+        
+        // Calcular posición atrás del boss
+        Vector3 portalPosition = bossDeathPosition - transform.forward * portalBackDistance;
+        
+        // Spawnear el portal
+        if (portalPrefab != null)
+        {
+            GameObject spawnedPortal = Instantiate(portalPrefab, portalPosition, Quaternion.identity);
+            spawnedPortal.SetActive(true);
+            
+            // Activar todos los componentes hijo
+            foreach (Transform child in spawnedPortal.transform)
+            {
+                child.gameObject.SetActive(true);
+            }
+            
+            // Activar ParticleSystem si existe
+            ParticleSystem ps = spawnedPortal.GetComponent<ParticleSystem>();
+            if (ps != null)
+            {
+                ps.Play();
+            }
+            
+            Debug.Log($"<color=cyan>[Boss] Portal spawned en {portalPosition} después de {portalSpawnDelay}s, {portalBackDistance}m atrás</color>");
+        }
+        else
+        {
+            Debug.LogWarning("[Boss] Portal prefab not assigned!");
+        }
     }
 }

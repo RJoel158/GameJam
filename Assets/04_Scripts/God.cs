@@ -126,6 +126,13 @@ public class God : MonoBehaviour
         {
             Debug.Log("<color=green>[God] ¡Boss derrotado! Iniciando secuencia de victoria...</color>");
 
+            // Spawn portal with delay
+            GodController godCtrl = GetComponent<GodController>();
+            if (godCtrl != null)
+            {
+                godCtrl.SpawnPortalWithDelay();
+            }
+
             // Trigger victory sequence
             if (VictoryManager.Instance != null)
             {
