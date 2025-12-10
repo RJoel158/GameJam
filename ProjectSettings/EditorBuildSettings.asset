@@ -1,60 +1,59 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
----
-!u!1045 &1
+--- !u!1045 &1
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-    - enabled: 1
-      path: Assets/RommelPrefabs/08_MainMenu/MainMenu.unity
-      guid: 0e1c4b94bf9470a47bf18a921e637c2a
-    - enabled: 1
-      path: Assets/RommelPrefabs/08_MainMenu/loading screens/LoadingScreen_1.unity
-      guid: 2711ce885ccb30747aa464eea27c913a
-    - enabled: 1
-      path: Assets/RommelPrefabs/10_PauseMenu/PauseMenuScene.unity
-      guid: d46d961cde68af24a8dc41f36adddf49
-    - enabled: 1
-      path: Assets/00_Scenes/Game.unity
-      guid: 01cc99d1ab3a11f44b0bce9ad67b9d53
-    - enabled: 0
-      path: Assets/00_Scenes/f.unity
-      guid: 4f49c38dcd33dd14fb44641d39124be6
-    - enabled: 0
-      path: Assets/00_Scenes/OpenWorldSceneEdu.unity
-      guid: fbea9d523ae21a94b94818aa5d3bb456
-    - enabled: 0
-      path: Assets/03_UsingPrefabs/Cold Night/Cold Night.unity
-      guid: 8c6f0d7d2a576443a92d35db4d83c4da
-    - enabled: 0
-      path: Assets/StarterAssets/ThirdPersonController/Scenes/Playground.unity
-      guid: e9017d5f96b9f09489b4b37e1d6eb914
-    - enabled: 0
-      path: Assets/00_Scenes/OpenWorldSceneMerged1.unity
-      guid: 9f86e9c5edb39094bb8d35acf2ad1afb
-    - enabled: 0
-      path: Packages/com.unity.render-pipelines.universal/Editor/SceneTemplates/Basic.unity
-      guid: e026d555eae824f65922633f37a14385
-    - enabled: 0
-      path: Packages/com.unity.render-pipelines.universal/Editor/SceneTemplates/Standard.unity
-      guid: 5cae0d87369a2405eaa962b8d920b947
-    - enabled: 0
-      path: Assets/StarterAssets/FirstPersonController/Scenes/Playground.unity
-      guid: 707acc8dffb72b144bb1ffbe1c965f3d
-    - enabled: 0
-      path: Assets/00_Scenes/OpenWorldSceneEduMerged.unity
-      guid: dcba49af08069314d8911742180c2df1
-    - enabled: 1
-      path: Assets/RommelPrefabs/goblin enemy/creacion prefab.unity
-      guid: 739647909d9fa4d42965bbefcdc8cd59
+  - enabled: 1
+    path: Assets/RommelPrefabs/08_MainMenu/MainMenu.unity
+    guid: 0e1c4b94bf9470a47bf18a921e637c2a
+  - enabled: 1
+    path: Assets/RommelPrefabs/08_MainMenu/loading screens/LoadingScreen_1.unity
+    guid: 2711ce885ccb30747aa464eea27c913a
+  - enabled: 1
+    path: Assets/RommelPrefabs/10_PauseMenu/PauseMenuScene.unity
+    guid: d46d961cde68af24a8dc41f36adddf49
+  - enabled: 1
+    path: Assets/00_Scenes/Game.unity
+    guid: 01cc99d1ab3a11f44b0bce9ad67b9d53
+  - enabled: 0
+    path: Assets/00_Scenes/f.unity
+    guid: 4f49c38dcd33dd14fb44641d39124be6
+  - enabled: 0
+    path: Assets/00_Scenes/OpenWorldSceneEdu.unity
+    guid: fbea9d523ae21a94b94818aa5d3bb456
+  - enabled: 0
+    path: Assets/03_UsingPrefabs/Cold Night/Cold Night.unity
+    guid: 8c6f0d7d2a576443a92d35db4d83c4da
+  - enabled: 0
+    path: Assets/StarterAssets/ThirdPersonController/Scenes/Playground.unity
+    guid: e9017d5f96b9f09489b4b37e1d6eb914
+  - enabled: 0
+    path: Assets/00_Scenes/OpenWorldSceneMerged1.unity
+    guid: 9f86e9c5edb39094bb8d35acf2ad1afb
+  - enabled: 0
+    path: Packages/com.unity.render-pipelines.universal/Editor/SceneTemplates/Basic.unity
+    guid: e026d555eae824f65922633f37a14385
+  - enabled: 0
+    path: Packages/com.unity.render-pipelines.universal/Editor/SceneTemplates/Standard.unity
+    guid: 5cae0d87369a2405eaa962b8d920b947
+  - enabled: 0
+    path: Assets/StarterAssets/FirstPersonController/Scenes/Playground.unity
+    guid: 707acc8dffb72b144bb1ffbe1c965f3d
+  - enabled: 0
+    path: Assets/00_Scenes/OpenWorldSceneEduMerged.unity
+    guid: dcba49af08069314d8911742180c2df1
+  - enabled: 1
+    path: Assets/00_Scenes/FinalBoss.unity
+    guid: 869e3ed2a2c908e41a15b7a255b5bc78
+  - enabled: 1
+    path: Assets/00_Scenes/FinalBossEdu.unity
+    guid: c1a26e2d08157a24294934244e42b08b
+  - enabled: 1
+    path: Assets/RommelPrefabs/goblin enemy/creacion prefab.unity
+    guid: 739647909d9fa4d42965bbefcdc8cd59
   m_configObjects:
-    com.unity.input.settings:
-      { fileID: 11400000, guid: 9e7be553448fa2546aea5752021cbcf7, type: 2 }
-    com.unity.input.settings.actions:
-      {
-        fileID: -944628639613478452,
-        guid: 4419d82f33d36e848b3ed5af4c8da37e,
-        type: 3,
-      }
+    com.unity.input.settings: {fileID: 11400000, guid: 9e7be553448fa2546aea5752021cbcf7, type: 2}
+    com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 4419d82f33d36e848b3ed5af4c8da37e, type: 3}
   m_UseUCBPForAssetBundles: 0

@@ -39,6 +39,10 @@ public class Boss : MonoBehaviour
     private int enemiesAlive = 0;
     public float SpeedChangeRate = 10.0f;
 
+    [Header("Phase Duration")]
+    [SerializeField] float phase1Duration = 60f; // 60 segundos para Fase 1
+    private float phase1Timer = 0f;
+
     [Header("Combat")]
     [SerializeField] float attackCD = 2f;
     [SerializeField] float attackRange = 1f;
@@ -207,11 +211,21 @@ public class Boss : MonoBehaviour
         switch (currentPhase)
         {
             case BossPhase.Phase1:
-
+                // Contar tiempo en Fase 1
+                phase1Timer += Time.deltaTime;
+                
                 if (!phase1Triggered)
                 {
                     phase1Triggered = true;
                     StartCoroutine(ExecuteSpawnWithDelay());
+                    Debug.Log($"<color=yellow>[Boss] Fase 1 iniciada. Durará {phase1Duration} segundos</color>");
+                }
+
+                // Si pasan 60 segundos, cambiar a Fase 2
+                if (phase1Timer >= phase1Duration)
+                {
+                    currentPhase = BossPhase.Phase2;
+                    Debug.Log($"<color=yellow>[Boss] Fase 1 completada después de {phase1Duration} segundos. Cambiando a Fase 2...</color>");
                 }
                 break;
 
@@ -223,6 +237,7 @@ public class Boss : MonoBehaviour
                 {
                     phase2Triggered = true;
                     StartCoroutine(ExecuteSpawnWithDelay());
+                    Debug.Log($"<color=yellow>[Boss] Fase 2 iniciada</color>");
                 }
                 break;
         }
@@ -301,6 +316,8 @@ public class Boss : MonoBehaviour
         // Emit boss defeated event at the boss's position
         Debug.Log($"<color=red>[Boss] Boss defeated! Emitting OnBossDefeated event at {transform.position}</color>");
         OnBossDefeated?.Invoke(transform.position);
+
+        
     }
 
     private void HandleStadistics()
@@ -328,5 +345,10 @@ public class Boss : MonoBehaviour
     public void ExitBossAttack()
     {
         isAttacking = false;
+    }
+
+    public void SpawnPortal()
+    {
+        portalPrefab.SetActive(true);
     }
 }

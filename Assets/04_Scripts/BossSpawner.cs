@@ -72,10 +72,10 @@ public class BossSpawner : MonoBehaviour
 
     [Header("Spawn Follow Mode")]
     [Tooltip("If true, after appearing the boss will follow the player for a short phase instead of edge-walking")]
-    public bool spawnFollowPlayer = true;
+    public bool spawnFollowPlayer = false;
 
     [Tooltip("Duration of the follow phase in seconds")]
-    public float followPhaseDuration = 8f;
+    public float followPhaseDuration = 60f;
 
     [Tooltip("Desired follow distance from player (meters)")]
     public float followDistance = 6f;

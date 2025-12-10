@@ -149,7 +149,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 6496e94c0b6d66a4594cb1985fdf339b, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 423.92093
+      value: 423.28
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 6496e94c0b6d66a4594cb1985fdf339b, type: 3}
       propertyPath: m_LocalRotation.w
@@ -278,7 +278,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &79277707
 Transform:
   m_ObjectHideFlags: 0
@@ -320,7 +320,17 @@ MonoBehaviour:
   teleportBossAfterCinematic: 1
   teleportDistance: 8
   teleportHeightOffset: 1.5
+  portalLeadTime: 0.6
+  spawnEffectScale: 1.6
+  bossSpawnYOffset: -0.5
+  spawnFollowPlayer: 1
+  followPhaseDuration: 8
+  followDistance: 6
+  followSpeed: 2
+  followJitter: 0.6
   bossAppearSound: {fileID: 8300000, guid: 017b817ca8dfceb4ab051d317931a35c, type: 3}
+  spawnEffectPrefab: {fileID: 0}
+  spawnEffectDuration: 5
 --- !u!4 &115644638 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3986179179329749341, guid: 8eb503696b886e04faff8fc0f480d473, type: 3}
@@ -505,6 +515,37 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1205021609740332654, guid: b99922c2f59b1a542bdd06ae8bee47ae, type: 3}
   m_PrefabInstance: {fileID: 208470222}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &272023216
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 272023217}
+  m_Layer: 0
+  m_Name: PortalSpawnPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &272023217
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 272023216}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &348959922 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3688684712675894981, guid: f479c293a80b0e346b41019b4026cda1, type: 3}
@@ -735,6 +776,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boss: {fileID: 1811894804}
+  bossObject: {fileID: 0}
   healthFillImage: {fileID: 1876926384}
   healthBackgroundImage: {fileID: 915757831}
   bossNameText: {fileID: 557389594}
@@ -751,6 +793,8 @@ MonoBehaviour:
   smoothUpdate: 1
   smoothSpeed: 5
   showDebugLogs: 1
+  autoShowWhenBossAssigned: 1
+  alwaysShow: 0
 --- !u!1 &457904435
 GameObject:
   m_ObjectHideFlags: 0
@@ -803,6 +847,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boss: {fileID: 1811894804}
+  bossObject: {fileID: 0}
   healthFillImage: {fileID: 1623765102}
   healthBackgroundImage: {fileID: 1932881345}
   bossNameText: {fileID: 1254801242}
@@ -819,6 +864,8 @@ MonoBehaviour:
   smoothUpdate: 1
   smoothSpeed: 5
   showDebugLogs: 0
+  autoShowWhenBossAssigned: 1
+  alwaysShow: 0
 --- !u!1 &458386208 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5282408608672437559, guid: 7ab4bdae51e6add4b9720a3f0cf87d35, type: 3}
@@ -1382,7 +1429,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f61c83aaa606cf4bb81ee241da51ad5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneToLoad: NextLevel
+  sceneToLoad: FinalBossEdu
   useSceneIndex: 0
   sceneIndex: 1
   playerTag: Player
@@ -2427,7 +2474,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3992058561654064293, guid: 13c990b8270c70b4c9f196019286028c, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3508,7 +3555,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 718798773006533722, guid: cdeca039185b7014482d73eeb0ebf2c4, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 718798773006533722, guid: cdeca039185b7014482d73eeb0ebf2c4, type: 3}
       propertyPath: m_TagString
@@ -3528,7 +3575,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3695379564501016287, guid: cdeca039185b7014482d73eeb0ebf2c4, type: 3}
       propertyPath: maxHealth
-      value: 200
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 3695379564501016287, guid: cdeca039185b7014482d73eeb0ebf2c4, type: 3}
       propertyPath: attackRange
@@ -4382,6 +4429,8 @@ MonoBehaviour:
   blockVolume: 0.8
   spawnEnemies: {fileID: 8300000, guid: 017b817ca8dfceb4ab051d317931a35c, type: 3}
   spawnEnemiesVolume: 0.8
+  shootPlayer: {fileID: 0}
+  shootPlayerVolume: 0.8
 --- !u!4 &1797954272
 Transform:
   m_ObjectHideFlags: 0
@@ -5023,10 +5072,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 39832315}
     m_Modifications:
-    - target: {fileID: 1584479647338789852, guid: f479c293a80b0e346b41019b4026cda1, type: 3}
-      propertyPath: 'm_Materials.Array.data[0]'
-      value: 
-      objectReference: {fileID: 4082476339126608652, guid: 4aa461aef6375c34d9ef8d517c50a877, type: 3}
     - target: {fileID: 934470409676294251, guid: 045b6fe317fed4647a1bfa6fb78c5054, type: 3}
       propertyPath: m_Controller
       value: 
@@ -5103,6 +5148,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1584479647338789852, guid: f479c293a80b0e346b41019b4026cda1, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 4082476339126608652, guid: 4aa461aef6375c34d9ef8d517c50a877, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5708,3 +5757,4 @@ SceneRoots:
   - {fileID: 525441015}
   - {fileID: 15753189}
   - {fileID: 1050619607}
+  - {fileID: 272023217}

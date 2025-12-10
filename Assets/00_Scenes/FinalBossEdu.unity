@@ -937,9 +937,9 @@ MonoBehaviour:
   spawnEffectScale: 1.85
   bossSpawnYOffset: -0.5
   spawnFollowPlayer: 1
-  followPhaseDuration: 15
+  followPhaseDuration: 60
   followDistance: 1
-  followSpeed: 2
+  followSpeed: 3
   followJitter: 0.6
   bossAppearSound: {fileID: 8300000, guid: 342289d6684d9684a9540eda305d4f40, type: 3}
   spawnEffectPrefab: {fileID: 5607819269926399345, guid: 45e0f06c750176947862c10346226439, type: 3}
@@ -1872,9 +1872,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 255a1d698ab780143972a57de32baca7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  edgePhaseDuration: 30
+  edgePhaseDuration: 60
   edgeRadius: 4
-  walkSpeed: 2.5
+  walkSpeed: 4
   facePlayerDuringWalk: 1
   facePlayerWeight: 0.3
   rotationSpeed: 360
@@ -1891,7 +1891,7 @@ MonoBehaviour:
   followAuraEnterSfx: {fileID: 8300000, guid: bd9d391265dc8dc46be14ae9e855b92b, type: 3}
   followAuraLoopSfx: {fileID: 8300000, guid: 2d2a3dd413e7c1d4abfe92c88d7c92c8, type: 3}
   followAuraExitSfx: {fileID: 8300000, guid: 29b57213a2d6bfc4fb5f81e0ceeabba9, type: 3}
-  teleportPhaseDuration: 15
+  teleportPhaseDuration: 60
   teleportPhaseDelay: 0.3
   startOnEnable: 0
   electroHitChildName: Electro hit

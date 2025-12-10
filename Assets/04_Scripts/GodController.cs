@@ -10,7 +10,7 @@ public class GodController : MonoBehaviour
 {
     [Header("Edge Phase Settings")]
     [Tooltip("Duration in seconds for the edge-walking phase")]
-    public float edgePhaseDuration = 8f;
+    public float edgePhaseDuration = 120f;
 
     [Tooltip("Radius (meters) around the spawn center to walk; adjust to match platform edges")]
     public float edgeRadius = 4f;
@@ -67,7 +67,7 @@ public class GodController : MonoBehaviour
 
     [Header("Teleport / Projectiles Phase")]
     [Tooltip("Duration of the teleport+projectile phase (seconds). Placeholder — replace with real logic later.")]
-    public float teleportPhaseDuration = 5f;
+    public float teleportPhaseDuration = 60f;
 
     [Tooltip("Delay before starting teleport phase after follow ends (seconds)")]
     public float teleportPhaseDelay = 0.3f;
@@ -297,7 +297,7 @@ public class GodController : MonoBehaviour
     /// <param name="distance">Desired following distance in meters</param>
     /// <param name="followSpeed">Speed of following movement</param>
     /// <param name="jitterAmount">Max lateral jitter in meters to make movement unsettling</param>
-    public void StartFollowPhase(float duration = 8f, float distance = 6f, float followSpeed = 2f, float jitterAmount = 0.6f)
+    public void StartFollowPhase(float duration = 60f, float distance = 6f, float followSpeed = 3f, float jitterAmount = 0.6f)
     {
         StopAllCoroutines();
         StartCoroutine(FollowPhaseCoroutine(duration, distance, followSpeed, jitterAmount));
@@ -1690,7 +1690,10 @@ public class GodController : MonoBehaviour
             animator.SetFloat("MotionSpeed", 0f);
         }
 
-        Debug.Log("<color=green>[GodController] Edge phase complete. Boss vulnerable again.</color>");
+        Debug.Log("<color=green>[GodController] Edge phase complete. Boss vulnerable again. Starting follow phase...</color>");
+        
+        // Automatically transition to follow phase after edge phase (60 seconds)
+        StartFollowPhase(60f, 6f, 2f, 0.6f);
     }
 
     /// <summary>

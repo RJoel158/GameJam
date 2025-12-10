@@ -112,13 +112,13 @@ public class VictoryManager : MonoBehaviour
             youWinImage = imageObj.AddComponent<Image>();
 
             RectTransform imageRt = youWinImage.GetComponent<RectTransform>();
-            imageRt.anchorMin = new Vector2(0.5f, 0.5f);
-            imageRt.anchorMax = new Vector2(0.5f, 0.5f);
-            imageRt.sizeDelta = new Vector2(800, 400);
-            imageRt.anchoredPosition = Vector2.zero;
+            imageRt.anchorMin = Vector2.zero;
+            imageRt.anchorMax = Vector2.one;
+            imageRt.offsetMin = Vector2.zero;
+            imageRt.offsetMax = Vector2.zero;
 
             youWinImage.color = new Color(1, 1, 1, 0);
-            youWinImage.preserveAspect = true;
+            youWinImage.preserveAspect = false;
 
             youWinPanel.SetActive(false);
         }
@@ -181,6 +181,7 @@ public class VictoryManager : MonoBehaviour
             videoPlayer.targetTexture = renderTexture;
             videoDisplay.texture = renderTexture;
             videoDisplay.gameObject.SetActive(true);
+            Debug.Log("[VictoryManager] VideoDisplay activado");
         }
 
         videoPlayer.Prepare();
@@ -203,6 +204,7 @@ public class VictoryManager : MonoBehaviour
         if (videoDisplay != null)
         {
             videoDisplay.gameObject.SetActive(false);
+            Debug.Log("[VictoryManager] VideoDisplay desactivado");
         }
     }
 
@@ -218,11 +220,18 @@ public class VictoryManager : MonoBehaviour
         }
 
         Debug.Log($"[VictoryManager] Activando panel YOU WIN. Sprite asignado: {youWinImage.sprite != null}");
+        Debug.Log($"[VictoryManager] youWinImage color: {youWinImage.color}, youWinBackground color: {youWinBackground.color}");
 
         // Activar panel
-        youWinBackground.transform.parent.gameObject.SetActive(true);
+        GameObject panelObj = youWinBackground.transform.parent.gameObject;
+        panelObj.SetActive(true);
 
-        Debug.Log($"[VictoryManager] Panel activado. GameObject activo: {youWinBackground.transform.parent.gameObject.activeSelf}");
+        Debug.Log($"[VictoryManager] Panel activado. GameObject activo: {panelObj.activeSelf}");
+        Debug.Log($"[VictoryManager] youWinImage parent: {youWinImage.transform.parent.name}, canvasGroup active: {youWinImage.gameObject.activeSelf}");
+
+        // Asegurar que el gameobject del image esté activo
+        youWinImage.gameObject.SetActive(true);
+        youWinBackground.gameObject.SetActive(true);
 
         // Reproducir música de victoria si está asignada
         if (victoryMusic != null)
@@ -230,6 +239,7 @@ public class VictoryManager : MonoBehaviour
             audioSource.clip = victoryMusic;
             audioSource.volume = victoryMusicVolume;
             audioSource.Play();
+            Debug.Log("[VictoryManager] Música de victoria reproducida");
         }
 
         // Fade in background y image
