@@ -9,6 +9,7 @@ TagManager:
   - Espada
   - Boss
   - Wizard
+  - Void
   layers:
   - Default
   - TransparentFX

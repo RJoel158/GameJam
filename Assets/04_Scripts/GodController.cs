@@ -233,13 +233,28 @@ public class GodController : MonoBehaviour
             animator.applyRootMotion = false;
         }
 
-        // Ensure an AudioSource exists for aura SFX
+        // Ensure an AudioSource exists for aura SFX (separate from music)
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null)
         {
             audioSource = gameObject.AddComponent<AudioSource>();
             audioSource.playOnAwake = false;
             audioSource.spatialBlend = 1f; // 3D sound
+            audioSource.priority = 128; // Normal priority for SFX
+        }
+
+        // Create a dedicated AudioSource for boss music (never interrupted)
+        if (bossMusicSource == null && bossLoopMusic != null)
+        {
+            bossMusicSource = gameObject.AddComponent<AudioSource>();
+            bossMusicSource.playOnAwake = false;
+            bossMusicSource.loop = true;
+            bossMusicSource.spatialBlend = 0f; // 2D music
+            bossMusicSource.priority = 0; // Highest priority - NEVER gets interrupted
+            bossMusicSource.ignoreListenerPause = true;
+            bossMusicSource.clip = bossLoopMusic;
+            bossMusicSource.volume = Mathf.Clamp01(bossMusicVolume);
+            Debug.Log("<color=green>[GodController] Dedicated boss music AudioSource created with priority 0 (highest)</color>");
         }
 
         // Try find player by tag, fallback to StarterAssets controller
@@ -471,8 +486,8 @@ public class GodController : MonoBehaviour
         // Disable or destroy aura visual (ensure done even if coroutines were interrupted)
         DisableActiveAura();
 
-        // stop boss music as follow phase ends
-        try { StopBossMusic(); } catch { }
+        // NO detenemos la música aquí - debe continuar durante todas las fases del boss
+        // try { StopBossMusic(); } catch { }
 
         Debug.Log("<color=green>[GodController] Follow phase complete. Boss vulnerable again.</color>");
 
@@ -1358,26 +1373,43 @@ public class GodController : MonoBehaviour
 
     private void StartBossMusic()
     {
-        if (bossLoopMusic == null) return;
+        if (bossLoopMusic == null)
+        {
+            Debug.LogWarning("[GodController] No boss loop music assigned.");
+            return;
+        }
+
         try
         {
+            // If bossMusicSource wasn't created in Awake, create it now
             if (bossMusicSource == null)
             {
                 bossMusicSource = gameObject.AddComponent<AudioSource>();
                 bossMusicSource.playOnAwake = false;
                 bossMusicSource.loop = true;
                 bossMusicSource.spatialBlend = 0f; // 2D music
-                // Give boss music highest priority so it won't be culled when many SFX play
-                bossMusicSource.priority = 0;
+                bossMusicSource.priority = 0; // Highest priority - NEVER interrupted
                 bossMusicSource.ignoreListenerPause = true;
+                bossMusicSource.clip = bossLoopMusic;
+                bossMusicSource.volume = Mathf.Clamp01(bossMusicVolume);
+                Debug.Log("<color=yellow>[GodController] Boss music AudioSource created on-demand</color>");
             }
-            bossMusicSource.clip = bossLoopMusic;
-            bossMusicSource.volume = Mathf.Clamp01(bossMusicVolume);
+
+            // Only play if not already playing
             if (!bossMusicSource.isPlaying)
+            {
                 bossMusicSource.Play();
-            Debug.Log("[GodController] Boss loop music started.");
+                Debug.Log("<color=green>[GodController] ♫ Boss loop music STARTED (priority 0, never interrupted)</color>");
+            }
+            else
+            {
+                Debug.Log("[GodController] Boss music already playing, continuing...");
+            }
         }
-        catch { }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[GodController] Error starting boss music: {ex.Message}");
+        }
     }
 
     private void StopBossMusic()
@@ -1387,10 +1419,17 @@ public class GodController : MonoBehaviour
             if (bossMusicSource != null && bossMusicSource.isPlaying)
             {
                 bossMusicSource.Stop();
-                Debug.Log("[GodController] Boss loop music stopped.");
+                Debug.Log("<color=red>[GodController] ♫ Boss loop music STOPPED</color>");
+            }
+            else if (bossMusicSource != null)
+            {
+                Debug.Log("[GodController] Boss music source exists but wasn't playing.");
             }
         }
-        catch { }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[GodController] Error stopping boss music: {ex.Message}");
+        }
     }
 
     // Hides the boss visually and disables its colliders/animator without deactivating the GameObject
@@ -1652,6 +1691,84 @@ public class GodController : MonoBehaviour
         }
 
         Debug.Log("<color=green>[GodController] Edge phase complete. Boss vulnerable again.</color>");
+    }
+
+    /// <summary>
+    /// Llamado por Wizard cuando muere. Aplica daño al boss.
+    /// </summary>
+    public void OnWizardKilled()
+    {
+        Debug.Log("<color=cyan>[GodController] OnWizardKilled() - Un wizard ha muerto, aplicando daño al boss</color>");
+
+        // Hay 4 wizards en la tercera fase
+        // Fase 1: -33%, Fase 2: -33%, Fase 3: -34% (4 wizards × 8.5% cada uno)
+        // 34% / 4 wizards = 8.5% por wizard
+        int damagePerWizard = 0;
+
+        try
+        {
+            // Intentar usar el componente Boss primero
+            Boss bossComp = GetComponent<Boss>() ?? GetComponentInChildren<Boss>(true) ?? FindAnyObjectByType<Boss>();
+
+            if (bossComp != null)
+            {
+                // Daño = 8.5% de la vida máxima (34% de la tercera fase / 4 wizards)
+                damagePerWizard = Mathf.Max(1, Mathf.RoundToInt(bossComp.maxHealth * 0.085f));
+                bossComp.TakeDamage(damagePerWizard);
+
+                Debug.Log($"<color=red>[GodController] ✓ Wizard muerto - aplicado {damagePerWizard} daño al Boss. Vida actual: {bossComp.health}/{bossComp.maxHealth}</color>");
+
+                // Actualizar la UI inmediatamente
+                try
+                {
+                    SimpleBossHealthBar healthBar = FindAnyObjectByType<SimpleBossHealthBar>();
+                    if (healthBar != null)
+                    {
+                        healthBar.boss = bossComp;
+                        healthBar.RefreshUI();
+                        Debug.Log("[GodController] UI del boss actualizada tras muerte de wizard");
+                    }
+                }
+                catch { }
+            }
+            else
+            {
+                // Fallback: usar componente God
+                if (god == null)
+                {
+                    god = GetComponentInChildren<God>(true) ?? FindAnyObjectByType<God>();
+                }
+
+                if (god != null)
+                {
+                    damagePerWizard = Mathf.Max(1, Mathf.RoundToInt(god.maxHealth * 0.085f));
+                    god.SetInvulnerable(false); // Asegurar que no esté invulnerable
+                    god.TakeDamage(damagePerWizard);
+
+                    Debug.Log($"<color=red>[GodController] ✓ Wizard muerto - aplicado {damagePerWizard} daño a God. Vida actual: {god.health}/{god.maxHealth}</color>");
+
+                    // Actualizar UI
+                    try
+                    {
+                        SimpleBossHealthBar healthBar = FindAnyObjectByType<SimpleBossHealthBar>();
+                        if (healthBar != null)
+                        {
+                            healthBar.RefreshUI();
+                            Debug.Log("[GodController] UI del boss actualizada tras muerte de wizard (God)");
+                        }
+                    }
+                    catch { }
+                }
+                else
+                {
+                    Debug.LogError("<color=red>[GodController] ERROR: No se encontró componente Boss ni God para aplicar daño por wizard!</color>");
+                }
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[GodController] Excepción al aplicar daño por wizard: {ex.Message}");
+        }
     }
 
     private void OnDrawGizmosSelected()
