@@ -937,9 +937,9 @@ MonoBehaviour:
   spawnEffectScale: 1.85
   bossSpawnYOffset: -0.5
   spawnFollowPlayer: 1
-  followPhaseDuration: 60
+  followPhaseDuration: 20
   followDistance: 1
-  followSpeed: 3
+  followSpeed: 2
   followJitter: 0.6
   bossAppearSound: {fileID: 8300000, guid: 342289d6684d9684a9540eda305d4f40, type: 3}
   spawnEffectPrefab: {fileID: 5607819269926399345, guid: 45e0f06c750176947862c10346226439, type: 3}
@@ -1926,6 +1926,9 @@ MonoBehaviour:
   meteorImpactSfx: {fileID: 0}
   meteorImpactSfxVolume: 1
   meteorImpactSfxPriority: 0
+  portalPrefab: {fileID: 0}
+  portalSpawnDelay: 3
+  portalBackDistance: 5
 --- !u!82 &458966853
 AudioSource:
   m_ObjectHideFlags: 0

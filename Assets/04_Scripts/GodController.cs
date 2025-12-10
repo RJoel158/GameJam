@@ -289,6 +289,34 @@ public class GodController : MonoBehaviour
     }
 
     /// <summary>
+    /// Detecta si el boss cae al vacío y muere instantáneamente
+    /// </summary>
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Void"))
+        {
+            Debug.Log("<color=red>[GodController] ¡El boss cayó al vacío! Muerte instantánea.</color>");
+            
+            // Intenta matar el boss mediante God component si existe
+            if (god != null)
+            {
+                god.health = 0;
+                god.TakeDamage(god.maxHealth);
+            }
+            // Fallback: intenta matar mediante Boss component
+            else
+            {
+                Boss bossComp = GetComponent<Boss>();
+                if (bossComp != null)
+                {
+                    bossComp.health = 0;
+                    bossComp.TakeDamage(bossComp.maxHealth);
+                }
+            }
+        }
+    }
+
+    /// <summary>
     /// Starts the edge-walk phase: sets invulnerable and begins walking for configured duration
     /// </summary>
     public void StartPhase()
